@@ -21,42 +21,205 @@ model User {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @map("updated_at")
 
-  chats Chat[]
+  influencers AIInfluencer[]
 
   @@map("users")
 }
 
-model Chat {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @map("user_id") @db.ObjectId
-  title     String   @default("New Chat")
+model AIInfluencer {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @map("user_id") @db.ObjectId
+  name        String
+  description String?
+  
+  // Character Identity
+  age                Int?
+  personalityArchetype String? @map("personality_archetype")
+  styleAesthetic     String?  @map("style_aesthetic")
+  
+  // Facial Features - Face Structure
+  faceShape      String? @map("face_shape")
+  jawline        String?
+  cheekbones     String?
+  forehead       String?
+  chin           String?
+  
+  // Eyes
+  eyeShape     String? @map("eye_shape")
+  eyeColor     String? @map("eye_color")
+  eyeSize      String? @map("eye_size")
+  eyebrowShape String? @map("eyebrow_shape")
+  eyebrowColor String? @map("eyebrow_color")
+  eyelashes    String?
+  
+  // Nose
+  noseShape    String? @map("nose_shape")
+  noseSize     String? @map("nose_size")
+  nostrilShape String? @map("nostril_shape")
+  
+  // Lips
+  lipShape        String? @map("lip_shape")
+  lipSize         String? @map("lip_size")
+  naturalLipColor String? @map("natural_lip_color")
+  
+  // Skin
+  skinTone      String? @map("skin_tone")
+  skinTexture   String? @map("skin_texture")
+  skinCondition String? @map("skin_condition")
+  complexion    String?
+  
+  // Hair
+  hairColor   String? @map("hair_color")
+  hairTexture String? @map("hair_texture")
+  hairLength  String? @map("hair_length")
+  hairVolume  String? @map("hair_volume")
+  hairStyle   String? @map("hair_style")
+  
+  // Body Characteristics - Overall Build
+  height       String?
+  weight       String?
+  bodyType     String? @map("body_type")
+  overallBuild String? @map("overall_build")
+  
+  // Body Proportions
+  shoulderWidth String? @map("shoulder_width")
+  waist         String?
+  hipWidth      String? @map("hip_width")
+  bodyShape     String? @map("body_shape")
+  
+  // Chest/Bust
+  chestSize  String? @map("chest_size")
+  chestShape String? @map("chest_shape")
+  
+  // Arms and Hands
+  armLength     String? @map("arm_length")
+  armMuscleTone String? @map("arm_muscle_tone")
+  handSize      String? @map("hand_size")
+  fingerLength  String? @map("finger_length")
+  nailStyle     String? @map("nail_style")
+  
+  // Legs and Feet
+  legLength  String? @map("leg_length")
+  thighShape String? @map("thigh_shape")
+  calfShape  String? @map("calf_shape")
+  footSize   String? @map("foot_size")
+  footShape  String? @map("foot_shape")
+  
+  // Ethnicity and Heritage
+  primaryEthnicity   String? @map("primary_ethnicity")
+  secondaryHeritage  String? @map("secondary_heritage")
+  culturalInfluences String? @map("cultural_influences")
+  
+  // Distinctive Features
+  uniqueCharacteristics String? @map("unique_characteristics")
+  signatureFeatures     String? @map("signature_features")
+  asymmetries          String?
+  
+  // Style Preferences - Makeup Style
+  dailyMakeupLook String? @map("daily_makeup_look")
+  signatureColors String? @map("signature_colors")
+  makeupIntensity String? @map("makeup_intensity")
+  
+  // Fashion Style
+  preferredSilhouettes String? @map("preferred_silhouettes")
+  colorPalette         String? @map("color_palette")
+  preferredNecklines   String? @map("preferred_necklines")
+  styleIcons           String? @map("style_icons")
+  
+  // Accessories
+  jewelryStyle         String? @map("jewelry_style")
+  preferredMetals      String? @map("preferred_metals")
+  signatureAccessories String? @map("signature_accessories")
+  
+  // Poses and Expressions - Facial Expressions
+  signatureSmile String? @map("signature_smile")
+  eyeExpression  String? @map("eye_expression")
+  restingFace    String? @map("resting_face")
+  
+  // Body Language
+  posture         String?
+  handPositions   String? @map("hand_positions")
+  preferredAngles String? @map("preferred_angles")
+  
+  // Voice and Personality (for video consistency)
+  voiceTone         String? @map("voice_tone")
+  speakingStyle     String? @map("speaking_style")
+  personalityTraits String? @map("personality_traits")
+  
+  // Technical Specifications
+  preferredLighting String? @map("preferred_lighting")
+  bestAngles        String? @map("best_angles")
+  cameraDistance    String? @map("camera_distance")
+  
+  // Consistency Notes
+  keyFeatures          String? @map("key_features")
+  acceptableVariations String? @map("acceptable_variations")
+  referenceImages      String? @map("reference_images") // Placeholder for reference image URLs
+  
+  isDefault Boolean @default(false) @map("is_default")
+  isActive  Boolean @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user     User      @relation(fields: [userId], references: [id])
-  messages Message[]
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images InfluencerImage[]
+  videos InfluencerVideo[]
 
-  @@map("chats")
+  @@map("ai_influencers")
 }
 
-model Message {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  chatId      String   @map("chat_id") @db.ObjectId
-  content     String
-  reasoning   String?
-  role        String
-  parts       Json
-  attachments Json?
-  annotations Json?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @map("updated_at")
+model InfluencerImage {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  influencerId String   @map("influencer_id") @db.ObjectId
+  imageUrl     String   @map("image_url")
+  imageType    ImageType @map("image_type")
+  prompt       String?
+  isReference  Boolean  @default(false) @map("is_reference")
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
 
-  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  influencer AIInfluencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
 
-  @@map("messages")
+  @@map("influencer_images")
+}
+
+model InfluencerVideo {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  influencerId String      @map("influencer_id") @db.ObjectId
+  title        String
+  description  String?
+  videoUrl     String?     @map("video_url")
+  thumbnailUrl String?     @map("thumbnail_url")
+  prompt       String
+  scenario     String?
+  duration     Int?        // in seconds
+  status       VideoStatus @default(PENDING)
+  metadata     Json?
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @map("updated_at")
+
+  influencer AIInfluencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_videos")
 }
 
 enum UserRole {
   ADMIN
   USER
+}
+
+enum ImageType {
+  PORTRAIT
+  FULL_BODY
+  BEAUTY_SHOT
+  LIFESTYLE
+  REFERENCE
+}
+
+enum VideoStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
 }

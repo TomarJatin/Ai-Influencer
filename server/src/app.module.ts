@@ -5,7 +5,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
-import { ChatModule } from './chat/chat.module';
+import { InfluencerModule } from './influencer/influencer.module';
 
 @Module({
   imports: [
@@ -26,7 +26,7 @@ import { ChatModule } from './chat/chat.module';
       },
     }),
     AuthModule,
-    ChatModule,
+    InfluencerModule,
   ],
   controllers: [AppController],
   providers: [

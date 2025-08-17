@@ -11,8 +11,8 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: 'Heizen AI',
-  description: 'Heizen AI',
+  title: 'AI Influencer Studio',
+  description: 'Create and manage AI influencers with advanced image and video generation',
 };
 
 export default async function RootLayout({
