@@ -12,14 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AIInfluencer, VideoIdea } from '@/types';
 import { InfluencerService } from '@/services';
 import { toast } from 'sonner';
-import { 
-  Video, 
-  Loader2, 
-  Play, 
-  Wand2, 
-  Clock, 
-  Sparkles
-} from 'lucide-react';
+import { Video, Loader2, Play, Wand2, Clock, Sparkles } from 'lucide-react';
 
 interface VideoGenerationDialogProps {
   influencer: AIInfluencer;
@@ -28,18 +21,13 @@ interface VideoGenerationDialogProps {
   onVideoGenerated: () => void;
 }
 
-export function VideoGenerationDialog({ 
-  influencer, 
-  open, 
-  onClose, 
-  onVideoGenerated 
-}: VideoGenerationDialogProps) {
+export function VideoGenerationDialog({ influencer, open, onClose, onVideoGenerated }: VideoGenerationDialogProps) {
   const [step, setStep] = useState<'ideas' | 'custom' | 'details' | 'generating'>('ideas');
   const [videoIdeas, setVideoIdeas] = useState<VideoIdea[]>([]);
   const [selectedIdea, setSelectedIdea] = useState<VideoIdea | null>(null);
   const [isLoadingIdeas, setIsLoadingIdeas] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  
+
   // Form data
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -54,7 +42,7 @@ export function VideoGenerationDialog({
     try {
       setIsLoadingIdeas(true);
       const response = await InfluencerService.generateVideoIdeas(influencer.id);
-      
+
       if (response.data) {
         setVideoIdeas(response.data);
       } else {
@@ -155,7 +143,7 @@ export function VideoGenerationDialog({
         }
 
         const response = await InfluencerService.getVideoStatus(videoId);
-        
+
         if (response.data) {
           if (response.data.status === 'COMPLETED') {
             setProgress(100);
@@ -216,66 +204,60 @@ export function VideoGenerationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className='max-h-[90vh] max-w-6xl overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Generate Video for {influencer.name}</DialogTitle>
-          <DialogDescription>
-            Create engaging video content using AI-powered video generation
-          </DialogDescription>
+          <DialogDescription>Create engaging video content using AI-powered video generation</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className='space-y-6'>
           {step === 'ideas' && (
             <>
-              <div className="flex justify-between items-center">
+              <div className='flex items-center justify-between'>
                 <div>
-                  <h3 className="text-lg font-medium">Video Ideas</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className='text-lg font-medium'>Video Ideas</h3>
+                  <p className='text-muted-foreground text-sm'>
                     Choose from AI-generated video concepts or create your own
                   </p>
                 </div>
-                <Button variant="outline" onClick={handleCustomVideo}>
-                  <Wand2 className="mr-2 h-4 w-4" />
+                <Button variant='outline' onClick={handleCustomVideo}>
+                  <Wand2 className='mr-2 h-4 w-4' />
                   Create Custom Video
                 </Button>
               </div>
 
               {isLoadingIdeas ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                <div className='flex items-center justify-center py-12'>
+                  <Loader2 className='mr-2 h-8 w-8 animate-spin' />
                   <span>Generating creative video ideas...</span>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-h-96 overflow-y-auto">
+                <div className='grid max-h-96 gap-4 overflow-y-auto md:grid-cols-2 lg:grid-cols-3'>
                   {videoIdeas.map((idea) => {
                     const IconComponent = getCategoryIcon(idea.category);
                     return (
-                      <Card 
+                      <Card
                         key={idea.id}
-                        className="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]"
+                        className='cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md'
                         onClick={() => handleIdeaSelect(idea)}
                       >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-2">
-                              <IconComponent className="h-5 w-5 text-primary" />
-                              <Badge variant="outline" className="text-xs">
+                        <CardHeader className='pb-3'>
+                          <div className='flex items-start justify-between'>
+                            <div className='flex items-center space-x-2'>
+                              <IconComponent className='text-primary h-5 w-5' />
+                              <Badge variant='outline' className='text-xs'>
                                 {idea.category}
                               </Badge>
                             </div>
-                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
+                            <div className='text-muted-foreground flex items-center space-x-1 text-xs'>
+                              <Clock className='h-3 w-3' />
                               <span>{idea.estimatedDuration}s</span>
                             </div>
                           </div>
-                          <CardTitle className="text-base leading-tight">
-                            {idea.title}
-                          </CardTitle>
+                          <CardTitle className='text-base leading-tight'>{idea.title}</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-0">
-                          <CardDescription className="text-sm line-clamp-3">
-                            {idea.description}
-                          </CardDescription>
+                        <CardContent className='pt-0'>
+                          <CardDescription className='line-clamp-3 text-sm'>{idea.description}</CardDescription>
                         </CardContent>
                       </Card>
                     );
@@ -287,141 +269,127 @@ export function VideoGenerationDialog({
 
           {step === 'custom' && (
             <>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setStep('ideas')}
-                >
+              <div className='flex items-center space-x-2'>
+                <Button variant='outline' size='sm' onClick={() => setStep('ideas')}>
                   ← Back to Ideas
                 </Button>
                 <div>
-                  <h3 className="font-medium">Create Custom Video</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Design your own unique video concept
-                  </p>
+                  <h3 className='font-medium'>Create Custom Video</h3>
+                  <p className='text-muted-foreground text-sm'>Design your own unique video concept</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="custom-title">Video Title *</Label>
+              <div className='space-y-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='custom-title'>Video Title *</Label>
                   <Input
-                    id="custom-title"
-                    placeholder="Enter video title..."
+                    id='custom-title'
+                    placeholder='Enter video title...'
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="custom-description">Description</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='custom-description'>Description</Label>
                   <Textarea
-                    id="custom-description"
-                    placeholder="Describe what happens in the video..."
+                    id='custom-description'
+                    placeholder='Describe what happens in the video...'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="min-h-[80px]"
+                    className='min-h-[80px]'
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="custom-scenario">Scenario/Setting *</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='custom-scenario'>Scenario/Setting *</Label>
                   <Textarea
-                    id="custom-scenario"
-                    placeholder="Describe the setting, actions, and environment..."
+                    id='custom-scenario'
+                    placeholder='Describe the setting, actions, and environment...'
                     value={scenario}
                     onChange={(e) => setScenario(e.target.value)}
-                    className="min-h-[100px]"
+                    className='min-h-[100px]'
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className='text-muted-foreground text-xs'>
                     Be specific about the location, lighting, actions, and mood
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="custom-prompt">Custom Prompt (Optional)</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='custom-prompt'>Custom Prompt (Optional)</Label>
                   <Textarea
-                    id="custom-prompt"
-                    placeholder="Advanced: Add specific technical requirements..."
+                    id='custom-prompt'
+                    placeholder='Advanced: Add specific technical requirements...'
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
-                    className="min-h-[80px]"
+                    className='min-h-[80px]'
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setStep('ideas')}>
+              <div className='flex justify-end space-x-2'>
+                <Button variant='outline' onClick={() => setStep('ideas')}>
                   Cancel
                 </Button>
-                <Button onClick={handleCustomSubmit}>
-                  Continue
-                </Button>
+                <Button onClick={handleCustomSubmit}>Continue</Button>
               </div>
             </>
           )}
 
           {step === 'details' && (
             <>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => selectedIdea ? setStep('ideas') : setStep('custom')}
+              <div className='flex items-center space-x-2'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => (selectedIdea ? setStep('ideas') : setStep('custom'))}
                 >
                   ← Back
                 </Button>
                 <div>
-                  <h3 className="font-medium">Video Details</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Review and customize your video before generation
-                  </p>
+                  <h3 className='font-medium'>Video Details</h3>
+                  <p className='text-muted-foreground text-sm'>Review and customize your video before generation</p>
                 </div>
               </div>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Video className="h-5 w-5" />
+                  <CardTitle className='flex items-center space-x-2'>
+                    <Video className='h-5 w-5' />
                     <span>Video Preview</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="final-title">Title</Label>
-                    <Input
-                      id="final-title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
+                <CardContent className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='final-title'>Title</Label>
+                    <Input id='final-title' value={title} onChange={(e) => setTitle(e.target.value)} />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="final-description">Description</Label>
+                  <div className='space-y-2'>
+                    <Label htmlFor='final-description'>Description</Label>
                     <Textarea
-                      id="final-description"
+                      id='final-description'
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="min-h-[80px]"
+                      className='min-h-[80px]'
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="final-scenario">Scenario</Label>
+                  <div className='space-y-2'>
+                    <Label htmlFor='final-scenario'>Scenario</Label>
                     <Textarea
-                      id="final-scenario"
+                      id='final-scenario'
                       value={scenario}
                       onChange={(e) => setScenario(e.target.value)}
-                      className="min-h-[100px]"
+                      className='min-h-[100px]'
                     />
                   </div>
 
                   {selectedIdea && (
-                    <div className="flex items-center space-x-4 p-3 bg-muted rounded-lg">
-                      <Badge variant="outline">{selectedIdea.category}</Badge>
-                      <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
+                    <div className='bg-muted flex items-center space-x-4 rounded-lg p-3'>
+                      <Badge variant='outline'>{selectedIdea.category}</Badge>
+                      <div className='text-muted-foreground flex items-center space-x-1 text-sm'>
+                        <Clock className='h-4 w-4' />
                         <span>~{selectedIdea.estimatedDuration} seconds</span>
                       </div>
                     </div>
@@ -429,12 +397,12 @@ export function VideoGenerationDialog({
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={handleClose}>
+              <div className='flex justify-end space-x-2'>
+                <Button variant='outline' onClick={handleClose}>
                   Cancel
                 </Button>
                 <Button onClick={handleGenerateVideo}>
-                  <Video className="mr-2 h-4 w-4" />
+                  <Video className='mr-2 h-4 w-4' />
                   Generate Video
                 </Button>
               </div>
@@ -442,43 +410,49 @@ export function VideoGenerationDialog({
           )}
 
           {step === 'generating' && (
-            <div className="text-center space-y-6 py-8">
-              <div className="flex justify-center">
-                <div className="relative">
-                  <div className="h-24 w-24 rounded-full border-4 border-primary/20">
-                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
+            <div className='space-y-6 py-8 text-center'>
+              <div className='flex justify-center'>
+                <div className='relative'>
+                  <div className='border-primary/20 h-24 w-24 rounded-full border-4'>
+                    <div className='border-t-primary absolute inset-0 animate-spin rounded-full border-4 border-transparent'></div>
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Video className="h-10 w-10 text-primary" />
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <Video className='text-primary h-10 w-10' />
                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">Generating Your Video</h3>
-                  <p className="text-muted-foreground">
+
+              <div className='space-y-4'>
+                <div className='space-y-2'>
+                  <h3 className='text-xl font-semibold'>Generating Your Video</h3>
+                  <p className='text-muted-foreground'>
                     Creating &quot;{title}&quot; with {influencer.name}
                   </p>
                 </div>
 
-                <div className="space-y-2 max-w-md mx-auto">
-                  <div className="flex justify-between text-sm">
+                <div className='mx-auto max-w-md space-y-2'>
+                  <div className='flex justify-between text-sm'>
                     <span>{currentStep}</span>
                     <span>{Math.round(progress)}%</span>
                   </div>
-                  <Progress value={progress} className="h-2" />
+                  <Progress value={progress} className='h-2' />
                 </div>
 
-                <div className="text-sm text-muted-foreground space-y-1">
+                <div className='text-muted-foreground space-y-1 text-sm'>
                   <p>This process typically takes 2-5 minutes</p>
                   <p>Please keep this dialog open during generation</p>
                 </div>
 
-                <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className='text-muted-foreground flex items-center justify-center space-x-2 text-sm'>
+                  <div className='bg-primary h-2 w-2 animate-bounce rounded-full'></div>
+                  <div
+                    className='bg-primary h-2 w-2 animate-bounce rounded-full'
+                    style={{ animationDelay: '0.1s' }}
+                  ></div>
+                  <div
+                    className='bg-primary h-2 w-2 animate-bounce rounded-full'
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
                 </div>
               </div>
             </div>

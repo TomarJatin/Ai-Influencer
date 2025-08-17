@@ -1,14 +1,14 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, Res } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
-import { 
-  CreateAIInfluencerDto, 
-  UpdateAIInfluencerDto, 
-  GenerateImageDto, 
+import {
+  CreateAIInfluencerDto,
+  UpdateAIInfluencerDto,
+  GenerateImageDto,
   GenerateVideoDto,
   VideoIdeaDto,
   ImageType,
-  VideoStatus 
+  VideoStatus,
 } from './dto/influencer.dto';
 import { RequestUser } from '../auth/dto/request-user.dto';
 
@@ -18,10 +18,7 @@ export class InfluencerService {
 
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createInfluencer(
-    createInfluencerDto: CreateAIInfluencerDto,
-    user: RequestUser,
-  ) {
+  async createInfluencer(createInfluencerDto: CreateAIInfluencerDto, user: RequestUser) {
     try {
       const influencer = await this.prismaService.aIInfluencer.create({
         data: {
@@ -46,10 +43,7 @@ export class InfluencerService {
     try {
       const influencers = await this.prismaService.aIInfluencer.findMany({
         where: {
-          OR: [
-            { userId: user.id },
-            { isDefault: true },
-          ],
+          OR: [{ userId: user.id }, { isDefault: true }],
           isActive: true,
         },
         include: {
@@ -75,10 +69,7 @@ export class InfluencerService {
       const influencer = await this.prismaService.aIInfluencer.findFirst({
         where: {
           id,
-          OR: [
-            { userId: user.id },
-            { isDefault: true },
-          ],
+          OR: [{ userId: user.id }, { isDefault: true }],
           isActive: true,
         },
         include: {
@@ -105,11 +96,7 @@ export class InfluencerService {
     }
   }
 
-  async updateInfluencer(
-    id: string,
-    updateInfluencerDto: UpdateAIInfluencerDto,
-    user: RequestUser,
-  ) {
+  async updateInfluencer(id: string, updateInfluencerDto: UpdateAIInfluencerDto, user: RequestUser) {
     try {
       // Check if user owns this influencer
       const existingInfluencer = await this.prismaService.aIInfluencer.findFirst({
@@ -179,10 +166,10 @@ export class InfluencerService {
   async generateImagePrompt(influencerId: string, imageType: ImageType, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       // Build the prompt based on the influencer's characteristics
       const prompt = this.buildImagePrompt(influencer, imageType);
-      
+
       return {
         prompt,
         influencer: {
@@ -200,10 +187,9 @@ export class InfluencerService {
   async generateImage(generateImageDto: GenerateImageDto, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(generateImageDto.influencerId, user);
-      
+
       // Generate the prompt if not provided
-      const prompt = generateImageDto.customPrompt || 
-        this.buildImagePrompt(influencer, generateImageDto.imageType);
+      const prompt = generateImageDto.customPrompt || this.buildImagePrompt(influencer, generateImageDto.imageType);
 
       // Here you would integrate with Google's Imagen API
       // For now, we'll create a placeholder image record
@@ -232,7 +218,7 @@ export class InfluencerService {
   async generateVideoIdeas(influencerId: string, user: RequestUser): Promise<VideoIdeaDto[]> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       // Generate 20 video ideas based on the influencer's characteristics
       const ideas: VideoIdeaDto[] = [
         {
@@ -409,7 +395,7 @@ export class InfluencerService {
   async generateVideo(generateVideoDto: GenerateVideoDto, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(generateVideoDto.influencerId, user);
-      
+
       // Create video record with PENDING status
       const videoRecord = await this.prismaService.influencerVideo.create({
         data: {
@@ -417,8 +403,7 @@ export class InfluencerService {
           title: generateVideoDto.title,
           description: generateVideoDto.description,
           scenario: generateVideoDto.scenario,
-          prompt: generateVideoDto.customPrompt || 
-            this.buildVideoPrompt(influencer, generateVideoDto.scenario),
+          prompt: generateVideoDto.customPrompt || this.buildVideoPrompt(influencer, generateVideoDto.scenario),
           duration: generateVideoDto.duration,
           status: VideoStatus.PENDING,
           metadata: {
@@ -429,7 +414,7 @@ export class InfluencerService {
       });
 
       // Start video generation process (async)
-      this.processVideoGeneration(videoRecord.id, influencer);
+      void this.processVideoGeneration(videoRecord.id);
 
       this.logger.log(`Video generation started for influencer ${generateVideoDto.influencerId}`);
       return videoRecord;
@@ -445,10 +430,7 @@ export class InfluencerService {
         where: {
           id: videoId,
           influencer: {
-            OR: [
-              { userId: user.id },
-              { isDefault: true },
-            ],
+            OR: [{ userId: user.id }, { isDefault: true }],
           },
         },
         include: {
@@ -474,12 +456,12 @@ export class InfluencerService {
     try {
       // First verify the video exists and user has access
       await this.getVideoStatus(videoId, user);
-      
+
       // Set SSE headers
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Cache-Control',
       });
@@ -495,9 +477,9 @@ export class InfluencerService {
           isComplete,
           error,
         });
-        
+
         res.write(`data: ${data}\n\n`);
-        
+
         if (isComplete || error) {
           completed = true;
           res.end();
@@ -539,7 +521,7 @@ export class InfluencerService {
           }
 
           if (!completed) {
-            setTimeout(pollStatus, 2000); // Poll every 2 seconds
+            setTimeout(() => void pollStatus(), 2000); // Poll every 2 seconds
           }
         } catch (error) {
           this.logger.error(`Error in progress stream: ${error.message}`, error);
@@ -554,16 +536,16 @@ export class InfluencerService {
       });
 
       // Start polling
-      pollStatus();
+      void pollStatus();
     } catch (error) {
       this.logger.error(`Failed to create progress stream: ${error.message}`, error);
       throw error;
     }
   }
 
-  private buildImagePrompt(influencer: any, imageType: ImageType): string {
+  private buildImagePrompt(influencer: Record<string, unknown>, imageType: ImageType): string {
     const baseDescription = this.buildCharacterDescription(influencer);
-    
+
     const typeSpecificPrompts = {
       [ImageType.PORTRAIT]: `Close-up portrait photograph of ${baseDescription}. Soft natural lighting from 45-degree angle, neutral background, professional photography style.`,
       [ImageType.FULL_BODY]: `Full body portrait photograph of ${baseDescription}. Standing pose, professional lighting, studio setting.`,
@@ -573,45 +555,56 @@ export class InfluencerService {
     };
 
     const qualityModifiers = `Technical specifications: 8K resolution, professional photography, sharp focus, detailed skin texture, realistic lighting, color graded, shot on Canon EOS R5, 85mm f/1.4 lens, perfect exposure, photorealistic, hyperrealistic.`;
-    
+
     const negativePrompt = `Negative prompt: cartoon, anime, illustration, painting, drawing, art, sketch, (worst quality:2), (low quality:2), blurry, bad anatomy, bad proportions.`;
 
     return `${typeSpecificPrompts[imageType]} ${qualityModifiers} ${negativePrompt}`;
   }
 
-  private buildVideoPrompt(influencer: any, scenario: string): string {
+  private buildVideoPrompt(influencer: Record<string, unknown>, scenario: string): string {
     const characterDescription = this.buildCharacterDescription(influencer);
-    
+
     return `${characterDescription} ${scenario}. High quality video, 4K resolution, smooth camera movement, professional lighting, realistic movement, cinematic style.`;
   }
 
-  private buildCharacterDescription(influencer: any): string {
+  private buildCharacterDescription(influencer: Record<string, unknown>): string {
     const parts: string[] = [];
-    
-    if (influencer.age) parts.push(`${influencer.age}-year-old`);
-    if (influencer.primaryEthnicity) parts.push(influencer.primaryEthnicity);
+
+    const age = influencer.age as string | number;
+    const primaryEthnicity = influencer.primaryEthnicity as string;
+    const faceShape = influencer.faceShape as string;
+    const eyeShape = influencer.eyeShape as string;
+    const eyeColor = influencer.eyeColor as string;
+    const hairLength = influencer.hairLength as string;
+    const hairColor = influencer.hairColor as string;
+    const hairTexture = influencer.hairTexture as string;
+    const height = influencer.height as string;
+    const overallBuild = influencer.overallBuild as string;
+
+    if (age) parts.push(`${age}-year-old`);
+    if (primaryEthnicity) parts.push(primaryEthnicity);
     parts.push('woman');
-    
-    if (influencer.faceShape) parts.push(`with ${influencer.faceShape} face shape`);
-    if (influencer.eyeColor && influencer.eyeShape) {
-      parts.push(`${influencer.eyeShape} ${influencer.eyeColor} eyes`);
+
+    if (faceShape) parts.push(`with ${faceShape} face shape`);
+    if (eyeColor && eyeShape) {
+      parts.push(`${eyeShape} ${eyeColor} eyes`);
     }
-    if (influencer.hairColor && influencer.hairTexture && influencer.hairLength) {
-      parts.push(`${influencer.hairLength} ${influencer.hairColor} ${influencer.hairTexture} hair`);
+    if (hairColor && hairTexture && hairLength) {
+      parts.push(`${hairLength} ${hairColor} ${hairTexture} hair`);
     }
-    if (influencer.height && influencer.overallBuild) {
-      parts.push(`${influencer.height} tall with ${influencer.overallBuild} build`);
+    if (height && overallBuild) {
+      parts.push(`${height} tall with ${overallBuild} build`);
     }
 
     return parts.join(', ');
   }
 
-  private async processVideoGeneration(videoId: string, influencer: any) {
+  private async processVideoGeneration(videoId: string) {
     try {
       // Update status to GENERATING
       await this.prismaService.influencerVideo.update({
         where: { id: videoId },
-        data: { 
+        data: {
           status: VideoStatus.GENERATING,
           metadata: {
             startedAt: new Date().toISOString(),
@@ -623,41 +616,42 @@ export class InfluencerService {
 
       // Simulate video generation process
       // In real implementation, this would call Veo3 API
-      setTimeout(async () => {
-        try {
-          await this.prismaService.influencerVideo.update({
-            where: { id: videoId },
-            data: {
-              status: VideoStatus.COMPLETED,
-              videoUrl: '/api/placeholder/video.mp4', // Placeholder
-              thumbnailUrl: '/api/placeholder/thumbnail.jpg',
-              metadata: {
-                startedAt: new Date().toISOString(),
-                completedAt: new Date().toISOString(),
-                model: 'veo3',
-                status: 'completed',
+      setTimeout(() => {
+        void (async () => {
+          try {
+            await this.prismaService.influencerVideo.update({
+              where: { id: videoId },
+              data: {
+                status: VideoStatus.COMPLETED,
+                videoUrl: '/api/placeholder/video.mp4', // Placeholder
+                thumbnailUrl: '/api/placeholder/thumbnail.jpg',
+                metadata: {
+                  startedAt: new Date().toISOString(),
+                  completedAt: new Date().toISOString(),
+                  model: 'veo3',
+                  status: 'completed',
+                },
               },
-            },
-          });
-          this.logger.log(`Video generation completed for video ${videoId}`);
-        } catch (error) {
-          await this.prismaService.influencerVideo.update({
-            where: { id: videoId },
-            data: {
-              status: VideoStatus.FAILED,
-              metadata: {
-                startedAt: new Date().toISOString(),
-                failedAt: new Date().toISOString(),
-                error: error.message,
-                model: 'veo3',
-                status: 'failed',
+            });
+            this.logger.log(`Video generation completed for video ${videoId}`);
+          } catch (error) {
+            await this.prismaService.influencerVideo.update({
+              where: { id: videoId },
+              data: {
+                status: VideoStatus.FAILED,
+                metadata: {
+                  startedAt: new Date().toISOString(),
+                  failedAt: new Date().toISOString(),
+                  error: error.message,
+                  model: 'veo3',
+                  status: 'failed',
+                },
               },
-            },
-          });
-          this.logger.error(`Video generation failed for video ${videoId}: ${error.message}`);
-        }
+            });
+            this.logger.error(`Video generation failed for video ${videoId}: ${error.message}`);
+          }
+        })();
       }, 30000); // 30 seconds simulation
-
     } catch (error) {
       this.logger.error(`Error in video generation process: ${error.message}`, error);
     }

@@ -49,7 +49,7 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
     try {
       setIsUpdating(true);
       const response = await InfluencerService.updateInfluencer(influencer.id, data as UpdateAIInfluencerDto);
-      
+
       if (response.data) {
         toast.success('Influencer updated successfully!');
         onInfluencerUpdated();
@@ -75,25 +75,23 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
   return (
     <div>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className='max-h-[90vh] max-w-2xl overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>Edit {influencer.name}</DialogTitle>
-            <DialogDescription>
-              Update the details of your AI influencer
-            </DialogDescription>
+            <DialogDescription>Update the details of your AI influencer</DialogDescription>
           </DialogHeader>
-          
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+              <div className='space-y-4'>
                 <FormField
                   control={form.control}
-                  name="name"
+                  name='name'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter influencer name" {...field} />
+                        <Input placeholder='Enter influencer name' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -102,15 +100,15 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
 
                 <FormField
                   control={form.control}
-                  name="description"
+                  name='description'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Describe your influencer's personality and style"
-                          className="min-h-[80px]"
-                          {...field} 
+                          className='min-h-[80px]'
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -118,18 +116,18 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                   <FormField
                     control={form.control}
-                    name="age"
+                    name='age'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Age</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            min="18" 
-                            max="50"
+                          <Input
+                            type='number'
+                            min='18'
+                            max='50'
                             {...field}
                             onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                           />
@@ -141,12 +139,12 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
 
                   <FormField
                     control={form.control}
-                    name="personalityArchetype"
+                    name='personalityArchetype'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Personality</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Confident, Playful" {...field} />
+                          <Input placeholder='e.g., Confident, Playful' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -155,19 +153,19 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={handleClose} disabled={isUpdating}>
+              <div className='flex justify-end space-x-2 pt-4'>
+                <Button type='button' variant='outline' onClick={handleClose} disabled={isUpdating}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isUpdating}>
+                <Button type='submit' disabled={isUpdating}>
                   {isUpdating ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                       Updating...
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <Save className='mr-2 h-4 w-4' />
                       Update
                     </>
                   )}

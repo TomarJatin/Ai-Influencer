@@ -3,19 +3,19 @@ export interface AIInfluencer {
   userId: string;
   name: string;
   description?: string;
-  
+
   // Character Identity
   age?: number;
   personalityArchetype?: string;
   styleAesthetic?: string;
-  
+
   // Facial Features - Face Structure
   faceShape?: string;
   jawline?: string;
   cheekbones?: string;
   forehead?: string;
   chin?: string;
-  
+
   // Eyes
   eyeShape?: string;
   eyeColor?: string;
@@ -23,116 +23,116 @@ export interface AIInfluencer {
   eyebrowShape?: string;
   eyebrowColor?: string;
   eyelashes?: string;
-  
+
   // Nose
   noseShape?: string;
   noseSize?: string;
   nostrilShape?: string;
-  
+
   // Lips
   lipShape?: string;
   lipSize?: string;
   naturalLipColor?: string;
-  
+
   // Skin
   skinTone?: string;
   skinTexture?: string;
   skinCondition?: string;
   complexion?: string;
-  
+
   // Hair
   hairColor?: string;
   hairTexture?: string;
   hairLength?: string;
   hairVolume?: string;
   hairStyle?: string;
-  
+
   // Body Characteristics - Overall Build
   height?: string;
   weight?: string;
   bodyType?: string;
   overallBuild?: string;
-  
+
   // Body Proportions
   shoulderWidth?: string;
   waist?: string;
   hipWidth?: string;
   bodyShape?: string;
-  
+
   // Chest/Bust
   chestSize?: string;
   chestShape?: string;
-  
+
   // Arms and Hands
   armLength?: string;
   armMuscleTone?: string;
   handSize?: string;
   fingerLength?: string;
   nailStyle?: string;
-  
+
   // Legs and Feet
   legLength?: string;
   thighShape?: string;
   calfShape?: string;
   footSize?: string;
   footShape?: string;
-  
+
   // Ethnicity and Heritage
   primaryEthnicity?: string;
   secondaryHeritage?: string;
   culturalInfluences?: string;
-  
+
   // Distinctive Features
   uniqueCharacteristics?: string;
   signatureFeatures?: string;
   asymmetries?: string;
-  
+
   // Style Preferences - Makeup Style
   dailyMakeupLook?: string;
   signatureColors?: string;
   makeupIntensity?: string;
-  
+
   // Fashion Style
   preferredSilhouettes?: string;
   colorPalette?: string;
   preferredNecklines?: string;
   styleIcons?: string;
-  
+
   // Accessories
   jewelryStyle?: string;
   preferredMetals?: string;
   signatureAccessories?: string;
-  
+
   // Poses and Expressions - Facial Expressions
   signatureSmile?: string;
   eyeExpression?: string;
   restingFace?: string;
-  
+
   // Body Language
   posture?: string;
   handPositions?: string;
   preferredAngles?: string;
-  
+
   // Voice and Personality
   voiceTone?: string;
   speakingStyle?: string;
   personalityTraits?: string;
-  
+
   // Technical Specifications
   preferredLighting?: string;
   bestAngles?: string;
   cameraDistance?: string;
-  
+
   // Consistency Notes
   keyFeatures?: string;
   acceptableVariations?: string;
   referenceImages?: string;
-  
+
   isDefault: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  
+
   images?: InfluencerImage[];
   videos?: InfluencerVideo[];
 }
@@ -168,19 +168,19 @@ export interface InfluencerVideo {
 export interface CreateAIInfluencerDto {
   name: string;
   description?: string;
-  
+
   // Character Identity
   age?: number;
   personalityArchetype?: string;
   styleAesthetic?: string;
-  
+
   // Facial Features - Face Structure
   faceShape?: string;
   jawline?: string;
   cheekbones?: string;
   forehead?: string;
   chin?: string;
-  
+
   // Eyes
   eyeShape?: string;
   eyeColor?: string;
@@ -188,106 +188,106 @@ export interface CreateAIInfluencerDto {
   eyebrowShape?: string;
   eyebrowColor?: string;
   eyelashes?: string;
-  
+
   // Nose
   noseShape?: string;
   noseSize?: string;
   nostrilShape?: string;
-  
+
   // Lips
   lipShape?: string;
   lipSize?: string;
   naturalLipColor?: string;
-  
+
   // Skin
   skinTone?: string;
   skinTexture?: string;
   skinCondition?: string;
   complexion?: string;
-  
+
   // Hair
   hairColor?: string;
   hairTexture?: string;
   hairLength?: string;
   hairVolume?: string;
   hairStyle?: string;
-  
+
   // Body Characteristics - Overall Build
   height?: string;
   weight?: string;
   bodyType?: string;
   overallBuild?: string;
-  
+
   // Body Proportions
   shoulderWidth?: string;
   waist?: string;
   hipWidth?: string;
   bodyShape?: string;
-  
+
   // Chest/Bust
   chestSize?: string;
   chestShape?: string;
-  
+
   // Arms and Hands
   armLength?: string;
   armMuscleTone?: string;
   handSize?: string;
   fingerLength?: string;
   nailStyle?: string;
-  
+
   // Legs and Feet
   legLength?: string;
   thighShape?: string;
   calfShape?: string;
   footSize?: string;
   footShape?: string;
-  
+
   // Ethnicity and Heritage
   primaryEthnicity?: string;
   secondaryHeritage?: string;
   culturalInfluences?: string;
-  
+
   // Distinctive Features
   uniqueCharacteristics?: string;
   signatureFeatures?: string;
   asymmetries?: string;
-  
+
   // Style Preferences - Makeup Style
   dailyMakeupLook?: string;
   signatureColors?: string;
   makeupIntensity?: string;
-  
+
   // Fashion Style
   preferredSilhouettes?: string;
   colorPalette?: string;
   preferredNecklines?: string;
   styleIcons?: string;
-  
+
   // Accessories
   jewelryStyle?: string;
   preferredMetals?: string;
   signatureAccessories?: string;
-  
+
   // Poses and Expressions - Facial Expressions
   signatureSmile?: string;
   eyeExpression?: string;
   restingFace?: string;
-  
+
   // Body Language
   posture?: string;
   handPositions?: string;
   preferredAngles?: string;
-  
+
   // Voice and Personality
   voiceTone?: string;
   speakingStyle?: string;
   personalityTraits?: string;
-  
+
   // Technical Specifications
   preferredLighting?: string;
   bestAngles?: string;
   cameraDistance?: string;
-  
+
   // Consistency Notes
   keyFeatures?: string;
   acceptableVariations?: string;
@@ -297,12 +297,12 @@ export interface CreateAIInfluencerDto {
 export interface UpdateAIInfluencerDto {
   name?: string;
   description?: string;
-  
+
   // All fields from CreateAIInfluencerDto are optional for updates
   age?: number;
   personalityArchetype?: string;
   styleAesthetic?: string;
-  
+
   // Note: In practice, include all fields from CreateAIInfluencerDto as optional
   [key: string]: unknown;
 }

@@ -7,7 +7,7 @@ export default withAuth(
     if (req.nextUrl.pathname === '/') {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
-    
+
     return NextResponse.next();
   },
   {
@@ -17,7 +17,7 @@ export default withAuth(
   }
 );
 
-export const config = { 
+export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:

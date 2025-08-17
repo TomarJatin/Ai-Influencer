@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, Image as ImageIcon, Video, Settings } from 'lucide-react';
+import { Plus, Users, Image as ImageIcon, Video } from 'lucide-react';
 import Link from 'next/link';
 import { AIInfluencer } from '@/types';
 import { InfluencerService } from '@/services/influencer.service';
@@ -38,9 +38,7 @@ export default function DashboardPage() {
   };
 
   const getInfluencerImage = (influencer: AIInfluencer) => {
-    const portraitImage = influencer.images?.find(
-      img => img.imageType === 'PORTRAIT' && img.isReference
-    );
+    const portraitImage = influencer.images?.find((img) => img.imageType === 'PORTRAIT' && img.isReference);
     return portraitImage?.imageUrl || '/api/placeholder/400/400';
   };
 
@@ -52,47 +50,47 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
+      <div className='flex-1 space-y-4 p-8 pt-6'>
+        <div className='flex items-center justify-between space-y-2'>
           <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-96 mt-2" />
+            <Skeleton className='h-8 w-48' />
+            <Skeleton className='mt-2 h-4 w-96' />
           </div>
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className='h-10 w-32' />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-4" />
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <Skeleton className='h-4 w-16' />
+                <Skeleton className='h-4 w-4' />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-12" />
-                <Skeleton className="h-3 w-20 mt-1" />
+                <Skeleton className='h-8 w-12' />
+                <Skeleton className='mt-1 h-3 w-20' />
               </CardContent>
             </Card>
           ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-16 w-16 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
+                <div className='flex items-center space-x-4'>
+                  <Skeleton className='h-16 w-16 rounded-full' />
+                  <div className='space-y-2'>
+                    <Skeleton className='h-4 w-24' />
+                    <Skeleton className='h-3 w-32' />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-4">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-6 w-16" />
+                <div className='flex items-center justify-between'>
+                  <div className='flex space-x-4'>
+                    <Skeleton className='h-6 w-16' />
+                    <Skeleton className='h-6 w-16' />
                   </div>
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className='h-8 w-20' />
                 </div>
               </CardContent>
             </Card>
@@ -104,21 +102,19 @@ export default function DashboardPage() {
 
   const totalImages = influencers.reduce((sum, inf) => sum + (inf.images?.length || 0), 0);
   const totalVideos = influencers.reduce((sum, inf) => sum + (inf.videos?.length || 0), 0);
-  const activeInfluencers = influencers.filter(inf => inf.isActive).length;
+  const activeInfluencers = influencers.filter((inf) => inf.isActive).length;
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className='flex-1 space-y-4 p-8 pt-6'>
+      <div className='flex items-center justify-between space-y-2'>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">AI Influencer Dashboard</h2>
-          <p className="text-muted-foreground">
-            Create and manage your AI influencers, generate images and videos
-          </p>
+          <h2 className='text-3xl font-bold tracking-tight'>AI Influencer Dashboard</h2>
+          <p className='text-muted-foreground'>Create and manage your AI influencers, generate images and videos</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Link href="/dashboard/create">
+        <div className='flex items-center space-x-2'>
+          <Link href='/dashboard/create'>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className='mr-2 h-4 w-4' />
               Create Influencer
             </Button>
           </Link>
@@ -126,41 +122,35 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Influencers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Total Influencers</CardTitle>
+            <Users className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{influencers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeInfluencers} active
-            </p>
+            <div className='text-2xl font-bold'>{influencers.length}</div>
+            <p className='text-muted-foreground text-xs'>{activeInfluencers} active</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Generated Images</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Generated Images</CardTitle>
+            <ImageIcon className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalImages}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all influencers
-            </p>
+            <div className='text-2xl font-bold'>{totalImages}</div>
+            <p className='text-muted-foreground text-xs'>Across all influencers</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Generated Videos</CardTitle>
-            <Video className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Generated Videos</CardTitle>
+            <Video className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalVideos}</div>
-            <p className="text-xs text-muted-foreground">
-              Total video content
-            </p>
+            <div className='text-2xl font-bold'>{totalVideos}</div>
+            <p className='text-muted-foreground text-xs'>Total video content</p>
           </CardContent>
         </Card>
       </div>
@@ -170,19 +160,18 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>No AI Influencers Yet</CardTitle>
-            <CardDescription>
-              Create your first AI influencer to get started with generating content
-            </CardDescription>
+            <CardDescription>Create your first AI influencer to get started with generating content</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 space-y-4">
-              <Users className="h-12 w-12 text-muted-foreground" />
-              <p className="text-muted-foreground text-center max-w-sm">
-                You haven&apos;t created any AI influencers yet. Start by creating your first influencer from our templates or build one from scratch.
+            <div className='flex flex-col items-center justify-center space-y-4 py-8'>
+              <Users className='text-muted-foreground h-12 w-12' />
+              <p className='text-muted-foreground max-w-sm text-center'>
+                You haven&apos;t created any AI influencers yet. Start by creating your first influencer from our
+                templates or build one from scratch.
               </p>
-              <Link href="/dashboard/create">
+              <Link href='/dashboard/create'>
                 <Button>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className='mr-2 h-4 w-4' />
                   Create Your First Influencer
                 </Button>
               </Link>
@@ -190,32 +179,29 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {influencers.map((influencer) => {
             const { imageCount, videoCount } = getInfluencerStats(influencer);
             return (
-              <Card key={influencer.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={influencer.id} className='overflow-hidden transition-shadow hover:shadow-lg'>
                 <CardHeader>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted">
-                      <Image
-                        src={getInfluencerImage(influencer)}
-                        alt={influencer.name}
-                        fill
-                        className="object-cover"
-                      />
+                  <div className='flex items-center space-x-4'>
+                    <div className='bg-muted relative h-16 w-16 overflow-hidden rounded-full'>
+                      <Image src={getInfluencerImage(influencer)} alt={influencer.name} fill className='object-cover' />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">{influencer.name}</CardTitle>
-                      <CardDescription className="truncate">
+                    <div className='min-w-0 flex-1'>
+                      <CardTitle className='truncate text-lg'>{influencer.name}</CardTitle>
+                      <CardDescription className='truncate'>
                         {influencer.description || 'No description'}
                       </CardDescription>
-                      <div className="flex items-center space-x-2 mt-2">
+                      <div className='mt-2 flex items-center space-x-2'>
                         {influencer.isDefault && (
-                          <Badge variant="secondary" className="text-xs">Default</Badge>
+                          <Badge variant='secondary' className='text-xs'>
+                            Default
+                          </Badge>
                         )}
                         {influencer.personalityArchetype && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant='outline' className='text-xs'>
                             {influencer.personalityArchetype}
                           </Badge>
                         )}
@@ -224,21 +210,19 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div className="flex space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <ImageIcon className="h-4 w-4" />
+                  <div className='flex items-center justify-between'>
+                    <div className='text-muted-foreground flex space-x-4 text-sm'>
+                      <div className='flex items-center space-x-1'>
+                        <ImageIcon className='h-4 w-4' />
                         <span>{imageCount}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Video className="h-4 w-4" />
+                      <div className='flex items-center space-x-1'>
+                        <Video className='h-4 w-4' />
                         <span>{videoCount}</span>
                       </div>
                     </div>
                     <Link href={`/dashboard/influencer/${influencer.id}`}>
-                      <Button size="sm">
-                        View Details
-                      </Button>
+                      <Button size='sm'>View Details</Button>
                     </Link>
                   </div>
                 </CardContent>

@@ -1,24 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Res } from '@nestjs/common';
 import { Response } from 'express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { InfluencerService } from './influencer.service';
 import {
   CreateAIInfluencerDto,
@@ -49,10 +31,7 @@ export class InfluencerController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createInfluencer(
-    @Body() createInfluencerDto: CreateAIInfluencerDto,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async createInfluencer(@Body() createInfluencerDto: CreateAIInfluencerDto, @CurrentUser() user: RequestUser) {
     return this.influencerService.createInfluencer(createInfluencerDto, user);
   }
 
@@ -78,10 +57,7 @@ export class InfluencerController {
   })
   @ApiResponse({ status: 404, description: 'AI influencer not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getInfluencer(
-    @Param('id') id: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async getInfluencer(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.influencerService.getInfluencer(id, user);
   }
 
@@ -109,20 +85,17 @@ export class InfluencerController {
   @ApiResponse({ status: 200, description: 'AI influencer deleted successfully' })
   @ApiResponse({ status: 404, description: 'AI influencer not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async deleteInfluencer(
-    @Param('id') id: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async deleteInfluencer(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.influencerService.deleteInfluencer(id, user);
   }
 
   @Get(':id/image-prompt')
   @ApiOperation({ summary: 'Generate image prompt for AI influencer' })
   @ApiParam({ name: 'id', description: 'AI Influencer ID' })
-  @ApiQuery({ 
-    name: 'imageType', 
-    enum: ImageType, 
-    description: 'Type of image to generate prompt for' 
+  @ApiQuery({
+    name: 'imageType',
+    enum: ImageType,
+    description: 'Type of image to generate prompt for',
   })
   @ApiResponse({ status: 200, description: 'Generated image prompt' })
   @ApiResponse({ status: 404, description: 'AI influencer not found' })
@@ -144,10 +117,7 @@ export class InfluencerController {
     @Body() generateImageDto: Omit<GenerateImageDto, 'influencerId'>,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.influencerService.generateImage(
-      { ...generateImageDto, influencerId: id },
-      user,
-    );
+    return this.influencerService.generateImage({ ...generateImageDto, influencerId: id }, user);
   }
 
   @Get(':id/video-ideas')
@@ -159,10 +129,7 @@ export class InfluencerController {
     type: [VideoIdeaDto],
   })
   @ApiResponse({ status: 404, description: 'AI influencer not found' })
-  async generateVideoIdeas(
-    @Param('id') id: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async generateVideoIdeas(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.influencerService.generateVideoIdeas(id, user);
   }
 
@@ -176,10 +143,7 @@ export class InfluencerController {
     @Body() generateVideoDto: Omit<GenerateVideoDto, 'influencerId'>,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.influencerService.generateVideo(
-      { ...generateVideoDto, influencerId: id },
-      user,
-    );
+    return this.influencerService.generateVideo({ ...generateVideoDto, influencerId: id }, user);
   }
 
   @Get('video/:videoId/status')
@@ -187,10 +151,7 @@ export class InfluencerController {
   @ApiParam({ name: 'videoId', description: 'Video ID' })
   @ApiResponse({ status: 200, description: 'Video status information' })
   @ApiResponse({ status: 404, description: 'Video not found' })
-  async getVideoStatus(
-    @Param('videoId') videoId: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async getVideoStatus(@Param('videoId') videoId: string, @CurrentUser() user: RequestUser) {
     return this.influencerService.getVideoStatus(videoId, user);
   }
 
@@ -198,11 +159,7 @@ export class InfluencerController {
   @ApiOperation({ summary: 'Stream video generation progress' })
   @ApiParam({ name: 'videoId', description: 'Video ID' })
   @ApiResponse({ status: 200, description: 'Server-sent events stream' })
-  async streamVideoProgress(
-    @Param('videoId') videoId: string,
-    @CurrentUser() user: RequestUser,
-    @Res() res: Response,
-  ) {
+  async streamVideoProgress(@Param('videoId') videoId: string, @CurrentUser() user: RequestUser, @Res() res: Response) {
     return this.influencerService.streamVideoProgress(videoId, user, res);
   }
 }

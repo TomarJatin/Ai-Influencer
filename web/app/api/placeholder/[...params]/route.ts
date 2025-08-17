@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ params: string[] }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ params: string[] }> }) {
   const { params: pathParams } = await params;
   const searchParams = request.nextUrl.searchParams;
-  
+
   // Extract dimensions from path (e.g., "400/400")
   const [width = '400', height = '400'] = pathParams || [];
   const text = searchParams.get('text') || 'Placeholder';
-  
+
   // Create a simple SVG placeholder
   const svg = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">

@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsBoolean,
-  IsEnum,
-  IsArray,
-  IsObject,
-} from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsEnum } from 'class-validator';
 
 export class CreateAIInfluencerDto {
   @ApiProperty({ description: 'Name of the AI influencer', example: 'Sophia Chen' })
@@ -566,10 +558,10 @@ export class AIInfluencerResponseDto {
   updatedAt: string;
 
   @ApiProperty({ description: 'Associated images', required: false, type: 'array' })
-  images?: any[];
+  images?: Record<string, unknown>[];
 
   @ApiProperty({ description: 'Associated videos', required: false, type: 'array' })
-  videos?: any[];
+  videos?: Record<string, unknown>[];
 }
 
 export class VideoIdeaDto {
@@ -588,9 +580,9 @@ export class VideoIdeaDto {
   @ApiProperty({ description: 'Estimated duration in seconds' })
   estimatedDuration: number;
 
-  @ApiProperty({ 
-    description: 'Category of the video', 
-    enum: ['lifestyle', 'fashion', 'fitness', 'beauty', 'dance', 'travel', 'cooking'] 
+  @ApiProperty({
+    description: 'Category of the video',
+    enum: ['lifestyle', 'fashion', 'fitness', 'beauty', 'dance', 'travel', 'cooking'],
   })
   category: string;
 }

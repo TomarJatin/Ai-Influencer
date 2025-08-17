@@ -1,13 +1,13 @@
 import { ApiClient } from '@/lib/api-client';
-import { 
-  AIInfluencer, 
-  CreateAIInfluencerDto, 
+import {
+  AIInfluencer,
+  CreateAIInfluencerDto,
   UpdateAIInfluencerDto,
   ImageGenerationRequest,
   VideoGenerationRequest,
   VideoIdea,
   GenerationProgress,
-  InfluencerVideo
+  InfluencerVideo,
 } from '@/types';
 
 export class InfluencerService {
@@ -104,12 +104,12 @@ export class InfluencerService {
    */
   static async streamVideoProgress(videoId: string, onProgress: (progress: GenerationProgress) => void) {
     const eventSource = new EventSource(`/api/influencers/video/${videoId}/stream`);
-    
+
     eventSource.onmessage = (event) => {
       try {
         const progress: GenerationProgress = JSON.parse(event.data);
         onProgress(progress);
-        
+
         if (progress.isComplete || progress.error) {
           eventSource.close();
         }
@@ -137,7 +137,7 @@ export class InfluencerService {
    * Poll video status until completion
    */
   static async pollVideoStatus(
-    videoId: string, 
+    videoId: string,
     onProgress: (video: InfluencerVideo) => void,
     intervalMs: number = 2000
   ): Promise<InfluencerVideo> {
@@ -145,10 +145,10 @@ export class InfluencerService {
       const poll = async () => {
         try {
           const response = await this.getVideoStatus(videoId);
-          
+
           if (response.data) {
             onProgress(response.data);
-            
+
             if (response.data.status === 'COMPLETED') {
               resolve(response.data);
             } else if (response.data.status === 'FAILED') {
@@ -187,13 +187,13 @@ export class InfluencerService {
    */
   static async duplicateInfluencer(sourceId: string, newName: string) {
     const sourceResponse = await this.getInfluencer(sourceId);
-    
+
     if (!sourceResponse.data) {
       throw new Error('Source influencer not found');
     }
 
     const { id, userId, createdAt, updatedAt, images, videos, ...influencerData } = sourceResponse.data;
-    
+
     return await this.createInfluencer({
       ...influencerData,
       name: newName,
@@ -205,20 +205,21 @@ export class InfluencerService {
    */
   static async getInfluencerStats(influencerId: string) {
     const response = await this.getInfluencer(influencerId);
-    
+
     if (!response.data) {
       throw new Error('Influencer not found');
     }
 
     const influencer = response.data;
-    
+
     return {
       totalImages: influencer.images?.length || 0,
       totalVideos: influencer.videos?.length || 0,
-      referenceImages: influencer.images?.filter(img => img.isReference).length || 0,
-      completedVideos: influencer.videos?.filter(video => video.status === 'COMPLETED').length || 0,
-      pendingVideos: influencer.videos?.filter(video => video.status === 'PENDING' || video.status === 'GENERATING').length || 0,
-      failedVideos: influencer.videos?.filter(video => video.status === 'FAILED').length || 0,
+      referenceImages: influencer.images?.filter((img) => img.isReference).length || 0,
+      completedVideos: influencer.videos?.filter((video) => video.status === 'COMPLETED').length || 0,
+      pendingVideos:
+        influencer.videos?.filter((video) => video.status === 'PENDING' || video.status === 'GENERATING').length || 0,
+      failedVideos: influencer.videos?.filter((video) => video.status === 'FAILED').length || 0,
     };
   }
 
@@ -265,13 +266,15 @@ export class InfluencerService {
       ...influencer,
       displayAge: influencer.age ? `${influencer.age} years old` : 'Age not specified',
       displayEthnicity: influencer.primaryEthnicity || 'Not specified',
-      displayBuild: influencer.height && influencer.overallBuild 
-        ? `${influencer.height}, ${influencer.overallBuild}` 
-        : 'Build not specified',
-      displayStyle: influencer.personalityArchetype && influencer.styleAesthetic
-        ? `${influencer.personalityArchetype}, ${influencer.styleAesthetic}`
-        : 'Style not specified',
-      keyFeaturesList: influencer.keyFeatures?.split(',').map(f => f.trim()) || [],
+      displayBuild:
+        influencer.height && influencer.overallBuild
+          ? `${influencer.height}, ${influencer.overallBuild}`
+          : 'Build not specified',
+      displayStyle:
+        influencer.personalityArchetype && influencer.styleAesthetic
+          ? `${influencer.personalityArchetype}, ${influencer.styleAesthetic}`
+          : 'Style not specified',
+      keyFeaturesList: influencer.keyFeatures?.split(',').map((f) => f.trim()) || [],
       createdDate: new Date(influencer.createdAt).toLocaleDateString(),
       updatedDate: new Date(influencer.updatedAt).toLocaleDateString(),
     };
