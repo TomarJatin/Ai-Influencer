@@ -44,16 +44,7 @@ export const ETHNICITIES = [
   'Pacific Islander',
 ] as const;
 
-export const FACE_SHAPES = [
-  'Oval',
-  'Round',
-  'Square',
-  'Heart',
-  'Diamond',
-  'Oblong',
-  'Triangle',
-  'Rectangle',
-] as const;
+export const FACE_SHAPES = ['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Oblong', 'Triangle', 'Rectangle'] as const;
 
 export const JAWLINE_TYPES = [
   'Soft and refined',
@@ -155,7 +146,7 @@ export const NOSTRIL_SHAPES = [
 ] as const;
 
 export const LIP_SHAPES = [
-  'Heart-shaped with cupid\'s bow',
+  "Heart-shaped with cupid's bow",
   'Full and plump',
   'Natural and balanced',
   'Thin and refined',
@@ -204,14 +195,7 @@ export const SKIN_CONDITIONS = [
   'Dimples',
 ] as const;
 
-export const COMPLEXIONS = [
-  'Matte',
-  'Dewy',
-  'Natural Glow',
-  'Luminous',
-  'Radiant',
-  'Satin finish',
-] as const;
+export const COMPLEXIONS = ['Matte', 'Dewy', 'Natural Glow', 'Luminous', 'Radiant', 'Satin finish'] as const;
 
 export const HAIR_COLORS = [
   { name: 'Raven Black', value: '#000000' },
@@ -238,13 +222,7 @@ export const HAIR_LENGTHS = [
   'Hip length',
 ] as const;
 
-export const HAIR_VOLUMES = [
-  'Fine and thin',
-  'Medium density',
-  'Thick and full',
-  'Voluminous',
-  'Very thick',
-] as const;
+export const HAIR_VOLUMES = ['Fine and thin', 'Medium density', 'Thick and full', 'Voluminous', 'Very thick'] as const;
 
 export const HAIR_STYLES = [
   'Sleek and straight',
@@ -300,45 +278,47 @@ export const OVERALL_BUILDS = [
   'Soft and rounded',
 ] as const;
 
-export const SHOULDER_WIDTHS = [
-  'Narrow',
-  'Medium',
-  'Broad',
-  'Extra broad',
-] as const;
+export const SHOULDER_WIDTHS = ['Narrow', 'Medium', 'Broad', 'Extra broad'] as const;
 
-export const WAIST_TYPES = [
-  'Very defined',
-  'Defined',
-  'Natural',
-  'Straight',
-  'Wide',
-] as const;
+export const WAIST_TYPES = ['Very defined', 'Defined', 'Natural', 'Straight', 'Wide'] as const;
 
-export const HIP_WIDTHS = [
-  'Narrow',
-  'Medium',
-  'Wide',
-  'Very wide',
-  'Curvy',
-] as const;
+export const HIP_WIDTHS = ['Narrow', 'Medium', 'Wide', 'Very wide', 'Curvy'] as const;
 
-export const BODY_SHAPES = [
-  'Hourglass',
-  'Pear',
-  'Apple',
-  'Rectangle',
-  'Inverted Triangle',
-  'Athletic',
-] as const;
+export const BODY_SHAPES = ['Hourglass', 'Pear', 'Apple', 'Rectangle', 'Inverted Triangle', 'Athletic'] as const;
 
 export const CHEST_SIZES = [
-  '30A', '30B', '30C', '30D', '30DD',
-  '32A', '32B', '32C', '32D', '32DD', '32DDD',
-  '34A', '34B', '34C', '34D', '34DD', '34DDD',
-  '36A', '36B', '36C', '36D', '36DD', '36DDD',
-  '38B', '38C', '38D', '38DD', '38DDD',
-  '40C', '40D', '40DD', '40DDD',
+  '30A',
+  '30B',
+  '30C',
+  '30D',
+  '30DD',
+  '32A',
+  '32B',
+  '32C',
+  '32D',
+  '32DD',
+  '32DDD',
+  '34A',
+  '34B',
+  '34C',
+  '34D',
+  '34DD',
+  '34DDD',
+  '36A',
+  '36B',
+  '36C',
+  '36D',
+  '36DD',
+  '36DDD',
+  '38B',
+  '38C',
+  '38D',
+  '38DD',
+  '38DDD',
+  '40C',
+  '40D',
+  '40DD',
+  '40DDD',
 ] as const;
 
 export const CHEST_SHAPES = [
@@ -350,11 +330,7 @@ export const CHEST_SHAPES = [
   'Close set',
 ] as const;
 
-export const ARM_LENGTHS = [
-  'Short',
-  'Proportionate',
-  'Long',
-] as const;
+export const ARM_LENGTHS = ['Short', 'Proportionate', 'Long'] as const;
 
 export const ARM_MUSCLE_TONES = [
   'Soft and feminine',
@@ -364,19 +340,9 @@ export const ARM_MUSCLE_TONES = [
   'Very muscular',
 ] as const;
 
-export const HAND_SIZES = [
-  'Small and delicate',
-  'Medium',
-  'Large',
-  'Long and elegant',
-] as const;
+export const HAND_SIZES = ['Small and delicate', 'Medium', 'Large', 'Long and elegant'] as const;
 
-export const FINGER_LENGTHS = [
-  'Short',
-  'Medium',
-  'Long and slender',
-  'Long and strong',
-] as const;
+export const FINGER_LENGTHS = ['Short', 'Medium', 'Long and slender', 'Long and strong'] as const;
 
 export const NAIL_STYLES = [
   'Natural short',
@@ -388,28 +354,11 @@ export const NAIL_STYLES = [
   'Artistic nail art',
 ] as const;
 
-export const LEG_LENGTHS = [
-  'Short',
-  'Proportionate',
-  'Long',
-  'Very long',
-] as const;
+export const LEG_LENGTHS = ['Short', 'Proportionate', 'Long', 'Very long'] as const;
 
-export const THIGH_SHAPES = [
-  'Slim',
-  'Athletic',
-  'Curvy',
-  'Muscular',
-  'Full',
-] as const;
+export const THIGH_SHAPES = ['Slim', 'Athletic', 'Curvy', 'Muscular', 'Full'] as const;
 
-export const CALF_SHAPES = [
-  'Slim',
-  'Defined',
-  'Muscular',
-  'Soft',
-  'Athletic',
-] as const;
+export const CALF_SHAPES = ['Slim', 'Defined', 'Muscular', 'Soft', 'Athletic'] as const;
 
 export const FOOT_SIZES = [
   'Size 5 US (35 EU)',
@@ -427,14 +376,7 @@ export const FOOT_SIZES = [
   'Size 11 US (42 EU)',
 ] as const;
 
-export const FOOT_SHAPES = [
-  'Narrow',
-  'Medium width',
-  'Wide',
-  'High arch',
-  'Flat feet',
-  'Athletic',
-] as const;
+export const FOOT_SHAPES = ['Narrow', 'Medium width', 'Wide', 'High arch', 'Flat feet', 'Athletic'] as const;
 
 export const UNIQUE_CHARACTERISTICS = [
   'Small beauty mark',
@@ -556,14 +498,7 @@ export const JEWELRY_STYLES = [
   'Edgy and bold',
 ] as const;
 
-export const PREFERRED_METALS = [
-  'Gold',
-  'Silver',
-  'Rose Gold',
-  'Mixed metals',
-  'Platinum',
-  'Copper',
-] as const;
+export const PREFERRED_METALS = ['Gold', 'Silver', 'Rose Gold', 'Mixed metals', 'Platinum', 'Copper'] as const;
 
 export const SIGNATURE_ACCESSORIES = [
   'Delicate necklace',
@@ -696,8 +631,8 @@ export const CAMERA_DISTANCES = [
 ] as const;
 
 // Helper function to get display value for color options
-export const getColorDisplay = (colorOptions: readonly { name: string; value: string }[]) => 
-  colorOptions.map(color => ({
+export const getColorDisplay = (colorOptions: readonly { name: string; value: string }[]) =>
+  colorOptions.map((color) => ({
     value: color.value,
     label: color.name,
     color: color.value,
@@ -705,7 +640,7 @@ export const getColorDisplay = (colorOptions: readonly { name: string; value: st
 
 // Helper function to get simple select options
 export const getSelectOptions = (options: readonly string[]) =>
-  options.map(option => ({
+  options.map((option) => ({
     value: option,
     label: option,
   }));

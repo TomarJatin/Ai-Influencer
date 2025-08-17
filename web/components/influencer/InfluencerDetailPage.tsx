@@ -472,8 +472,8 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                         <div>
                           <span className='text-muted-foreground font-medium'>Eye Color:</span>
                           <div className='mt-1 flex items-center gap-2'>
-                            <div 
-                              className='h-4 w-4 rounded-full border border-gray-300' 
+                            <div
+                              className='h-4 w-4 rounded-full border border-gray-300'
                               style={{ backgroundColor: influencer.eyeColor }}
                             />
                             <p>{influencer.eyeColor}</p>
@@ -496,8 +496,8 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                         <div>
                           <span className='text-muted-foreground font-medium'>Natural Lip Color:</span>
                           <div className='mt-1 flex items-center gap-2'>
-                            <div 
-                              className='h-4 w-4 rounded-full border border-gray-300' 
+                            <div
+                              className='h-4 w-4 rounded-full border border-gray-300'
                               style={{ backgroundColor: influencer.naturalLipColor }}
                             />
                             <p>{influencer.naturalLipColor}</p>
@@ -537,8 +537,8 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                         <div>
                           <span className='text-muted-foreground font-medium'>Hair Color:</span>
                           <div className='mt-1 flex items-center gap-2'>
-                            <div 
-                              className='h-4 w-4 rounded-full border border-gray-300' 
+                            <div
+                              className='h-4 w-4 rounded-full border border-gray-300'
                               style={{ backgroundColor: influencer.hairColor }}
                             />
                             <p>{influencer.hairColor}</p>

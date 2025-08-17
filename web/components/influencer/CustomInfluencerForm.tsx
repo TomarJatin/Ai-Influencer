@@ -24,7 +24,7 @@ const createInfluencerSchema = z.object({
   age: z.number().min(18, 'Age must be at least 18').max(50, 'Age must be at most 50').optional(),
   personalityArchetype: z.string().optional(),
   styleAesthetic: z.string().optional(),
-  
+
   // Facial Features - Face Structure
   faceShape: z.string().optional(),
   jawline: z.string().optional(),
@@ -55,14 +55,14 @@ const createInfluencerSchema = z.object({
   skinTexture: z.string().optional(),
   skinCondition: z.string().optional(),
   complexion: z.string().optional(),
-  
+
   // Hair
   hairColor: z.string().optional(),
   hairTexture: z.string().optional(),
   hairLength: z.string().optional(),
   hairVolume: z.string().optional(),
   hairStyle: z.string().optional(),
-  
+
   // Body Characteristics
   height: z.string().optional(),
   weight: z.string().optional(),
@@ -213,117 +213,117 @@ export function CustomInfluencerForm({ onSubmit, isSubmitting }: CustomInfluence
                 </TabsList>
 
                 <TabsContent value='basic' className='space-y-6'>
-              {/* Basic Information */}
+                  {/* Basic Information */}
                   <div className='space-y-4'>
                     <h3 className='text-lg font-medium'>Basic Information</h3>
-                
-                <FormField
-                  control={form.control}
-                      name='name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name *</FormLabel>
-                      <FormControl>
-                            <Input placeholder='Enter influencer name' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
+                    <FormField
+                      control={form.control}
+                      name='name'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder='Enter influencer name' {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe your influencer's personality and style"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe your influencer's personality and style"
                               className='min-h-[80px]'
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        A brief description that captures the essence of your influencer
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            A brief description that captures the essence of your influencer
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
-                  <FormField
-                    control={form.control}
+                      <FormField
+                        control={form.control}
                         name='age'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Age</FormLabel>
-                        <FormControl>
-                          <Input 
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Age</FormLabel>
+                            <FormControl>
+                              <Input
                                 type='number'
                                 min='18'
                                 max='50'
                                 placeholder='25'
-                            {...field}
-                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={form.control}
+                      <FormField
+                        control={form.control}
                         name='personalityArchetype'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Personality</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Personality</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
                                   <SelectValue placeholder='Select personality' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
                                 {FormOptions.PERSONALITY_ARCHETYPES.map((personality) => (
                                   <SelectItem key={personality} value={personality}>
                                     {personality}
                                   </SelectItem>
                                 ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={form.control}
+                      <FormField
+                        control={form.control}
                         name='styleAesthetic'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Style Aesthetic</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Style Aesthetic</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
                                   <SelectValue placeholder='Select style' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
                                 {FormOptions.STYLE_AESTHETICS.map((style) => (
                                   <SelectItem key={style} value={style}>
                                     {style}
                                   </SelectItem>
                                 ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     {/* Ethnicity and Heritage */}
                     <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
@@ -376,7 +376,7 @@ export function CustomInfluencerForm({ onSubmit, isSubmitting }: CustomInfluence
                           </FormItem>
                         )}
                       />
-              </div>
+                    </div>
                   </div>
                 </TabsContent>
 
