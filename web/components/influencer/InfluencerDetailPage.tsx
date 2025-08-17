@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit, Image as ImageIcon, Video, Plus, Download, Play, Settings, Eye } from 'lucide-react';
@@ -395,84 +395,436 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
             </TabsContent>
 
             <TabsContent value='details' className='space-y-4'>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Influencer Details</CardTitle>
-                  <CardDescription>Complete character specifications and settings</CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-6'>
-                  {/* Character Identity */}
-                  {(influencer.personalityArchetype || influencer.styleAesthetic) && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>Character Identity</h4>
-                      <div className='grid grid-cols-2 gap-4 text-sm'>
-                        {influencer.personalityArchetype && (
-                          <div>
-                            <span className='text-muted-foreground'>Personality:</span>
-                            <p>{influencer.personalityArchetype}</p>
-                          </div>
-                        )}
-                        {influencer.styleAesthetic && (
-                          <div>
-                            <span className='text-muted-foreground'>Style:</span>
-                            <p>{influencer.styleAesthetic}</p>
-                          </div>
-                        )}
-                      </div>
+              <div className='grid gap-6 md:grid-cols-2'>
+                {/* Character Identity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Character Identity</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
+                      {influencer.personalityArchetype && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Personality:</span>
+                          <p className='mt-1'>{influencer.personalityArchetype}</p>
+                        </div>
+                      )}
+                      {influencer.styleAesthetic && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Style Aesthetic:</span>
+                          <p className='mt-1'>{influencer.styleAesthetic}</p>
+                        </div>
+                      )}
+                      {influencer.primaryEthnicity && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Primary Ethnicity:</span>
+                          <p className='mt-1'>{influencer.primaryEthnicity}</p>
+                        </div>
+                      )}
+                      {influencer.secondaryHeritage && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Secondary Heritage:</span>
+                          <p className='mt-1'>{influencer.secondaryHeritage}</p>
+                        </div>
+                      )}
+                      {influencer.culturalInfluences && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Cultural Influences:</span>
+                          <p className='mt-1'>{influencer.culturalInfluences}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
 
-                  {/* Physical Features */}
-                  <div>
-                    <h4 className='mb-2 font-medium'>Physical Features</h4>
-                    <div className='grid grid-cols-2 gap-4 text-sm'>
+                {/* Physical Features - Face */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Facial Features</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
                       {influencer.faceShape && (
                         <div>
-                          <span className='text-muted-foreground'>Face Shape:</span>
-                          <p>{influencer.faceShape}</p>
+                          <span className='text-muted-foreground font-medium'>Face Shape:</span>
+                          <p className='mt-1'>{influencer.faceShape}</p>
+                        </div>
+                      )}
+                      {influencer.jawline && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Jawline:</span>
+                          <p className='mt-1'>{influencer.jawline}</p>
+                        </div>
+                      )}
+                      {influencer.cheekbones && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Cheekbones:</span>
+                          <p className='mt-1'>{influencer.cheekbones}</p>
+                        </div>
+                      )}
+                      {influencer.eyeShape && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Eye Shape:</span>
+                          <p className='mt-1'>{influencer.eyeShape}</p>
                         </div>
                       )}
                       {influencer.eyeColor && (
                         <div>
-                          <span className='text-muted-foreground'>Eye Color:</span>
-                          <p>{influencer.eyeColor}</p>
+                          <span className='text-muted-foreground font-medium'>Eye Color:</span>
+                          <div className='mt-1 flex items-center gap-2'>
+                            <div 
+                              className='h-4 w-4 rounded-full border border-gray-300' 
+                              style={{ backgroundColor: influencer.eyeColor }}
+                            />
+                            <p>{influencer.eyeColor}</p>
+                          </div>
+                        </div>
+                      )}
+                      {influencer.noseShape && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Nose Shape:</span>
+                          <p className='mt-1'>{influencer.noseShape}</p>
+                        </div>
+                      )}
+                      {influencer.lipShape && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Lip Shape:</span>
+                          <p className='mt-1'>{influencer.lipShape}</p>
+                        </div>
+                      )}
+                      {influencer.naturalLipColor && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Natural Lip Color:</span>
+                          <div className='mt-1 flex items-center gap-2'>
+                            <div 
+                              className='h-4 w-4 rounded-full border border-gray-300' 
+                              style={{ backgroundColor: influencer.naturalLipColor }}
+                            />
+                            <p>{influencer.naturalLipColor}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Skin & Hair */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Skin & Hair</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
+                      {influencer.skinTone && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Skin Tone:</span>
+                          <p className='mt-1'>{influencer.skinTone}</p>
+                        </div>
+                      )}
+                      {influencer.skinTexture && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Skin Texture:</span>
+                          <p className='mt-1'>{influencer.skinTexture}</p>
+                        </div>
+                      )}
+                      {influencer.complexion && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Complexion:</span>
+                          <p className='mt-1'>{influencer.complexion}</p>
                         </div>
                       )}
                       {influencer.hairColor && (
                         <div>
-                          <span className='text-muted-foreground'>Hair Color:</span>
-                          <p>{influencer.hairColor}</p>
+                          <span className='text-muted-foreground font-medium'>Hair Color:</span>
+                          <div className='mt-1 flex items-center gap-2'>
+                            <div 
+                              className='h-4 w-4 rounded-full border border-gray-300' 
+                              style={{ backgroundColor: influencer.hairColor }}
+                            />
+                            <p>{influencer.hairColor}</p>
+                          </div>
                         </div>
                       )}
-                      {influencer.skinTone && (
+                      {influencer.hairTexture && (
                         <div>
-                          <span className='text-muted-foreground'>Skin Tone:</span>
-                          <p>{influencer.skinTone}</p>
+                          <span className='text-muted-foreground font-medium'>Hair Texture:</span>
+                          <p className='mt-1'>{influencer.hairTexture}</p>
+                        </div>
+                      )}
+                      {influencer.hairLength && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Hair Length:</span>
+                          <p className='mt-1'>{influencer.hairLength}</p>
+                        </div>
+                      )}
+                      {influencer.hairStyle && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Hair Style:</span>
+                          <p className='mt-1'>{influencer.hairStyle}</p>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  {/* Key Features */}
-                  {influencer.keyFeatures && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>Key Features</h4>
-                      <p className='text-muted-foreground text-sm'>{influencer.keyFeatures}</p>
+                {/* Body Characteristics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Body Characteristics</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
+                      {influencer.height && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Height:</span>
+                          <p className='mt-1'>{influencer.height}</p>
+                        </div>
+                      )}
+                      {influencer.weight && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Weight:</span>
+                          <p className='mt-1'>{influencer.weight}</p>
+                        </div>
+                      )}
+                      {influencer.bodyType && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Body Type:</span>
+                          <p className='mt-1'>{influencer.bodyType}</p>
+                        </div>
+                      )}
+                      {influencer.overallBuild && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Overall Build:</span>
+                          <p className='mt-1'>{influencer.overallBuild}</p>
+                        </div>
+                      )}
+                      {influencer.bodyShape && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Body Shape:</span>
+                          <p className='mt-1'>{influencer.bodyShape}</p>
+                        </div>
+                      )}
+                      {influencer.shoulderWidth && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Shoulder Width:</span>
+                          <p className='mt-1'>{influencer.shoulderWidth}</p>
+                        </div>
+                      )}
+                      {influencer.waist && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Waist:</span>
+                          <p className='mt-1'>{influencer.waist}</p>
+                        </div>
+                      )}
+                      {influencer.hipWidth && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Hip Width:</span>
+                          <p className='mt-1'>{influencer.hipWidth}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
 
-                  {/* Technical Settings */}
-                  {influencer.preferredLighting && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>Technical Settings</h4>
-                      <div className='text-sm'>
-                        <span className='text-muted-foreground'>Preferred Lighting:</span>
-                        <p>{influencer.preferredLighting}</p>
+                {/* Style Preferences */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Style Preferences</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
+                      {influencer.dailyMakeupLook && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Daily Makeup:</span>
+                          <p className='mt-1'>{influencer.dailyMakeupLook}</p>
+                        </div>
+                      )}
+                      {influencer.signatureColors && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Signature Colors:</span>
+                          <p className='mt-1'>{influencer.signatureColors}</p>
+                        </div>
+                      )}
+                      {influencer.colorPalette && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Color Palette:</span>
+                          <p className='mt-1'>{influencer.colorPalette}</p>
+                        </div>
+                      )}
+                      {influencer.jewelryStyle && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Jewelry Style:</span>
+                          <p className='mt-1'>{influencer.jewelryStyle}</p>
+                        </div>
+                      )}
+                      {influencer.preferredMetals && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Preferred Metals:</span>
+                          <p className='mt-1'>{influencer.preferredMetals}</p>
+                        </div>
+                      )}
+                      {influencer.styleIcons && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Style Icons:</span>
+                          <p className='mt-1'>{influencer.styleIcons}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Expressions & Personality */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Expressions & Personality</CardTitle>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-3 text-sm'>
+                      {influencer.signatureSmile && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Signature Smile:</span>
+                          <p className='mt-1'>{influencer.signatureSmile}</p>
+                        </div>
+                      )}
+                      {influencer.eyeExpression && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Eye Expression:</span>
+                          <p className='mt-1'>{influencer.eyeExpression}</p>
+                        </div>
+                      )}
+                      {influencer.restingFace && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Resting Face:</span>
+                          <p className='mt-1'>{influencer.restingFace}</p>
+                        </div>
+                      )}
+                      {influencer.posture && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Posture:</span>
+                          <p className='mt-1'>{influencer.posture}</p>
+                        </div>
+                      )}
+                      {influencer.handPositions && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Hand Positions:</span>
+                          <p className='mt-1'>{influencer.handPositions}</p>
+                        </div>
+                      )}
+                      {influencer.personalityTraits && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Personality Traits:</span>
+                          <p className='mt-1'>{influencer.personalityTraits}</p>
+                        </div>
+                      )}
+                      {influencer.voiceTone && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Voice Tone:</span>
+                          <p className='mt-1'>{influencer.voiceTone}</p>
+                        </div>
+                      )}
+                      {influencer.speakingStyle && (
+                        <div>
+                          <span className='text-muted-foreground font-medium'>Speaking Style:</span>
+                          <p className='mt-1'>{influencer.speakingStyle}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Distinctive Features */}
+                {(influencer.uniqueCharacteristics || influencer.signatureFeatures || influencer.asymmetries) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className='text-lg'>Distinctive Features</CardTitle>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      <div className='grid grid-cols-1 gap-3 text-sm'>
+                        {influencer.uniqueCharacteristics && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Unique Characteristics:</span>
+                            <p className='mt-1'>{influencer.uniqueCharacteristics}</p>
+                          </div>
+                        )}
+                        {influencer.signatureFeatures && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Signature Features:</span>
+                            <p className='mt-1'>{influencer.signatureFeatures}</p>
+                          </div>
+                        )}
+                        {influencer.asymmetries && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Asymmetries:</span>
+                            <p className='mt-1'>{influencer.asymmetries}</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Technical Specifications */}
+                {(influencer.preferredLighting || influencer.bestAngles || influencer.cameraDistance) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className='text-lg'>Technical Specifications</CardTitle>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      <div className='grid grid-cols-1 gap-3 text-sm'>
+                        {influencer.preferredLighting && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Preferred Lighting:</span>
+                            <p className='mt-1'>{influencer.preferredLighting}</p>
+                          </div>
+                        )}
+                        {influencer.bestAngles && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Best Angles:</span>
+                            <p className='mt-1'>{influencer.bestAngles}</p>
+                          </div>
+                        )}
+                        {influencer.cameraDistance && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Camera Distance:</span>
+                            <p className='mt-1'>{influencer.cameraDistance}</p>
+                          </div>
+                        )}
+                        {influencer.preferredAngles && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Preferred Angles:</span>
+                            <p className='mt-1'>{influencer.preferredAngles}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Consistency Notes */}
+                {(influencer.keyFeatures || influencer.acceptableVariations) && (
+                  <Card className='md:col-span-2'>
+                    <CardHeader>
+                      <CardTitle className='text-lg'>Consistency Notes</CardTitle>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-2'>
+                        {influencer.keyFeatures && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Key Features:</span>
+                            <p className='mt-1 text-sm leading-relaxed'>{influencer.keyFeatures}</p>
+                          </div>
+                        )}
+                        {influencer.acceptableVariations && (
+                          <div>
+                            <span className='text-muted-foreground font-medium'>Acceptable Variations:</span>
+                            <p className='mt-1 text-sm leading-relaxed'>{influencer.acceptableVariations}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>

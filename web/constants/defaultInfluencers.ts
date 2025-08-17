@@ -1,4 +1,5 @@
 import { CreateAIInfluencerDto } from '@/types';
+import * as FormOptions from './influencerFormOptions';
 
 export const DEFAULT_INFLUENCERS: CreateAIInfluencerDto[] = [
   {
@@ -7,23 +8,23 @@ export const DEFAULT_INFLUENCERS: CreateAIInfluencerDto[] = [
 
     // Character Identity
     age: 24,
-    personalityArchetype: 'Sophisticated',
-    styleAesthetic: 'Minimalist',
+    personalityArchetype: FormOptions.PERSONALITY_ARCHETYPES[2], // Sophisticated
+    styleAesthetic: FormOptions.STYLE_AESTHETICS[0], // Minimalist
 
     // Facial Features - Face Structure
-    faceShape: 'Oval',
-    jawline: 'Soft and refined',
-    cheekbones: 'High and subtle',
-    forehead: 'Average height, proportionate',
-    chin: 'Delicate and pointed',
+    faceShape: FormOptions.FACE_SHAPES[0], // Oval
+    jawline: FormOptions.JAWLINE_TYPES[0], // Soft and refined
+    cheekbones: FormOptions.CHEEKBONE_TYPES[1], // Subtle and soft
+    forehead: FormOptions.FOREHEAD_TYPES[0], // Average height
+    chin: FormOptions.CHIN_TYPES[0], // Delicate and pointed
 
     // Eyes
-    eyeShape: 'Almond',
-    eyeColor: 'Deep Brown #2C1810',
-    eyeSize: 'Medium',
-    eyebrowShape: 'Naturally arched, medium thickness',
-    eyebrowColor: 'Dark brown matching hair',
-    eyelashes: 'Long and naturally curled',
+    eyeShape: FormOptions.EYE_SHAPES[0], // Almond
+    eyeColor: FormOptions.EYE_COLORS[0].value, // Deep Brown
+    eyeSize: FormOptions.EYE_SIZES[1], // Medium
+    eyebrowShape: FormOptions.EYEBROW_SHAPES[0], // Naturally arched
+    eyebrowColor: FormOptions.HAIR_COLORS[1].value, // Dark Brown
+    eyelashes: FormOptions.EYELASH_TYPES[0], // Long and curled
 
     // Nose
     noseShape: 'Straight and refined',
@@ -49,10 +50,10 @@ export const DEFAULT_INFLUENCERS: CreateAIInfluencerDto[] = [
     hairStyle: 'Sleek and straight, often center-parted',
 
     // Body Characteristics - Overall Build
-    height: '5\'6" (168cm)',
-    weight: '120-125 lbs (54-57kg)',
-    bodyType: 'Ectomorph',
-    overallBuild: 'Slim and elegant',
+    height: FormOptions.HEIGHTS[8], // 5'6" (168cm)
+    weight: FormOptions.WEIGHT_RANGES[2], // 120-130 lbs (54-59kg)
+    bodyType: FormOptions.BODY_TYPES[0], // Ectomorph
+    overallBuild: FormOptions.OVERALL_BUILDS[1], // Slim and elegant
 
     // Body Proportions
     shoulderWidth: 'Narrow',
