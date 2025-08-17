@@ -1,0 +1,138 @@
+EXAMPLE AI INFLUENCER PROMPTS COLLECTION
+=========================================
+
+CHARACTER EXAMPLE: "SOPHIA CHEN"
+================================
+
+BASE MODEL DEFINITION EXAMPLE:
+------------------------------
+Name: Sophia Chen
+Age: 24
+Ethnicity: Mixed (East Asian/Northern European)
+Face Shape: Oval
+Skin: Medium tone with golden undertones, smooth texture
+Eyes: Almond-shaped, emerald green (#50C878)
+Hair: Long chocolate brown with caramel highlights, loose waves
+Height: 5'7" (170cm)
+Build: Athletic hourglass, 34C, 26" waist, 36" hips
+Personality: Confident, sophisticated, health-conscious
+
+FACE GENERATION PROMPT EXAMPLE:
+-------------------------------
+Close-up portrait photograph of a 24-year-old mixed heritage (East Asian and Northern European) woman with oval face shape, medium skin tone with golden undertones and smooth texture, almond-shaped emerald green eyes (#50C878), naturally arched medium-thickness dark brown eyebrows, straight medium-sized nose, full heart-shaped lips in natural rose pink, long chocolate brown hair with caramel highlights in loose waves flowing over one shoulder. Subtle confident smile with soft, approachable eyes looking directly at camera. Soft natural lighting from a large window creating gentle shadows that define facial structure.
+
+Style: Contemporary portrait photography
+Lighting: Soft window light from 45-degree angle, subtle fill light to prevent harsh shadows
+Background: Neutral cream backdrop with subtle texture, slightly out of focus
+Mood: Confident, approachable, sophisticated
+
+Technical specifications: 8K resolution, professional photography, sharp focus on eyes, detailed skin texture showing natural skin pores, realistic lighting with soft shadows, color graded with warm tones, shot on Canon EOS R5, 85mm f/1.4 lens, perfect exposure, no blur, no grain, photorealistic, hyperrealistic.
+
+Negative prompt: cartoon, anime, illustration, painting, drawing, art, sketch, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, skin spots, acnes, skin blemishes, age spot, glans, extra fingers, fewer fingers, strange fingers, bad hand, mole, ((extra limbs)), ((extra arms)), ((extra legs)), ((missing arms)), ((missing legs)), ((extra hands)), ((extra feet)), ((missing hands)), ((missing feet)), blurry, bad anatomy, bad proportions, gross proportions.
+
+FULL BODY GENERATION PROMPT EXAMPLE:
+------------------------------------
+Full body portrait photograph of a 24-year-old mixed heritage (East Asian and Northern European) woman, 5'7" tall with athletic hourglass build. Oval face with emerald green almond eyes, chocolate brown wavy hair with caramel highlights flowing past shoulders, confident subtle smile. Toned arms, defined waist (26"), proportionate hips (36"), long legs with athletic muscle definition. Wearing a fitted cream-colored cashmere sweater tucked into high-waisted dark wash straight-leg jeans, nude pointed-toe ankle boots, delicate gold layered necklaces, small gold hoop earrings. Standing in a relaxed contrapposto pose with weight on right leg, left hand on hip, right arm naturally at side, head slightly tilted, looking directly at camera with confident expression. Modern minimalist studio setting with white seamless backdrop and subtle geometric shadows from window blinds creating interesting patterns on the floor.
+
+Pose: Confident contrapposto stance, weight shifted to right leg, left hand on hip, right arm relaxed, slight head tilt, direct eye contact
+Outfit: Cream cashmere sweater, dark wash straight jeans, nude ankle boots, gold jewelry - sophisticated casual style
+Setting: Modern minimalist studio with white backdrop, geometric shadow patterns from blinds
+Lighting: Soft natural window light from left side, subtle fill light to prevent harsh shadows, creating dimensional lighting on face and body
+Composition: Full body centered in frame, shot from slightly below eye level to create empowering perspective
+
+Technical specifications: 8K resolution, professional fashion photography, sharp focus throughout, detailed fabric textures showing cashmere weave and denim texture, realistic body proportions, natural skin texture, color graded with warm undertones, shot on Canon EOS R5, 50mm f/2.8 lens, perfect exposure, full body in frame, no crop.
+
+VEO3 VIDEO GENERATION PROMPT EXAMPLES:
+=====================================
+
+DANCING VIDEO PROMPT:
+---------------------
+A 24-year-old mixed heritage woman with oval face, emerald green almond eyes, long chocolate brown wavy hair with caramel highlights, 5'7" athletic hourglass build, wearing a fitted sage green sports bra and matching high-waisted leggings, dancing energetically to upbeat music in a luxurious modern bedroom. The room features floor-to-ceiling windows with sheer white curtains allowing soft natural light to filter in, a king-size bed with white linen bedding and gold accent pillows, light oak hardwood floors with a plush cream area rug, minimalist white furniture including a dresser with a large circular mirror, potted plants (monstera and fiddle leaf fig) in woven baskets, fairy string lights creating warm ambient lighting, and contemporary art pieces on the walls. She performs a mix of contemporary and hip-hop dance moves, her hair flowing naturally with each movement, maintaining confident facial expressions with genuine joy and rhythm. The camera starts with a wide establishing shot showing the full room, then moves to medium shots capturing her full body dance movements, includes close-ups of her facial expressions and hand movements, and ends with a slow circular camera movement around her as she strikes a final pose. Golden hour lighting streams through the windows creating beautiful rim lighting on her silhouette, with additional warm LED strip lighting hidden behind the headboard providing ambient glow.
+
+Character: Maintain exact appearance - oval face structure, emerald green eyes, chocolate brown wavy hair, athletic build, confident personality
+Action: Fluid contemporary and hip-hop dance movements, hair flowing naturally, genuine expressions of joy
+Setting: Luxury modern bedroom with floor-to-ceiling windows, white linens, gold accents, plants, fairy lights, hardwood floors
+Camera: Wide establishing shot → medium dance shots → facial close-ups → circular finale movement
+Duration: 20-30 seconds
+Style: Lifestyle/luxury content, Instagram-ready, warm and inviting cinematography
+
+MORNING ROUTINE VIDEO PROMPT:
+-----------------------------
+The same 24-year-old woman in a marble-clad luxury bathroom performing her morning skincare routine. She's wearing a soft white cotton robe, her hair in a loose messy bun with face-framing pieces. The bathroom features Carrara marble countertops and walls, a large backlit mirror, gold fixtures including a rainfall shower visible in the background, white subway tile, a freestanding white bathtub, fresh white orchids in a glass vase, luxury skincare products arranged aesthetically on marble trays, and soft white towels. She applies skincare products with gentle, deliberate movements - cleansing her face, applying serums, and moisturizer - while maintaining natural, content facial expressions. The camera captures intimate close-ups of her hands applying products, medium shots showing her reflection in the mirror, and wide shots establishing the luxurious bathroom setting. Soft natural light comes from a frosted window, supplemented by the warm glow of the backlit mirror and subtle recessed lighting.
+
+Character: Same woman, natural morning appearance, soft white robe, hair in messy bun
+Action: Gentle skincare application, natural self-care movements, content expressions
+Setting: Luxury marble bathroom with gold fixtures, backlit mirror, orchids, premium products
+Camera: Close-ups of skincare application → mirror reflection shots → establishing bathroom shots
+Duration: 25-30 seconds
+Style: Luxury lifestyle, self-care content, soft and aspirational cinematography
+
+WORKOUT VIDEO PROMPT:
+---------------------
+The same woman working out in a dedicated home gym space. She's wearing matching athletic wear - a sports bra and high-waisted leggings in sage green, her hair in a high ponytail. The gym features rubber flooring, mirrored walls, natural light from large windows, modern exercise equipment including dumbbells on a rack, a yoga mat area with plants, motivational artwork, a sound system, and a small towel station with a water bottle. She performs a mix of strength training and yoga poses - squats, lunges, planks, and warrior poses - showing proper form and athletic grace. Her expressions show focus during exercises and satisfaction between sets. The camera captures her full body during exercises from multiple angles, includes close-ups of proper form and facial expressions of determination, and wide shots showing the complete gym setup. Natural light creates dynamic shadows during movement, with additional track lighting providing even illumination.
+
+Character: Same woman, athletic wear, ponytail, focused and determined expressions
+Action: Strength training and yoga movements, proper form, athletic grace
+Setting: Home gym with mirrors, rubber flooring, equipment, plants, natural light
+Camera: Multiple exercise angles → form close-ups → determination expressions → gym wide shots
+Duration: 25-30 seconds
+Style: Fitness content, motivational, dynamic and energetic cinematography
+
+COOKING VIDEO PROMPT:
+---------------------
+The same woman cooking a healthy breakfast in a stunning modern kitchen. She's wearing a cream-colored cashmere sweater and high-waisted jeans, her hair styled in loose waves. The kitchen features white quartz waterfall countertops, navy blue cabinets with brass hardware, a large kitchen island with bar seating, pendant lights with brass accents, a subway tile backsplash, stainless steel appliances including a large range and hood, open shelving displaying beautiful dishware, fresh herbs in small pots on the windowsill, and a bowl of fresh fruit as decoration. She's preparing avocado toast and a smoothie bowl, moving confidently around the kitchen, chopping avocados, arranging toppings, and plating with artistic flair. Her expressions show concentration while cooking and satisfaction when presenting the final dish. The camera follows her movements with smooth tracking shots, captures overhead shots of the food preparation, includes close-ups of her hands working and facial expressions, and wide shots showcasing the beautiful kitchen space.
+
+Character: Same woman, casual chic styling, confident culinary movements
+Action: Cooking healthy breakfast, artistic food plating, satisfied expressions
+Setting: Modern kitchen with navy cabinets, quartz counters, brass accents, natural light
+Camera: Tracking cooking movements → overhead food shots → close-ups → kitchen wide shots
+Duration: 30-35 seconds
+Style: Lifestyle content, healthy living, warm and inviting cinematography
+
+ADDITIONAL QUICK PROMPTS:
+========================
+
+BEAUTY CLOSE-UP:
+Beauty close-up portrait of Sophia Chen, focus on flawless skin texture and emerald green eyes, minimal natural makeup highlighting her features, soft beauty lighting, shot on macro lens for incredible detail.
+
+FASHION PORTRAIT:
+High-fashion portrait of Sophia Chen wearing designer clothing, editorial styling, dramatic lighting, fashion photography aesthetic, shot for magazine cover, artistic composition.
+
+LIFESTYLE CANDID:
+Candid lifestyle portrait of Sophia Chen laughing naturally, environmental portrait in coffee shop, natural lighting, authentic moment captured, documentary photography style.
+
+PROFESSIONAL HEADSHOT:
+Professional business headshot of Sophia Chen, navy blazer, subtle smile, clean background, corporate lighting, shot for LinkedIn profile.
+
+CONSISTENCY KEYWORDS FOR ALL PROMPTS:
+=====================================
+- "maintaining exact appearance as Sophia Chen"
+- "identical facial structure and features"
+- "same emerald green eyes (#50C878)"
+- "chocolate brown hair with caramel highlights"
+- "5'7" athletic hourglass build"
+- "oval face shape with golden undertones"
+- "confident, sophisticated personality traits"
+
+QUALITY MODIFIERS TO ALWAYS INCLUDE:
+====================================
+8K resolution, professional photography, sharp focus, detailed skin texture, natural skin pores, realistic lighting, color graded, shot on Canon EOS R5, perfect exposure, no blur, no grain, photorealistic, hyperrealistic
+
+NEGATIVE PROMPTS TO ALWAYS USE:
+===============================
+cartoon, anime, illustration, painting, drawing, art, sketch, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, skin spots, acnes, skin blemishes, age spot, bad anatomy, bad proportions, gross proportions, extra limbs, missing limbs, blurry, distorted
+
+PLATFORM-SPECIFIC ADAPTATIONS:
+==============================
+
+INSTAGRAM REEL VERSION:
+Add: "shot in 9:16 vertical format, Instagram-ready, trendy aesthetic"
+
+TIKTOK VERSION:
+Add: "casual, relatable vibe, TikTok style, engaging and fun"
+
+YOUTUBE SHORTS VERSION:
+Add: "high production value, cinematic quality, YouTube Shorts format"
+
+TWITTER/X VERSION:
+Add: "quick, engaging content, optimized for social media sharing"

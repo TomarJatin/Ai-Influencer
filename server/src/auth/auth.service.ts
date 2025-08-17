@@ -45,9 +45,6 @@ export class AuthService {
         },
       });
       if (!user) {
-        if (!email.endsWith('@heizen.work')) {
-          throw new UnauthorizedException('Only heizen.work emails are allowed');
-        }
         user = await this.prismaService.user.create({
           data: {
             email,
@@ -94,9 +91,6 @@ export class AuthService {
         },
       });
       if (!user) {
-        if (!email.endsWith('@heizen.work')) {
-          throw new UnauthorizedException('Only heizen.work emails are allowed');
-        }
         user = await this.prismaService.user.create({
           data: {
             email,

@@ -97,8 +97,7 @@ export default function LoginPage() {
           <CardHeader className='space-y-2 pb-6'>
             <CardTitle className='text-center text-2xl font-semibold'>Welcome back to Heizen</CardTitle>
             <CardDescription className='text-center text-sm'>
-              {showOTP ? 'Enter the verification code sent to your email' : 'Sign in to your account'} (Only heizen.work
-              emails are allowed)
+              {showOTP ? 'Enter the verification code sent to your email' : 'Sign in to your account'}
             </CardDescription>
           </CardHeader>
           <CardContent>
