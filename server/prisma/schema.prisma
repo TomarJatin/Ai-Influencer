@@ -161,9 +161,11 @@ model AIInfluencer {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images InfluencerImage[]
-  videos InfluencerVideo[]
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images     InfluencerImage[]
+  videos     InfluencerVideo[]
+  imageIdeas ImageIdea[]
+  videoIdeas VideoIdea[]
 
   @@map("ai_influencers")
 }
@@ -171,6 +173,7 @@ model AIInfluencer {
 model InfluencerImage {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   influencerId String   @map("influencer_id") @db.ObjectId
+  imageIdeaId  String?  @map("image_idea_id") @db.ObjectId
   imageUrl     String   @map("image_url")
   imageType    ImageType @map("image_type")
   prompt       String?
@@ -180,6 +183,7 @@ model InfluencerImage {
   updatedAt    DateTime @default(now()) @map("updated_at")
 
   influencer AIInfluencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  imageIdea  ImageIdea?   @relation(fields: [imageIdeaId], references: [id], onDelete: SetNull)
 
   @@map("influencer_images")
 }
@@ -187,6 +191,7 @@ model InfluencerImage {
 model InfluencerVideo {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
   influencerId String      @map("influencer_id") @db.ObjectId
+  videoIdeaId  String?     @map("video_idea_id") @db.ObjectId
   title        String
   description  String?
   videoUrl     String?     @map("video_url")
@@ -200,8 +205,56 @@ model InfluencerVideo {
   updatedAt    DateTime    @default(now()) @map("updated_at")
 
   influencer AIInfluencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  videoIdea  VideoIdea?   @relation(fields: [videoIdeaId], references: [id], onDelete: SetNull)
 
   @@map("influencer_videos")
+}
+
+model ImageIdea {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  influencerId String   @map("influencer_id") @db.ObjectId
+  ideaId       String   @map("idea_id") // Generated ID from AI (e.g., img_portrait_001)
+  title        String
+  description  String
+  category     String
+  visualElements Json   @map("visual_elements") // Array of visual elements
+  mood         String
+  setting      String
+  styleNotes   String   @map("style_notes")
+  isUsed       Boolean  @default(false) @map("is_used")
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  influencer AIInfluencer     @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  images     InfluencerImage[]
+
+  @@unique([influencerId, ideaId])
+  @@map("image_ideas")
+}
+
+model VideoIdea {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  influencerId String   @map("influencer_id") @db.ObjectId
+  ideaId       String   @map("idea_id") // Generated ID from AI (e.g., vid_lifestyle_001)
+  title        String
+  description  String
+  category     String
+  scenario     String
+  keyMoments   Json     @map("key_moments") // Array of key moments
+  duration     String
+  mood         String
+  visualStyle  String   @map("visual_style")
+  isUsed       Boolean  @default(false) @map("is_used")
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  influencer AIInfluencer     @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  videos     InfluencerVideo[]
+
+  @@unique([influencerId, ideaId])
+  @@map("video_ideas")
 }
 
 enum UserRole {

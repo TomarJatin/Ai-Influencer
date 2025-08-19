@@ -6,11 +6,22 @@ import {
   ImageGenerationRequest,
   VideoGenerationRequest,
   VideoIdea,
+  ImageIdea,
+  OptimizedPrompt,
+  GenerateImageIdeasRequest,
+  GenerateVideoIdeasRequest,
+  GeneratePromptRequest,
+  UploadMediaRequest,
   GenerationProgress,
   InfluencerVideo,
+  LegacyVideoIdea,
 } from '@/types';
 
 export class InfluencerService {
+  // ============================================================================
+  // BASIC INFLUENCER CRUD OPERATIONS
+  // ============================================================================
+
   /**
    * Create a new AI influencer
    */
@@ -46,10 +57,93 @@ export class InfluencerService {
     return await ApiClient.delete<{ success: boolean; message: string }>(`/api/influencers/${id}`);
   }
 
+  // ============================================================================
+  // NEW IMAGE IDEA GENERATION WORKFLOW
+  // ============================================================================
+
   /**
-   * Generate image prompt for AI influencer
+   * Generate new image ideas for AI influencer
    */
-  static async generateImagePrompt(influencerId: string, imageType: string) {
+  static async generateImageIdeas(influencerId: string, request: GenerateImageIdeasRequest = {}) {
+    return await ApiClient.post<ImageIdea[]>(`/api/influencers/${influencerId}/image-ideas/generate`, request);
+  }
+
+  /**
+   * Get all image ideas for AI influencer
+   */
+  static async getImageIdeas(influencerId: string) {
+    return await ApiClient.get<ImageIdea[]>(`/api/influencers/${influencerId}/image-ideas`);
+  }
+
+  /**
+   * Generate optimized prompt for a specific image idea
+   */
+  static async generateImagePrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
+    return await ApiClient.post<OptimizedPrompt>(`/api/influencers/${influencerId}/image-ideas/${ideaId}/prompt`, request);
+  }
+
+  /**
+   * Upload generated image for a specific idea
+   */
+  static async uploadImage(influencerId: string, ideaId: string, file: File, request: UploadMediaRequest) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('generatedPrompt', request.generatedPrompt);
+    if (request.metadata) {
+      formData.append('metadata', JSON.stringify(request.metadata));
+    }
+
+    return await ApiClient.postFormData<any>(`/api/influencers/${influencerId}/image-ideas/${ideaId}/upload`, formData);
+  }
+
+  // ============================================================================
+  // NEW VIDEO IDEA GENERATION WORKFLOW
+  // ============================================================================
+
+  /**
+   * Generate new video ideas for AI influencer
+   */
+  static async generateVideoIdeas(influencerId: string, request: GenerateVideoIdeasRequest = {}) {
+    return await ApiClient.post<VideoIdea[]>(`/api/influencers/${influencerId}/video-ideas/generate`, request);
+  }
+
+  /**
+   * Get all video ideas for AI influencer
+   */
+  static async getVideoIdeas(influencerId: string) {
+    return await ApiClient.get<VideoIdea[]>(`/api/influencers/${influencerId}/video-ideas`);
+  }
+
+  /**
+   * Generate optimized prompt for a specific video idea
+   */
+  static async generateVideoPrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
+    return await ApiClient.post<OptimizedPrompt>(`/api/influencers/${influencerId}/video-ideas/${ideaId}/prompt`, request);
+  }
+
+  /**
+   * Upload generated video for a specific idea
+   */
+  static async uploadVideo(influencerId: string, ideaId: string, file: File, request: UploadMediaRequest) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('generatedPrompt', request.generatedPrompt);
+    if (request.metadata) {
+      formData.append('metadata', JSON.stringify(request.metadata));
+    }
+
+    return await ApiClient.postFormData<any>(`/api/influencers/${influencerId}/video-ideas/${ideaId}/upload`, formData);
+  }
+
+  // ============================================================================
+  // LEGACY METHODS (Deprecated but kept for backward compatibility)
+  // ============================================================================
+
+  /**
+   * Generate image prompt for AI influencer (Legacy)
+   * @deprecated Use generateImagePrompt with ideaId instead
+   */
+  static async generateLegacyImagePrompt(influencerId: string, imageType: string) {
     return await ApiClient.get<{
       prompt: string;
       influencer: { id: string; name: string };
@@ -58,7 +152,8 @@ export class InfluencerService {
   }
 
   /**
-   * Generate an image for AI influencer
+   * Generate an image for AI influencer (Legacy)
+   * @deprecated Use the new workflow with ideas instead
    */
   static async generateImage(request: ImageGenerationRequest) {
     return await ApiClient.post<{
@@ -74,14 +169,16 @@ export class InfluencerService {
   }
 
   /**
-   * Generate video ideas for AI influencer
+   * Generate video ideas for AI influencer (Legacy)
+   * @deprecated Use generateVideoIdeas instead
    */
-  static async generateVideoIdeas(influencerId: string) {
-    return await ApiClient.get<VideoIdea[]>(`/api/influencers/${influencerId}/video-ideas`);
+  static async generateLegacyVideoIdeas(influencerId: string) {
+    return await ApiClient.get<LegacyVideoIdea[]>(`/api/influencers/${influencerId}/video-ideas`);
   }
 
   /**
-   * Generate a video for AI influencer
+   * Generate a video for AI influencer (Legacy)
+   * @deprecated Use the new workflow with ideas instead
    */
   static async generateVideo(request: VideoGenerationRequest) {
     return await ApiClient.post<InfluencerVideo>(`/api/influencers/${request.influencerId}/generate-video`, {
@@ -93,14 +190,16 @@ export class InfluencerService {
   }
 
   /**
-   * Get video generation status
+   * Get video generation status (Legacy)
+   * @deprecated Videos are now uploaded directly
    */
   static async getVideoStatus(videoId: string) {
     return await ApiClient.get<InfluencerVideo>(`/api/influencers/video/${videoId}/status`);
   }
 
   /**
-   * Stream video generation progress (Server-Sent Events)
+   * Stream video generation progress (Server-Sent Events) (Legacy)
+   * @deprecated Videos are now uploaded directly
    */
   static async streamVideoProgress(videoId: string, onProgress: (progress: GenerationProgress) => void) {
     const eventSource = new EventSource(`/api/influencers/video/${videoId}/stream`);
@@ -134,7 +233,8 @@ export class InfluencerService {
   }
 
   /**
-   * Poll video status until completion
+   * Poll video status until completion (Legacy)
+   * @deprecated Videos are now uploaded directly
    */
   static async pollVideoStatus(
     videoId: string,
@@ -169,6 +269,10 @@ export class InfluencerService {
     });
   }
 
+  // ============================================================================
+  // UTILITY METHODS
+  // ============================================================================
+
   /**
    * Create influencer from default template
    */
@@ -192,7 +296,7 @@ export class InfluencerService {
       throw new Error('Source influencer not found');
     }
 
-    const { id, userId, createdAt, updatedAt, images, videos, ...influencerData } = sourceResponse.data;
+    const { id, userId, createdAt, updatedAt, images, videos, imageIdeas, videoIdeas, ...influencerData } = sourceResponse.data;
 
     return await this.createInfluencer({
       ...influencerData,
@@ -215,6 +319,10 @@ export class InfluencerService {
     return {
       totalImages: influencer.images?.length || 0,
       totalVideos: influencer.videos?.length || 0,
+      totalImageIdeas: influencer.imageIdeas?.length || 0,
+      totalVideoIdeas: influencer.videoIdeas?.length || 0,
+      usedImageIdeas: influencer.imageIdeas?.filter((idea) => idea.isUsed).length || 0,
+      usedVideoIdeas: influencer.videoIdeas?.filter((idea) => idea.isUsed).length || 0,
       referenceImages: influencer.images?.filter((img) => img.isReference).length || 0,
       completedVideos: influencer.videos?.filter((video) => video.status === 'COMPLETED').length || 0,
       pendingVideos:

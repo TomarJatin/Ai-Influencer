@@ -34,7 +34,29 @@ export class S3Service {
       return { key, url };
     } catch (error) {
       this.logger.error(`Error uploading to S3: ${error}`);
-      throw new Error('Failed to upload audio to S3');
+      throw new Error('Failed to upload file to S3');
+    }
+  }
+
+  async uploadBuffer(buffer: Buffer, key: string, contentType: string): Promise<{ key: string; url: string }> {
+    this.logger.debug(`Uploading buffer to ${key}`);
+    try {
+      const uploadCommand = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+        ACL: 'public-read', // Make the image publicly accessible
+      });
+
+      await this.s3Client.send(uploadCommand);
+
+      const url = this.getFileUrl(key);
+      this.logger.debug(`Uploaded buffer to S3: ${url}`);
+      return { key, url };
+    } catch (error) {
+      this.logger.error(`Error uploading buffer to S3: ${error}`);
+      throw new Error('Failed to upload buffer to S3');
     }
   }
 

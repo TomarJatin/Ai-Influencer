@@ -3,9 +3,10 @@ import { InfluencerController } from './influencer.controller';
 import { InfluencerService } from './influencer.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
+import { CommonModule } from '../common/common.module';
 
 @Module({
-  imports: [PrismaModule, JwtModule],
+  imports: [PrismaModule, JwtModule, CommonModule],
   controllers: [InfluencerController],
   providers: [InfluencerService],
   exports: [InfluencerService],

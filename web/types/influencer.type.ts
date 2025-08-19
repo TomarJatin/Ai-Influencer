@@ -135,11 +135,14 @@ export interface AIInfluencer {
 
   images?: InfluencerImage[];
   videos?: InfluencerVideo[];
+  imageIdeas?: ImageIdea[];
+  videoIdeas?: VideoIdea[];
 }
 
 export interface InfluencerImage {
   id: string;
   influencerId: string;
+  imageIdeaId?: string;
   imageUrl: string;
   imageType: 'PORTRAIT' | 'FULL_BODY' | 'BEAUTY_SHOT' | 'LIFESTYLE' | 'REFERENCE';
   prompt?: string;
@@ -152,6 +155,7 @@ export interface InfluencerImage {
 export interface InfluencerVideo {
   id: string;
   influencerId: string;
+  videoIdeaId?: string;
   title: string;
   description?: string;
   videoUrl?: string;
@@ -322,14 +326,64 @@ export interface VideoGenerationRequest {
   customPrompt?: string;
 }
 
+// ============================================================================
+// NEW IDEA GENERATION WORKFLOW TYPES
+// ============================================================================
+
+export interface ImageIdea {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  visualElements: string[];
+  mood: string;
+  setting: string;
+  styleNotes: string;
+  isUsed: boolean;
+  createdAt: string;
+}
+
 export interface VideoIdea {
   id: string;
   title: string;
   description: string;
+  category: string;
   scenario: string;
-  estimatedDuration: number;
-  category: 'lifestyle' | 'fashion' | 'fitness' | 'beauty' | 'dance' | 'travel' | 'cooking';
+  keyMoments: string[];
+  duration: string;
+  mood: string;
+  visualStyle: string;
+  isUsed: boolean;
+  createdAt: string;
 }
+
+export interface OptimizedPrompt {
+  prompt: string;
+  reasoning: string;
+  technicalNotes: string;
+  alternativePrompts: string[];
+}
+
+export interface GenerateImageIdeasRequest {
+  count?: number;
+}
+
+export interface GenerateVideoIdeasRequest {
+  count?: number;
+}
+
+export interface GeneratePromptRequest {
+  customInstructions?: string;
+}
+
+export interface UploadMediaRequest {
+  generatedPrompt: string;
+  metadata?: Record<string, unknown>;
+}
+
+// ============================================================================
+// LEGACY TYPES (Deprecated but kept for backward compatibility)
+// ============================================================================
 
 export interface GenerationProgress {
   step: string;
@@ -337,4 +391,14 @@ export interface GenerationProgress {
   message: string;
   isComplete: boolean;
   error?: string;
+}
+
+// Legacy VideoIdea interface for backward compatibility
+export interface LegacyVideoIdea {
+  id: string;
+  title: string;
+  description: string;
+  scenario: string;
+  estimatedDuration: number;
+  category: 'lifestyle' | 'fashion' | 'fitness' | 'beauty' | 'dance' | 'travel' | 'cooking';
 }

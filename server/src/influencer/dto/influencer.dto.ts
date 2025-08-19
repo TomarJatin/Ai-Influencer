@@ -564,6 +564,54 @@ export class AIInfluencerResponseDto {
   videos?: Record<string, unknown>[];
 }
 
+// New DTOs for idea generation workflow
+
+export class GenerateImageIdeasDto {
+  @ApiProperty({ description: 'Number of ideas to generate', minimum: 1, maximum: 10, default: 6 })
+  @IsOptional()
+  @IsNumber()
+  count?: number = 6;
+}
+
+export class GenerateVideoIdeasDto {
+  @ApiProperty({ description: 'Number of ideas to generate', minimum: 1, maximum: 10, default: 6 })
+  @IsOptional()
+  @IsNumber()
+  count?: number = 6;
+}
+
+export class ImageIdeaDto {
+  @ApiProperty({ description: 'Unique identifier for the idea' })
+  id: string;
+
+  @ApiProperty({ description: 'Title of the image idea' })
+  title: string;
+
+  @ApiProperty({ description: 'Description of the image concept' })
+  description: string;
+
+  @ApiProperty({ description: 'Image category (portrait, lifestyle, fashion, beauty, fitness, etc.)' })
+  category: string;
+
+  @ApiProperty({ description: 'Key visual elements to include', type: [String] })
+  visualElements: string[];
+
+  @ApiProperty({ description: 'Overall mood or feeling of the image' })
+  mood: string;
+
+  @ApiProperty({ description: 'Location or setting for the image' })
+  setting: string;
+
+  @ApiProperty({ description: 'Specific style or aesthetic notes' })
+  styleNotes: string;
+
+  @ApiProperty({ description: 'Whether this idea has been used' })
+  isUsed: boolean;
+
+  @ApiProperty({ description: 'Creation date' })
+  createdAt: string;
+}
+
 export class VideoIdeaDto {
   @ApiProperty({ description: 'Unique identifier for the idea' })
   id: string;
@@ -571,18 +619,61 @@ export class VideoIdeaDto {
   @ApiProperty({ description: 'Title of the video idea' })
   title: string;
 
-  @ApiProperty({ description: 'Description of the video idea' })
+  @ApiProperty({ description: 'Description of the video concept' })
   description: string;
 
-  @ApiProperty({ description: 'Scenario for the video' })
+  @ApiProperty({ description: 'Video category (lifestyle, fashion, beauty, travel, fitness, tutorial, etc.)' })
+  category: string;
+
+  @ApiProperty({ description: 'Detailed scenario or storyline' })
   scenario: string;
 
-  @ApiProperty({ description: 'Estimated duration in seconds' })
-  estimatedDuration: number;
+  @ApiProperty({ description: 'Key moments or scenes in the video', type: [String] })
+  keyMoments: string[];
 
-  @ApiProperty({
-    description: 'Category of the video',
-    enum: ['lifestyle', 'fashion', 'fitness', 'beauty', 'dance', 'travel', 'cooking'],
-  })
-  category: string;
+  @ApiProperty({ description: 'Estimated video duration' })
+  duration: string;
+
+  @ApiProperty({ description: 'Overall tone and mood' })
+  mood: string;
+
+  @ApiProperty({ description: 'Visual style and aesthetic approach' })
+  visualStyle: string;
+
+  @ApiProperty({ description: 'Whether this idea has been used' })
+  isUsed: boolean;
+
+  @ApiProperty({ description: 'Creation date' })
+  createdAt: string;
+}
+
+export class GeneratePromptDto {
+  @ApiProperty({ description: 'Custom instructions for prompt generation', required: false })
+  @IsOptional()
+  @IsString()
+  customInstructions?: string;
+}
+
+export class OptimizedPromptDto {
+  @ApiProperty({ description: 'Optimized prompt for image/video generation' })
+  prompt: string;
+
+  @ApiProperty({ description: 'Explanation of prompt optimization choices' })
+  reasoning: string;
+
+  @ApiProperty({ description: 'Technical considerations for generation' })
+  technicalNotes: string;
+
+  @ApiProperty({ description: 'Alternative prompt variations', type: [String] })
+  alternativePrompts: string[];
+}
+
+export class UploadMediaDto {
+  @ApiProperty({ description: 'Generated prompt used for this media' })
+  @IsString()
+  generatedPrompt: string;
+
+  @ApiProperty({ description: 'Additional metadata', required: false })
+  @IsOptional()
+  metadata?: Record<string, unknown>;
 }

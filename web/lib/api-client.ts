@@ -75,4 +75,15 @@ export class ApiClient {
   static async delete<T>(url: string, params?: Record<string, unknown>): Promise<ApiResult<T>> {
     return this.request<T>({ method: 'DELETE', url, params });
   }
+
+  static async postFormData<T>(url: string, formData: FormData): Promise<ApiResult<T>> {
+    return this.request<T>({ 
+      method: 'POST', 
+      url, 
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
 }

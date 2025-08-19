@@ -42,7 +42,7 @@ export function ImageGenerationDialog({ influencer, open, onClose, onImageGenera
 
     try {
       setIsGeneratingPrompt(true);
-      const response = await InfluencerService.generateImagePrompt(influencer.id, type);
+      const response = await InfluencerService.generateLegacyImagePrompt(influencer.id, type);
 
       if (response.data) {
         setGeneratedPrompt(response.data.prompt);
