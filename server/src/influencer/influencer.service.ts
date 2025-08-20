@@ -1,13 +1,18 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AIService, ImageIdea, VideoIdea } from '../common/ai.service';
+import { AIService, ImageAnalysis } from '../common/ai.service';
 import {
   CreateAIInfluencerDto,
   UpdateAIInfluencerDto,
-  GenerateImageIdeasDto,
-  GenerateVideoIdeasDto,
-  GeneratePromptDto,
-  UploadMediaDto,
+  CreateImageIdeaDto,
+  CreateVideoIdeaDto,
+  UpdateImageIdeaDto,
+  UpdateVideoIdeaDto,
+  GenerateImageFromIdeaDto,
+  GenerateVideoFromIdeaDto,
+  AnalyzeImageForIdeaDto,
+  PaginationQueryDto,
+  PaginatedResponseDto,
   ImageIdeaDto,
   VideoIdeaDto,
   OptimizedPromptDto,
@@ -189,158 +194,232 @@ export class InfluencerService {
   }
 
   // ============================================================================
-  // IMAGE IDEA GENERATION AND MANAGEMENT
+  // IMAGE IDEA MANAGEMENT
   // ============================================================================
 
-  async generateImageIdeas(
+  async createImageIdea(
     influencerId: string,
-    generateDto: GenerateImageIdeasDto,
+    createDto: CreateImageIdeaDto,
     user: RequestUser,
-  ): Promise<ImageIdeaDto[]> {
-    try {
-      const influencer = await this.getInfluencer(influencerId, user);
-
-      // Get already used idea IDs to avoid duplicates
-      const usedIdeas = await this.prismaService.imageIdea.findMany({
-        where: { influencerId, isUsed: true },
-        select: { ideaId: true },
-      });
-      const usedIdeaIds = usedIdeas.map((idea) => idea.ideaId);
-
-      // Generate new ideas using AI
-      const aiIdeas = await this.aiService.generateImageIdeas(influencer, generateDto.count || 6, usedIdeaIds);
-
-      // Save ideas to database
-      const savedIdeas = await Promise.all(
-        aiIdeas.map(async (idea: ImageIdea) => {
-          const savedIdea = await this.prismaService.imageIdea.create({
-            data: {
-              influencerId,
-              ideaId: idea.id,
-              title: idea.title,
-              description: idea.description,
-              category: idea.category,
-              visualElements: idea.visualElements,
-              mood: idea.mood,
-              setting: idea.setting,
-              styleNotes: idea.styleNotes,
-            },
-          });
-
-          return this.mapImageIdeaToDto(savedIdea);
-        }),
-      );
-
-      this.logger.log(`Generated ${savedIdeas.length} image ideas for influencer ${influencerId}`);
-      return savedIdeas;
-    } catch (error) {
-      this.logger.error(`Failed to generate image ideas: ${error.message}`, error);
-      throw new BadRequestException('Failed to generate image ideas');
-    }
-  }
-
-  async getImageIdeas(influencerId: string, user: RequestUser): Promise<ImageIdeaDto[]> {
+  ): Promise<ImageIdeaDto> {
     try {
       await this.getInfluencer(influencerId, user); // Verify access
 
-      const ideas = await this.prismaService.imageIdea.findMany({
-        where: { influencerId },
-        orderBy: { createdAt: 'desc' },
+      const idea = await this.prismaService.imageIdea.create({
+        data: {
+          influencerId,
+          ideaId: `img_custom_${Date.now()}`, // Generate unique ID
+          title: createDto.title,
+          description: createDto.description,
+          category: createDto.category || 'Custom',
+          visualElements: createDto.visualElements || [],
+          mood: createDto.mood || '',
+          setting: createDto.setting || '',
+          styleNotes: createDto.styleNotes || '',
+        },
       });
 
-      return ideas.map((idea) => this.mapImageIdeaToDto(idea));
+      this.logger.log(`Created image idea ${idea.id} for influencer ${influencerId}`);
+      return this.mapImageIdeaToDto(idea);
+    } catch (error) {
+      this.logger.error(`Failed to create image idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to create image idea');
+    }
+  }
+
+  async analyzeImageForIdea(
+    influencerId: string,
+    file: Express.Multer.File,
+    user: RequestUser,
+  ): Promise<AnalyzeImageForIdeaDto> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const analysis = await this.aiService.analyzeImageForIdea(file.buffer, file.mimetype);
+
+      this.logger.log(`Analyzed image for idea generation for influencer ${influencerId}`);
+      return analysis;
+    } catch (error) {
+      this.logger.error(`Failed to analyze image: ${error.message}`, error);
+      throw new BadRequestException('Failed to analyze image for idea generation');
+    }
+  }
+
+  async getImageIdeas(
+    influencerId: string,
+    query: PaginationQueryDto,
+    user: RequestUser,
+  ): Promise<PaginatedResponseDto<ImageIdeaDto>> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const { page = 1, limit = 10, search, category, isUsed } = query;
+      const skip = (page - 1) * limit;
+
+      const where: any = { influencerId };
+
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      if (category) {
+        where.category = category;
+      }
+
+      if (typeof isUsed === 'boolean') {
+        where.isUsed = isUsed;
+      }
+
+      const [ideas, total] = await Promise.all([
+        this.prismaService.imageIdea.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        this.prismaService.imageIdea.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        items: ideas.map((idea) => this.mapImageIdeaToDto(idea)),
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
     } catch (error) {
       this.logger.error(`Failed to get image ideas: ${error.message}`, error);
       throw new BadRequestException('Failed to retrieve image ideas');
     }
   }
 
-  async generateImagePrompt(
+  async updateImageIdea(
     influencerId: string,
     ideaId: string,
-    promptDto: GeneratePromptDto,
+    updateDto: UpdateImageIdeaDto,
     user: RequestUser,
-  ): Promise<OptimizedPromptDto> {
+  ): Promise<ImageIdeaDto> {
     try {
-      const influencer = await this.getInfluencer(influencerId, user);
+      await this.getInfluencer(influencerId, user); // Verify access
 
       const idea = await this.prismaService.imageIdea.findFirst({
-        where: { influencerId, ideaId },
+        where: { id: ideaId, influencerId },
       });
 
       if (!idea) {
         throw new NotFoundException('Image idea not found');
       }
 
-      // Convert database idea to AI service format
-      const imageIdea: ImageIdea = {
-        id: idea.ideaId,
-        title: idea.title,
-        description: idea.description,
-        category: idea.category,
-        visualElements: idea.visualElements as string[],
-        mood: idea.mood,
-        setting: idea.setting,
-        styleNotes: idea.styleNotes,
-      };
+      const updatedIdea = await this.prismaService.imageIdea.update({
+        where: { id: ideaId },
+        data: {
+          ...updateDto,
+          visualElements: updateDto.visualElements || (idea.visualElements as string[]),
+        },
+      });
 
-      const optimizedPrompt = await this.aiService.generateImagePrompt(
-        influencer,
-        imageIdea,
-        promptDto.customInstructions,
-      );
-
-      this.logger.log(`Generated optimized image prompt for idea ${ideaId}`);
-      return optimizedPrompt;
+      this.logger.log(`Updated image idea ${ideaId} for influencer ${influencerId}`);
+      return this.mapImageIdeaToDto(updatedIdea);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to generate image prompt: ${error.message}`, error);
-      throw new BadRequestException('Failed to generate image prompt');
+      this.logger.error(`Failed to update image idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to update image idea');
     }
   }
 
-  async uploadImage(
+  async deleteImageIdea(influencerId: string, ideaId: string, user: RequestUser): Promise<void> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const idea = await this.prismaService.imageIdea.findFirst({
+        where: { id: ideaId, influencerId },
+      });
+
+      if (!idea) {
+        throw new NotFoundException('Image idea not found');
+      }
+
+      await this.prismaService.imageIdea.delete({
+        where: { id: ideaId },
+      });
+
+      this.logger.log(`Deleted image idea ${ideaId} for influencer ${influencerId}`);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to delete image idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to delete image idea');
+    }
+  }
+
+  async generateImageFromIdea(
     influencerId: string,
-    ideaId: string,
-    file: Express.Multer.File,
-    uploadDto: UploadMediaDto,
+    generateDto: GenerateImageFromIdeaDto,
     user: RequestUser,
   ) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
 
       const idea = await this.prismaService.imageIdea.findFirst({
-        where: { influencerId, ideaId },
+        where: { id: generateDto.imageIdeaId, influencerId },
       });
 
       if (!idea) {
         throw new NotFoundException('Image idea not found');
       }
 
-      // Upload file to S3
-      const uploadResult = await this.aiService.uploadFile(file, 'image');
+      // Generate optimized prompt based on idea and influencer data
+      const promptData = {
+        influencer,
+        idea: {
+          title: idea.title,
+          description: idea.description,
+          category: idea.category,
+          visualElements: idea.visualElements as string[],
+          mood: idea.mood,
+          setting: idea.setting,
+          styleNotes: idea.styleNotes,
+        },
+        imageType: generateDto.imageType,
+      };
+
+      const optimizedPrompt = await this.generateImagePromptFromIdea(promptData);
+      const finalPrompt = generateDto.customPrompt || optimizedPrompt.prompt;
+
+      // Generate image using Gemini Imagen
+      const result = await this.aiService.generateImageWithGemini(
+        finalPrompt,
+        generateDto.imageType,
+        '1:1' // Default aspect ratio, could be configurable
+      );
 
       // Create image record
       const imageRecord = await this.prismaService.influencerImage.create({
         data: {
           influencerId,
           imageIdeaId: idea.id,
-          imageUrl: uploadResult.url,
-          imageType: 'LIFESTYLE', // Default type, could be determined from idea category
-          prompt: uploadDto.generatedPrompt,
-          isReference: false,
+          imageUrl: result.imageUrl,
+          imageType: generateDto.imageType,
+          prompt: finalPrompt,
+          isReference: generateDto.isReference || false,
           metadata: {
-            ...uploadDto.metadata,
-            uploadedAt: new Date().toISOString(),
-            originalFileName: file.originalname,
-            s3Key: uploadResult.key,
+            ...result.metadata,
             ideaUsed: {
-              id: idea.ideaId,
+              id: idea.id,
               title: idea.title,
               category: idea.category,
             },
+            optimizedPrompt: JSON.parse(JSON.stringify(optimizedPrompt)),
           },
         },
       });
@@ -351,152 +430,261 @@ export class InfluencerService {
         data: { isUsed: true },
       });
 
-      this.logger.log(`Image uploaded for influencer ${influencerId} using idea ${ideaId}`);
+      this.logger.log(`Generated image for influencer ${influencerId} using idea ${generateDto.imageIdeaId}`);
       return imageRecord;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to upload image: ${error.message}`, error);
-      throw new BadRequestException('Failed to upload image');
+      this.logger.error(`Failed to generate image from idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to generate image from idea');
     }
   }
 
+  private async generateImagePromptFromIdea(data: any): Promise<OptimizedPromptDto> {
+    const { influencer, idea, imageType } = data;
+
+    const prompt = `
+You are an expert prompt engineer specializing in AI image generation. Create an optimized prompt for generating a high-quality ${imageType} image based on the following:
+
+INFLUENCER CHARACTERISTICS:
+- Name: ${influencer.name || 'AI Influencer'}
+- Personality: ${influencer.personalityArchetype || 'Not specified'}
+- Style: ${influencer.styleAesthetic || 'Not specified'}
+- Age: ${influencer.age || 'Not specified'}
+- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
+- Height: ${influencer.height || 'Not specified'}
+- Body Type: ${influencer.bodyType || 'Not specified'}
+- Hair: ${influencer.hairColor || 'Not specified'}
+- Eyes: ${influencer.eyeColor || 'Not specified'}
+- Key Features: ${influencer.keyFeatures || 'Not specified'}
+
+SELECTED IMAGE IDEA:
+- Title: ${idea.title}
+- Description: ${idea.description}
+- Category: ${idea.category}
+- Visual Elements: ${idea.visualElements.join(', ')}
+- Mood: ${idea.mood}
+- Setting: ${idea.setting}
+- Style Notes: ${idea.styleNotes}
+
+OPTIMIZATION REQUIREMENTS:
+1. Create a detailed, specific prompt optimized for AI image generation
+2. Include physical characteristics that match the influencer
+3. Specify lighting, composition, and camera angles
+4. Add professional photography terminology
+5. Include style and mood descriptors
+6. Ensure the prompt is clear and unambiguous
+7. Optimize for high-quality, realistic results
+8. Keep the prompt focused and not overly complex
+
+Generate an optimized prompt that will produce a stunning, professional-quality image that authentically represents this AI influencer.
+    `;
+
+    return await this.aiService.generateObject(prompt, {
+      type: 'object',
+      properties: {
+        prompt: { type: 'string' },
+        reasoning: { type: 'string' },
+        technicalNotes: { type: 'string' },
+        alternativePrompts: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['prompt', 'reasoning', 'technicalNotes', 'alternativePrompts'],
+    });
+  }
+
   // ============================================================================
-  // VIDEO IDEA GENERATION AND MANAGEMENT
+  // VIDEO IDEA MANAGEMENT
   // ============================================================================
 
-  async generateVideoIdeas(
+  async createVideoIdea(
     influencerId: string,
-    generateDto: GenerateVideoIdeasDto,
+    createDto: CreateVideoIdeaDto,
     user: RequestUser,
-  ): Promise<VideoIdeaDto[]> {
-    try {
-      const influencer = await this.getInfluencer(influencerId, user);
-
-      // Get already used idea IDs to avoid duplicates
-      const usedIdeas = await this.prismaService.videoIdea.findMany({
-        where: { influencerId, isUsed: true },
-        select: { ideaId: true },
-      });
-      const usedIdeaIds = usedIdeas.map((idea) => idea.ideaId);
-
-      // Generate new ideas using AI
-      const aiIdeas = await this.aiService.generateVideoIdeas(influencer, generateDto.count || 6, usedIdeaIds);
-
-      // Save ideas to database
-      const savedIdeas = await Promise.all(
-        aiIdeas.map(async (idea: VideoIdea) => {
-          const savedIdea = await this.prismaService.videoIdea.create({
-            data: {
-              influencerId,
-              ideaId: idea.id,
-              title: idea.title,
-              description: idea.description,
-              category: idea.category,
-              scenario: idea.scenario,
-              keyMoments: idea.keyMoments,
-              duration: idea.duration,
-              mood: idea.mood,
-              visualStyle: idea.visualStyle,
-            },
-          });
-
-          return this.mapVideoIdeaToDto(savedIdea);
-        }),
-      );
-
-      this.logger.log(`Generated ${savedIdeas.length} video ideas for influencer ${influencerId}`);
-      return savedIdeas;
-    } catch (error) {
-      this.logger.error(`Failed to generate video ideas: ${error.message}`, error);
-      throw new BadRequestException('Failed to generate video ideas');
-    }
-  }
-
-  async getVideoIdeas(influencerId: string, user: RequestUser): Promise<VideoIdeaDto[]> {
+  ): Promise<VideoIdeaDto> {
     try {
       await this.getInfluencer(influencerId, user); // Verify access
 
-      const ideas = await this.prismaService.videoIdea.findMany({
-        where: { influencerId },
-        orderBy: { createdAt: 'desc' },
+      const idea = await this.prismaService.videoIdea.create({
+        data: {
+          influencerId,
+          ideaId: `vid_custom_${Date.now()}`, // Generate unique ID
+          title: createDto.title,
+          description: createDto.description,
+          scenario: createDto.scenario,
+          category: createDto.category || 'Custom',
+          keyMoments: createDto.keyMoments || [],
+          duration: createDto.duration || '5-10 seconds',
+          mood: createDto.mood || '',
+          visualStyle: createDto.visualStyle || '',
+        },
       });
 
-      return ideas.map((idea) => this.mapVideoIdeaToDto(idea));
+      this.logger.log(`Created video idea ${idea.id} for influencer ${influencerId}`);
+      return this.mapVideoIdeaToDto(idea);
+    } catch (error) {
+      this.logger.error(`Failed to create video idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to create video idea');
+    }
+  }
+
+  async getVideoIdeas(
+    influencerId: string,
+    query: PaginationQueryDto,
+    user: RequestUser,
+  ): Promise<PaginatedResponseDto<VideoIdeaDto>> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const { page = 1, limit = 10, search, category, isUsed } = query;
+      const skip = (page - 1) * limit;
+
+      const where: any = { influencerId };
+
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+          { scenario: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      if (category) {
+        where.category = category;
+      }
+
+      if (typeof isUsed === 'boolean') {
+        where.isUsed = isUsed;
+      }
+
+      const [ideas, total] = await Promise.all([
+        this.prismaService.videoIdea.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        this.prismaService.videoIdea.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        items: ideas.map((idea) => this.mapVideoIdeaToDto(idea)),
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
     } catch (error) {
       this.logger.error(`Failed to get video ideas: ${error.message}`, error);
       throw new BadRequestException('Failed to retrieve video ideas');
     }
   }
 
-  async generateVideoPrompt(
+  async updateVideoIdea(
     influencerId: string,
     ideaId: string,
-    promptDto: GeneratePromptDto,
+    updateDto: UpdateVideoIdeaDto,
     user: RequestUser,
-  ): Promise<OptimizedPromptDto> {
+  ): Promise<VideoIdeaDto> {
     try {
-      const influencer = await this.getInfluencer(influencerId, user);
+      await this.getInfluencer(influencerId, user); // Verify access
 
       const idea = await this.prismaService.videoIdea.findFirst({
-        where: { influencerId, ideaId },
+        where: { id: ideaId, influencerId },
       });
 
       if (!idea) {
         throw new NotFoundException('Video idea not found');
       }
 
-      // Convert database idea to AI service format
-      const videoIdea: VideoIdea = {
-        id: idea.ideaId,
-        title: idea.title,
-        description: idea.description,
-        category: idea.category,
-        scenario: idea.scenario,
-        keyMoments: idea.keyMoments as string[],
-        duration: idea.duration,
-        mood: idea.mood,
-        visualStyle: idea.visualStyle,
-      };
+      const updatedIdea = await this.prismaService.videoIdea.update({
+        where: { id: ideaId },
+        data: {
+          ...updateDto,
+          keyMoments: updateDto.keyMoments || (idea.keyMoments as string[]),
+        },
+      });
 
-      const optimizedPrompt = await this.aiService.generateVideoPrompt(
-        influencer,
-        videoIdea,
-        promptDto.customInstructions,
-      );
-
-      this.logger.log(`Generated optimized video prompt for idea ${ideaId}`);
-      return optimizedPrompt;
+      this.logger.log(`Updated video idea ${ideaId} for influencer ${influencerId}`);
+      return this.mapVideoIdeaToDto(updatedIdea);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to generate video prompt: ${error.message}`, error);
-      throw new BadRequestException('Failed to generate video prompt');
+      this.logger.error(`Failed to update video idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to update video idea');
     }
   }
 
-  async uploadVideo(
+  async deleteVideoIdea(influencerId: string, ideaId: string, user: RequestUser): Promise<void> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const idea = await this.prismaService.videoIdea.findFirst({
+        where: { id: ideaId, influencerId },
+      });
+
+      if (!idea) {
+        throw new NotFoundException('Video idea not found');
+      }
+
+      await this.prismaService.videoIdea.delete({
+        where: { id: ideaId },
+      });
+
+      this.logger.log(`Deleted video idea ${ideaId} for influencer ${influencerId}`);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to delete video idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to delete video idea');
+    }
+  }
+
+  async generateVideoFromIdea(
     influencerId: string,
-    ideaId: string,
-    file: Express.Multer.File,
-    uploadDto: UploadMediaDto,
+    generateDto: GenerateVideoFromIdeaDto,
     user: RequestUser,
   ) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
 
       const idea = await this.prismaService.videoIdea.findFirst({
-        where: { influencerId, ideaId },
+        where: { id: generateDto.videoIdeaId, influencerId },
       });
 
       if (!idea) {
         throw new NotFoundException('Video idea not found');
       }
 
-      // Upload file to S3
-      const uploadResult = await this.aiService.uploadFile(file, 'video');
+      // Generate optimized prompt based on idea and influencer data
+      const promptData = {
+        influencer,
+        idea: {
+          title: idea.title,
+          description: idea.description,
+          category: idea.category,
+          scenario: idea.scenario,
+          keyMoments: idea.keyMoments as string[],
+          duration: idea.duration,
+          mood: idea.mood,
+          visualStyle: idea.visualStyle,
+        },
+      };
+
+      const optimizedPrompt = await this.generateVideoPromptFromIdea(promptData);
+      const finalPrompt = generateDto.customPrompt || optimizedPrompt.prompt;
+
+      // Generate video using Veo3
+      const result = await this.aiService.generateVideoWithVeo3(
+        finalPrompt,
+        generateDto.duration || 5
+      );
 
       // Create video record
       const videoRecord = await this.prismaService.influencerVideo.create({
@@ -505,20 +693,18 @@ export class InfluencerService {
           videoIdeaId: idea.id,
           title: idea.title,
           description: idea.description,
-          videoUrl: uploadResult.url,
-          prompt: uploadDto.generatedPrompt,
+          prompt: finalPrompt,
           scenario: idea.scenario,
-          status: 'COMPLETED',
+          status: 'GENERATING',
           metadata: {
-            ...uploadDto.metadata,
-            uploadedAt: new Date().toISOString(),
-            originalFileName: file.originalname,
-            s3Key: uploadResult.key,
+            ...result.metadata,
             ideaUsed: {
-              id: idea.ideaId,
+              id: idea.id,
               title: idea.title,
               category: idea.category,
             },
+            optimizedPrompt: JSON.parse(JSON.stringify(optimizedPrompt)),
+            videoId: result.videoId,
           },
         },
       });
@@ -529,15 +715,124 @@ export class InfluencerService {
         data: { isUsed: true },
       });
 
-      this.logger.log(`Video uploaded for influencer ${influencerId} using idea ${ideaId}`);
+      this.logger.log(`Started video generation for influencer ${influencerId} using idea ${generateDto.videoIdeaId}`);
       return videoRecord;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to upload video: ${error.message}`, error);
-      throw new BadRequestException('Failed to upload video');
+      this.logger.error(`Failed to generate video from idea: ${error.message}`, error);
+      throw new BadRequestException('Failed to generate video from idea');
     }
+  }
+
+  async checkVideoGenerationStatus(videoId: string, user: RequestUser) {
+    try {
+      const video = await this.prismaService.influencerVideo.findUnique({
+        where: { id: videoId },
+        include: { influencer: true },
+      });
+
+      if (!video) {
+        throw new NotFoundException('Video not found');
+      }
+
+      // Check if user has access to this video
+      if (video.influencer.userId !== user.id) {
+        throw new NotFoundException('Video not found');
+      }
+
+      if (video.status === 'COMPLETED' || video.status === 'FAILED') {
+        return video;
+      }
+
+      // Check status with AI service
+      const metadata = video.metadata as any;
+      const operationId = metadata?.operationId as string;
+      if (!operationId) {
+        throw new BadRequestException('No operation ID found for video generation');
+      }
+
+      const status = await this.aiService.checkVideoStatus(videoId, operationId);
+
+      // Update video record with new status
+      const updatedVideo = await this.prismaService.influencerVideo.update({
+        where: { id: videoId },
+        data: {
+          status: status.status as any,
+          videoUrl: status.videoUrl,
+          thumbnailUrl: status.thumbnailUrl,
+          duration: status.metadata?.duration as number,
+          metadata: {
+            ...(video.metadata as any),
+            ...(status.metadata || {}),
+          },
+        },
+      });
+
+      this.logger.log(`Updated video status for ${videoId}: ${status.status}`);
+      return updatedVideo;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.error(`Failed to check video status: ${error.message}`, error);
+      throw new BadRequestException('Failed to check video generation status');
+    }
+  }
+
+  private async generateVideoPromptFromIdea(data: any): Promise<OptimizedPromptDto> {
+    const { influencer, idea } = data;
+
+    const prompt = `
+You are an expert prompt engineer specializing in AI video generation. Create an optimized prompt for generating a high-quality video based on the following:
+
+INFLUENCER CHARACTERISTICS:
+- Name: ${influencer.name || 'AI Influencer'}
+- Personality: ${influencer.personalityArchetype || 'Not specified'}
+- Style: ${influencer.styleAesthetic || 'Not specified'}
+- Age: ${influencer.age || 'Not specified'}
+- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
+- Height: ${influencer.height || 'Not specified'}
+- Body Type: ${influencer.bodyType || 'Not specified'}
+- Hair: ${influencer.hairColor || 'Not specified'}
+- Eyes: ${influencer.eyeColor || 'Not specified'}
+- Key Features: ${influencer.keyFeatures || 'Not specified'}
+
+SELECTED VIDEO IDEA:
+- Title: ${idea.title}
+- Description: ${idea.description}
+- Category: ${idea.category}
+- Scenario: ${idea.scenario}
+- Key Moments: ${idea.keyMoments.join(', ')}
+- Duration: ${idea.duration}
+- Mood: ${idea.mood}
+- Visual Style: ${idea.visualStyle}
+
+OPTIMIZATION REQUIREMENTS:
+1. Create a detailed, specific prompt optimized for AI video generation
+2. Include physical characteristics that match the influencer
+3. Describe camera movements, angles, and transitions
+4. Specify lighting and visual aesthetics
+5. Include pacing and timing considerations
+6. Add professional cinematography terminology
+7. Ensure narrative flow and visual continuity
+8. Optimize for engaging, high-quality video content
+9. Consider the target video duration and format
+
+Generate an optimized prompt that will produce a compelling, professional-quality video that authentically represents this AI influencer.
+    `;
+
+    return await this.aiService.generateObject(prompt, {
+      type: 'object',
+      properties: {
+        prompt: { type: 'string' },
+        reasoning: { type: 'string' },
+        technicalNotes: { type: 'string' },
+        alternativePrompts: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['prompt', 'reasoning', 'technicalNotes', 'alternativePrompts'],
+    });
   }
 
   // ============================================================================
@@ -546,7 +841,7 @@ export class InfluencerService {
 
   private mapImageIdeaToDto(idea: any): ImageIdeaDto {
     return {
-      id: idea.ideaId,
+      id: idea.id, // Use database ID instead of ideaId
       title: idea.title,
       description: idea.description,
       category: idea.category,
@@ -556,12 +851,13 @@ export class InfluencerService {
       styleNotes: idea.styleNotes,
       isUsed: idea.isUsed,
       createdAt: idea.createdAt.toISOString(),
+      updatedAt: idea.updatedAt.toISOString(),
     };
   }
 
   private mapVideoIdeaToDto(idea: any): VideoIdeaDto {
     return {
-      id: idea.ideaId,
+      id: idea.id, // Use database ID instead of ideaId
       title: idea.title,
       description: idea.description,
       category: idea.category,
@@ -572,6 +868,7 @@ export class InfluencerService {
       visualStyle: idea.visualStyle,
       isUsed: idea.isUsed,
       createdAt: idea.createdAt.toISOString(),
+      updatedAt: idea.updatedAt.toISOString(),
     };
   }
 }

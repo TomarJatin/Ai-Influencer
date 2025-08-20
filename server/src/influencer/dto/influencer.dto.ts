@@ -610,6 +610,9 @@ export class ImageIdeaDto {
 
   @ApiProperty({ description: 'Creation date' })
   createdAt: string;
+
+  @ApiProperty({ description: 'Update date' })
+  updatedAt: string;
 }
 
 export class VideoIdeaDto {
@@ -645,6 +648,9 @@ export class VideoIdeaDto {
 
   @ApiProperty({ description: 'Creation date' })
   createdAt: string;
+
+  @ApiProperty({ description: 'Update date' })
+  updatedAt: string;
 }
 
 export class GeneratePromptDto {
@@ -676,4 +682,267 @@ export class UploadMediaDto {
   @ApiProperty({ description: 'Additional metadata', required: false })
   @IsOptional()
   metadata?: Record<string, unknown>;
+}
+
+// New DTOs for redesigned idea management workflow
+
+export class CreateImageIdeaDto {
+  @ApiProperty({ description: 'Title of the image idea' })
+  @IsString()
+  title: string;
+
+  @ApiProperty({ description: 'Description of the image concept' })
+  @IsString()
+  description: string;
+
+  @ApiProperty({ description: 'Category of the image', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Setting/location for the image', required: false })
+  @IsOptional()
+  @IsString()
+  setting?: string;
+
+  @ApiProperty({ description: 'Mood of the image', required: false })
+  @IsOptional()
+  @IsString()
+  mood?: string;
+
+  @ApiProperty({ description: 'Style notes for the image', required: false })
+  @IsOptional()
+  @IsString()
+  styleNotes?: string;
+
+  @ApiProperty({ description: 'Visual elements in the image', required: false })
+  @IsOptional()
+  visualElements?: string[];
+}
+
+export class CreateVideoIdeaDto {
+  @ApiProperty({ description: 'Title of the video idea' })
+  @IsString()
+  title: string;
+
+  @ApiProperty({ description: 'Description of the video concept' })
+  @IsString()
+  description: string;
+
+  @ApiProperty({ description: 'Scenario/setting for the video' })
+  @IsString()
+  scenario: string;
+
+  @ApiProperty({ description: 'Category of the video', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Estimated duration', required: false })
+  @IsOptional()
+  @IsString()
+  duration?: string;
+
+  @ApiProperty({ description: 'Mood of the video', required: false })
+  @IsOptional()
+  @IsString()
+  mood?: string;
+
+  @ApiProperty({ description: 'Visual style of the video', required: false })
+  @IsOptional()
+  @IsString()
+  visualStyle?: string;
+
+  @ApiProperty({ description: 'Key moments in the video', required: false })
+  @IsOptional()
+  keyMoments?: string[];
+}
+
+export class UpdateImageIdeaDto {
+  @ApiProperty({ description: 'Title of the image idea', required: false })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({ description: 'Description of the image concept', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ description: 'Category of the image', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Setting/location for the image', required: false })
+  @IsOptional()
+  @IsString()
+  setting?: string;
+
+  @ApiProperty({ description: 'Mood of the image', required: false })
+  @IsOptional()
+  @IsString()
+  mood?: string;
+
+  @ApiProperty({ description: 'Style notes for the image', required: false })
+  @IsOptional()
+  @IsString()
+  styleNotes?: string;
+
+  @ApiProperty({ description: 'Visual elements in the image', required: false })
+  @IsOptional()
+  visualElements?: string[];
+}
+
+export class UpdateVideoIdeaDto {
+  @ApiProperty({ description: 'Title of the video idea', required: false })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({ description: 'Description of the video concept', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ description: 'Scenario/setting for the video', required: false })
+  @IsOptional()
+  @IsString()
+  scenario?: string;
+
+  @ApiProperty({ description: 'Category of the video', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Estimated duration', required: false })
+  @IsOptional()
+  @IsString()
+  duration?: string;
+
+  @ApiProperty({ description: 'Mood of the video', required: false })
+  @IsOptional()
+  @IsString()
+  mood?: string;
+
+  @ApiProperty({ description: 'Visual style of the video', required: false })
+  @IsOptional()
+  @IsString()
+  visualStyle?: string;
+
+  @ApiProperty({ description: 'Key moments in the video', required: false })
+  @IsOptional()
+  keyMoments?: string[];
+}
+
+export class GenerateImageFromIdeaDto {
+  @ApiProperty({ description: 'ID of the image idea to use' })
+  @IsString()
+  imageIdeaId: string;
+
+  @ApiProperty({ description: 'Type of image to generate', enum: ImageType })
+  @IsEnum(ImageType)
+  imageType: ImageType;
+
+  @ApiProperty({ description: 'Custom prompt override', required: false })
+  @IsOptional()
+  @IsString()
+  customPrompt?: string;
+
+  @ApiProperty({ description: 'Whether this is a reference image', default: false })
+  @IsOptional()
+  @IsBoolean()
+  isReference?: boolean;
+}
+
+export class GenerateVideoFromIdeaDto {
+  @ApiProperty({ description: 'ID of the video idea to use' })
+  @IsString()
+  videoIdeaId: string;
+
+  @ApiProperty({ description: 'Custom prompt override', required: false })
+  @IsOptional()
+  @IsString()
+  customPrompt?: string;
+
+  @ApiProperty({ description: 'Estimated duration in seconds', required: false })
+  @IsOptional()
+  @IsNumber()
+  duration?: number;
+}
+
+export class AnalyzeImageForIdeaDto {
+  @ApiProperty({ description: 'Analysis of the uploaded image' })
+  analysis: string;
+
+  @ApiProperty({ description: 'Suggested title for the idea' })
+  suggestedTitle: string;
+
+  @ApiProperty({ description: 'Suggested description for the idea' })
+  suggestedDescription: string;
+
+  @ApiProperty({ description: 'Suggested category' })
+  suggestedCategory: string;
+
+  @ApiProperty({ description: 'Suggested mood' })
+  suggestedMood: string;
+
+  @ApiProperty({ description: 'Suggested setting' })
+  suggestedSetting: string;
+
+  @ApiProperty({ description: 'Suggested style notes' })
+  suggestedStyleNotes: string;
+
+  @ApiProperty({ description: 'Suggested visual elements' })
+  suggestedVisualElements: string[];
+}
+
+export class PaginationQueryDto {
+  @ApiProperty({ description: 'Page number', minimum: 1, default: 1 })
+  @IsOptional()
+  @IsNumber()
+  page?: number = 1;
+
+  @ApiProperty({ description: 'Items per page', minimum: 1, maximum: 50, default: 10 })
+  @IsOptional()
+  @IsNumber()
+  limit?: number = 10;
+
+  @ApiProperty({ description: 'Search query', required: false })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty({ description: 'Filter by category', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Filter by used status', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isUsed?: boolean;
+}
+
+export class PaginatedResponseDto<T> {
+  @ApiProperty({ description: 'Array of items' })
+  items: T[];
+
+  @ApiProperty({ description: 'Total number of items' })
+  total: number;
+
+  @ApiProperty({ description: 'Current page number' })
+  page: number;
+
+  @ApiProperty({ description: 'Items per page' })
+  limit: number;
+
+  @ApiProperty({ description: 'Total number of pages' })
+  totalPages: number;
+
+  @ApiProperty({ description: 'Whether there are more pages' })
+  hasNextPage: boolean;
+
+  @ApiProperty({ description: 'Whether there are previous pages' })
+  hasPreviousPage: boolean;
 }

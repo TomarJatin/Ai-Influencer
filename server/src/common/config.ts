@@ -30,9 +30,10 @@ export const config = {
     openaiApiKey: process.env.OPENAI_API_KEY!,
     anthropicApiKey: process.env.ANTHROPIC_API_KEY!,
   },
-  googleCloud: {
+  gcp: {
     projectId: process.env.GOOGLE_CLOUD_PROJECT_ID!,
     location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
+    serviceAccountKey: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   },
   aws: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,

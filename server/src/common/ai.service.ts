@@ -5,6 +5,7 @@ import { config } from './config';
 import { z } from 'zod';
 import { S3Service } from './s3.service';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 // Simplified schemas for structured data generation
 const ImageIdeaItemSchema = z.object({
@@ -45,9 +46,21 @@ export const OptimizedPromptSchema = z.object({
   alternativePrompts: z.array(z.string()),
 });
 
+const ImageAnalysisSchema = z.object({
+  analysis: z.string(),
+  suggestedTitle: z.string(),
+  suggestedDescription: z.string(),
+  suggestedCategory: z.string(),
+  suggestedMood: z.string(),
+  suggestedSetting: z.string(),
+  suggestedStyleNotes: z.string(),
+  suggestedVisualElements: z.array(z.string()),
+});
+
 export type ImageIdea = z.infer<typeof ImageIdeaSchema>['ideas'][0];
 export type VideoIdea = z.infer<typeof VideoIdeaSchema>['ideas'][0];
 export type OptimizedPrompt = z.infer<typeof OptimizedPromptSchema>;
+export type ImageAnalysis = z.infer<typeof ImageAnalysisSchema>;
 
 @Injectable()
 export class AIService {
@@ -363,6 +376,297 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
     } catch (error) {
       this.logger.error(`Failed to generate object: ${error.message}`, error);
       throw new Error('Failed to generate structured data');
+    }
+  }
+
+  /**
+   * Analyze an uploaded image to suggest idea details
+   */
+  async analyzeImageForIdea(imageBuffer: Buffer, mimeType: string): Promise<ImageAnalysis> {
+    try {
+      this.logger.log('Analyzing uploaded image for idea generation');
+
+      // Convert buffer to base64
+      const base64Image = imageBuffer.toString('base64');
+      const dataUrl = `data:${mimeType};base64,${base64Image}`;
+
+      const prompt = `
+Analyze this image and suggest details for creating an AI influencer image idea based on what you see.
+
+Please analyze the following aspects:
+1. Overall composition and style
+2. Lighting and mood
+3. Setting/environment
+4. Visual elements present
+5. Aesthetic style and mood
+6. Potential category (portrait, lifestyle, fashion, beauty, fitness, etc.)
+
+Based on your analysis, suggest:
+- A catchy title for this image idea
+- A detailed description of the concept
+- The most appropriate category
+- The mood/feeling it conveys
+- The setting/location type
+- Style notes that capture the aesthetic
+- Key visual elements that make it appealing
+
+Make your suggestions specific and actionable for AI image generation.
+      `;
+
+      const result = await generateObject({
+        model: this.model,
+        schema: ImageAnalysisSchema as any,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image', image: dataUrl }
+            ]
+          }
+        ]
+      });
+
+      this.logger.log('Successfully analyzed image for idea generation');
+      return result.object;
+    } catch (error) {
+      this.logger.error(`Failed to analyze image: ${error.message}`, error);
+      throw new Error('Failed to analyze image for idea generation');
+    }
+  }
+
+  /**
+   * Generate image using Google's Imagen model
+   */
+  async generateImageWithGemini(
+    prompt: string,
+    imageType: string = 'LIFESTYLE',
+    aspectRatio: string = '1:1'
+  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+    try {
+      this.logger.log(`Generating image with Gemini Imagen: ${imageType}`);
+
+      // Use Google's Imagen API via Vertex AI
+      const response = await axios.post(
+        `https://us-central1-aiplatform.googleapis.com/v1/projects/${config.gcp.projectId}/locations/us-central1/publishers/google/models/imagegeneration@006:predict`,
+        {
+          instances: [
+            {
+              prompt: prompt,
+              aspectRatio: aspectRatio,
+              negativePrompt: 'blurry, low quality, distorted, watermark, text, signature',
+              guidanceScale: 7.5,
+              outputOptions: {
+                mimeType: 'image/jpeg'
+              }
+            }
+          ]
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.data.predictions || response.data.predictions.length === 0) {
+        throw new Error('No image generated from Imagen API');
+      }
+
+      const prediction = response.data.predictions[0];
+      
+      // Upload the generated image to S3
+      const imageBuffer = Buffer.from(prediction.bytesBase64Encoded, 'base64');
+      const filename = `generated-images/${uuidv4()}.jpg`;
+      
+      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, 'image/jpeg');
+
+      this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
+      
+      return {
+        imageUrl: uploadResult.url,
+        metadata: {
+          model: 'imagen-2.0',
+          prompt: prompt,
+          imageType: imageType,
+          aspectRatio: aspectRatio,
+          generatedAt: new Date().toISOString(),
+          s3Key: uploadResult.key
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
+      throw new Error('Failed to generate image with Gemini Imagen');
+    }
+  }
+
+  /**
+   * Generate video using Google's Veo3 model
+   */
+  async generateVideoWithVeo3(
+    prompt: string,
+    duration: number = 5
+  ): Promise<{ videoId: string; status: string; metadata: Record<string, unknown> }> {
+    try {
+      this.logger.log(`Generating video with Veo3, duration: ${duration}s`);
+
+      // Use Google's Veo3 API via Vertex AI
+      const response = await axios.post(
+        `https://us-central1-aiplatform.googleapis.com/v1/projects/${config.gcp.projectId}/locations/us-central1/publishers/google/models/veo-3:predict`,
+        {
+          instances: [
+            {
+              prompt: prompt,
+              duration: duration,
+              resolution: '1280x720',
+              frameRate: 24,
+              outputOptions: {
+                mimeType: 'video/mp4'
+              }
+            }
+          ]
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.data.predictions || response.data.predictions.length === 0) {
+        throw new Error('No video generation job started');
+      }
+
+      const prediction = response.data.predictions[0];
+      const videoId = prediction.operationId || uuidv4();
+
+      this.logger.log(`Successfully started video generation with ID: ${videoId}`);
+      
+      return {
+        videoId,
+        status: 'GENERATING',
+        metadata: {
+          model: 'veo-3',
+          prompt: prompt,
+          duration: duration,
+          resolution: '1280x720',
+          frameRate: 24,
+          generatedAt: new Date().toISOString(),
+          operationId: prediction.operationId
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to generate video with Veo3: ${error.message}`, error);
+      throw new Error('Failed to generate video with Veo3');
+    }
+  }
+
+  /**
+   * Check video generation status and retrieve result
+   */
+  async checkVideoStatus(videoId: string, operationId: string): Promise<{
+    status: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      this.logger.log(`Checking video generation status for ID: ${videoId}`);
+
+      const response = await axios.get(
+        `https://us-central1-aiplatform.googleapis.com/v1/projects/${config.gcp.projectId}/locations/us-central1/operations/${operationId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const operation = response.data;
+
+      if (!operation.done) {
+        return { status: 'GENERATING' };
+      }
+
+      if (operation.error) {
+        this.logger.error(`Video generation failed: ${JSON.stringify(operation.error)}`);
+        return { status: 'FAILED' };
+      }
+
+      // Extract video data from response
+      const result = operation.response;
+      if (!result.bytesBase64Encoded) {
+        throw new Error('No video data in completed operation');
+      }
+
+      // Upload the generated video to S3
+      const videoBuffer = Buffer.from(result.bytesBase64Encoded, 'base64');
+      const filename = `generated-videos/${videoId}.mp4`;
+      
+      const uploadResult = await this.s3Service.uploadBuffer(videoBuffer, filename, 'video/mp4');
+
+      // Generate thumbnail (optional - could be done later)
+      const thumbnailUrl = await this.generateVideoThumbnail(uploadResult.url);
+
+      this.logger.log(`Successfully completed video generation: ${uploadResult.url}`);
+      
+      return {
+        status: 'COMPLETED',
+        videoUrl: uploadResult.url,
+        thumbnailUrl,
+        metadata: {
+          s3Key: uploadResult.key,
+          completedAt: new Date().toISOString(),
+          duration: result.duration || 5
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to check video status: ${error.message}`, error);
+      return { status: 'FAILED' };
+    }
+  }
+
+  /**
+   * Generate video thumbnail (placeholder implementation)
+   */
+  private async generateVideoThumbnail(videoUrl: string): Promise<string> {
+    // This is a placeholder - in a real implementation, you'd use a video processing service
+    // to extract a frame from the video and create a thumbnail
+    this.logger.log(`Generating thumbnail for video: ${videoUrl}`);
+    
+    // For now, return a placeholder thumbnail URL
+    // In production, you'd use services like AWS MediaConvert, FFmpeg, etc.
+    return videoUrl.replace('.mp4', '_thumbnail.jpg');
+  }
+
+  /**
+   * Get Google Cloud access token
+   */
+  private async getGoogleAccessToken(): Promise<string> {
+    try {
+      // In production, use Google Cloud SDK or service account credentials
+      // This is a simplified version - you should use proper authentication
+      
+      if (config.gcp.serviceAccountKey) {
+        // Use service account key for authentication
+        const { GoogleAuth } = require('google-auth-library');
+        const auth = new GoogleAuth({
+          keyFile: config.gcp.serviceAccountKey,
+          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        });
+        
+        const client = await auth.getClient();
+        const accessToken = await client.getAccessToken();
+        return accessToken.token;
+      }
+      
+      throw new Error('No Google Cloud authentication configured');
+    } catch (error) {
+      this.logger.error(`Failed to get Google access token: ${error.message}`, error);
+      throw new Error('Failed to authenticate with Google Cloud');
     }
   }
 }

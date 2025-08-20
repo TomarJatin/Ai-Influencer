@@ -5,16 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Image as ImageIcon, Video, Plus, Download, Play, Settings, Eye } from 'lucide-react';
+import { ArrowLeft, Edit, Image as ImageIcon, Video, Plus, Download, Play, Settings, Eye, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { AIInfluencer } from '@/types';
-import { InfluencerService } from '@/services';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { ImageGenerationDialog } from './ImageGenerationDialog';
 import { VideoGenerationDialog } from './VideoGenerationDialog';
 import { EditInfluencerDialog } from './EditInfluencerDialog';
+import { IdeaManagementDialog } from './IdeaManagementDialog';
+import { NewImageGenerationDialog } from './NewImageGenerationDialog';
+import { NewVideoGenerationDialog } from './NewVideoGenerationDialog';
+import { IdeaCard } from './IdeaCard';
+import { IdeaPagination } from './IdeaPagination';
+import { InfluencerService, ImageIdea, VideoIdea, PaginationQueryDto } from '@/services';
 
 interface InfluencerDetailPageProps {
   influencerId: string;
@@ -23,9 +28,39 @@ interface InfluencerDetailPageProps {
 export default function InfluencerDetailPage({ influencerId }: InfluencerDetailPageProps) {
   const [influencer, setInfluencer] = useState<AIInfluencer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Dialog states
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showIdeaDialog, setShowIdeaDialog] = useState(false);
+  const [showNewImageDialog, setShowNewImageDialog] = useState(false);
+  const [showNewVideoDialog, setShowNewVideoDialog] = useState(false);
+  
+  // Idea management states
+  const [ideaDialogTab, setIdeaDialogTab] = useState<'image' | 'video'>('image');
+  const [editingImageIdea, setEditingImageIdea] = useState<ImageIdea | null>(null);
+  const [editingVideoIdea, setEditingVideoIdea] = useState<VideoIdea | null>(null);
+  
+  // Ideas data
+  const [imageIdeas, setImageIdeas] = useState<ImageIdea[]>([]);
+  const [videoIdeas, setVideoIdeas] = useState<VideoIdea[]>([]);
+  const [isLoadingImageIdeas, setIsLoadingImageIdeas] = useState(false);
+  const [isLoadingVideoIdeas, setIsLoadingVideoIdeas] = useState(false);
+  
+  // Pagination states
+  const [imagePagination, setImagePagination] = useState({
+    page: 1,
+    limit: 6,
+    total: 0,
+    totalPages: 0,
+  });
+  const [videoPagination, setVideoPagination] = useState({
+    page: 1,
+    limit: 6,
+    total: 0,
+    totalPages: 0,
+  });
 
   const loadInfluencer = useCallback(async () => {
     try {
@@ -44,9 +79,63 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
     }
   }, [influencerId]);
 
+  // Load image ideas
+  const loadImageIdeas = useCallback(async (query: PaginationQueryDto = {}) => {
+    try {
+      setIsLoadingImageIdeas(true);
+      const response = await InfluencerService.getImageIdeas(influencerId, {
+        page: imagePagination.page,
+        limit: imagePagination.limit,
+        ...query,
+      });
+
+      if (response.data) {
+        setImageIdeas(response.data.items);
+        setImagePagination(prev => ({
+          ...prev,
+          total: response.data.total,
+          totalPages: response.data.totalPages,
+          page: response.data.page,
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading image ideas:', error);
+    } finally {
+      setIsLoadingImageIdeas(false);
+    }
+  }, [influencerId, imagePagination.page, imagePagination.limit]);
+
+  // Load video ideas
+  const loadVideoIdeas = useCallback(async (query: PaginationQueryDto = {}) => {
+    try {
+      setIsLoadingVideoIdeas(true);
+      const response = await InfluencerService.getVideoIdeas(influencerId, {
+        page: videoPagination.page,
+        limit: videoPagination.limit,
+        ...query,
+      });
+
+      if (response.data) {
+        setVideoIdeas(response.data.items);
+        setVideoPagination(prev => ({
+          ...prev,
+          total: response.data.total,
+          totalPages: response.data.totalPages,
+          page: response.data.page,
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading video ideas:', error);
+    } finally {
+      setIsLoadingVideoIdeas(false);
+    }
+  }, [influencerId, videoPagination.page, videoPagination.limit]);
+
   useEffect(() => {
     loadInfluencer();
-  }, [loadInfluencer]);
+    loadImageIdeas();
+    loadVideoIdeas();
+  }, [loadInfluencer, loadImageIdeas, loadVideoIdeas]);
 
   const handleImageGenerated = () => {
     loadInfluencer(); // Refresh data
@@ -61,6 +150,55 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
   const handleInfluencerUpdated = () => {
     loadInfluencer(); // Refresh data
     setShowEditDialog(false);
+  };
+
+  // Handle idea management
+  const handleCreateIdea = (type: 'image' | 'video') => {
+    setIdeaDialogTab(type);
+    setEditingImageIdea(null);
+    setEditingVideoIdea(null);
+    setShowIdeaDialog(true);
+  };
+
+  const handleEditIdea = (idea: ImageIdea | VideoIdea, type: 'image' | 'video') => {
+    if (type === 'image') {
+      setEditingImageIdea(idea as ImageIdea);
+      setEditingVideoIdea(null);
+    } else {
+      setEditingVideoIdea(idea as VideoIdea);
+      setEditingImageIdea(null);
+    }
+    setIdeaDialogTab(type);
+    setShowIdeaDialog(true);
+  };
+
+  const handleDeleteIdea = (ideaId: string, type: 'image' | 'video') => {
+    if (type === 'image') {
+      setImageIdeas(prev => prev.filter(idea => idea.id !== ideaId));
+      setImagePagination(prev => ({ ...prev, total: prev.total - 1 }));
+    } else {
+      setVideoIdeas(prev => prev.filter(idea => idea.id !== ideaId));
+      setVideoPagination(prev => ({ ...prev, total: prev.total - 1 }));
+    }
+  };
+
+  const handleIdeaCreated = (type: 'image' | 'video') => {
+    if (type === 'image') {
+      loadImageIdeas();
+    } else {
+      loadVideoIdeas();
+    }
+    setShowIdeaDialog(false);
+    setEditingImageIdea(null);
+    setEditingVideoIdea(null);
+  };
+
+  const handleGenerateFromIdea = (idea: ImageIdea | VideoIdea, type: 'image' | 'video') => {
+    if (type === 'image') {
+      setShowNewImageDialog(true);
+    } else {
+      setShowNewVideoDialog(true);
+    }
   };
 
   if (isLoading) {
@@ -234,7 +372,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
         {/* Right Column - Content */}
         <div className='md:col-span-2'>
           <Tabs defaultValue='images' className='space-y-4'>
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value='images' className='flex items-center space-x-2'>
                 <ImageIcon className='h-4 w-4' />
                 <span>Images ({stats.totalImages})</span>
@@ -242,6 +380,14 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               <TabsTrigger value='videos' className='flex items-center space-x-2'>
                 <Video className='h-4 w-4' />
                 <span>Videos ({stats.totalVideos})</span>
+              </TabsTrigger>
+              <TabsTrigger value='image-ideas' className='flex items-center space-x-2'>
+                <Plus className='h-4 w-4' />
+                <span>Image Ideas</span>
+              </TabsTrigger>
+              <TabsTrigger value='video-ideas' className='flex items-center space-x-2'>
+                <Plus className='h-4 w-4' />
+                <span>Video Ideas</span>
               </TabsTrigger>
               <TabsTrigger value='details' className='flex items-center space-x-2'>
                 <Settings className='h-4 w-4' />
@@ -388,6 +534,146 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                     <Button onClick={() => setShowVideoDialog(true)}>
                       <Plus className='mr-2 h-4 w-4' />
                       Generate First Video
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value='image-ideas' className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <h3 className='text-lg font-medium'>Image Ideas</h3>
+                <div className="flex space-x-2">
+                  <Button onClick={() => handleCreateIdea('image')} variant="outline">
+                    <Plus className='mr-2 h-4 w-4' />
+                    Add Idea
+                  </Button>
+                  <Button onClick={() => setShowNewImageDialog(true)}>
+                    <ImageIcon className='mr-2 h-4 w-4' />
+                    Generate Image
+                  </Button>
+                </div>
+              </div>
+
+              {isLoadingImageIdeas ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                  <span>Loading image ideas...</span>
+                </div>
+              ) : imageIdeas.length > 0 ? (
+                <div className="space-y-6">
+                  <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+                    {imageIdeas.map((idea) => (
+                      <IdeaCard
+                        key={idea.id}
+                        idea={idea}
+                        type="image"
+                        influencerId={influencer.id}
+                        onEdit={(idea) => handleEditIdea(idea, 'image')}
+                        onDelete={(ideaId) => handleDeleteIdea(ideaId, 'image')}
+                        onGenerate={(idea) => handleGenerateFromIdea(idea, 'image')}
+                      />
+                    ))}
+                  </div>
+                  
+                  <IdeaPagination
+                    currentPage={imagePagination.page}
+                    totalPages={imagePagination.totalPages}
+                    totalItems={imagePagination.total}
+                    itemsPerPage={imagePagination.limit}
+                    onPageChange={(page) => {
+                      setImagePagination(prev => ({ ...prev, page }));
+                      loadImageIdeas({ page });
+                    }}
+                    onItemsPerPageChange={(limit) => {
+                      setImagePagination(prev => ({ ...prev, limit, page: 1 }));
+                      loadImageIdeas({ page: 1, limit });
+                    }}
+                  />
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className='flex flex-col items-center justify-center space-y-4 py-8'>
+                    <ImageIcon className='text-muted-foreground h-12 w-12' />
+                    <div className='space-y-2 text-center'>
+                      <h4 className='font-medium'>No Image Ideas</h4>
+                      <p className='text-muted-foreground text-sm'>
+                        Create image ideas to organize and plan your AI influencer&apos;s photo shoots
+                      </p>
+                    </div>
+                    <Button onClick={() => handleCreateIdea('image')}>
+                      <Plus className='mr-2 h-4 w-4' />
+                      Create First Image Idea
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value='video-ideas' className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <h3 className='text-lg font-medium'>Video Ideas</h3>
+                <div className="flex space-x-2">
+                  <Button onClick={() => handleCreateIdea('video')} variant="outline">
+                    <Plus className='mr-2 h-4 w-4' />
+                    Add Idea
+                  </Button>
+                  <Button onClick={() => setShowNewVideoDialog(true)}>
+                    <Video className='mr-2 h-4 w-4' />
+                    Generate Video
+                  </Button>
+                </div>
+              </div>
+
+              {isLoadingVideoIdeas ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                  <span>Loading video ideas...</span>
+                </div>
+              ) : videoIdeas.length > 0 ? (
+                <div className="space-y-6">
+                  <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+                    {videoIdeas.map((idea) => (
+                      <IdeaCard
+                        key={idea.id}
+                        idea={idea}
+                        type="video"
+                        influencerId={influencer.id}
+                        onEdit={(idea) => handleEditIdea(idea, 'video')}
+                        onDelete={(ideaId) => handleDeleteIdea(ideaId, 'video')}
+                        onGenerate={(idea) => handleGenerateFromIdea(idea, 'video')}
+                      />
+                    ))}
+                  </div>
+                  
+                  <IdeaPagination
+                    currentPage={videoPagination.page}
+                    totalPages={videoPagination.totalPages}
+                    totalItems={videoPagination.total}
+                    itemsPerPage={videoPagination.limit}
+                    onPageChange={(page) => {
+                      setVideoPagination(prev => ({ ...prev, page }));
+                      loadVideoIdeas({ page });
+                    }}
+                    onItemsPerPageChange={(limit) => {
+                      setVideoPagination(prev => ({ ...prev, limit, page: 1 }));
+                      loadVideoIdeas({ page: 1, limit });
+                    }}
+                  />
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className='flex flex-col items-center justify-center space-y-4 py-8'>
+                    <Video className='text-muted-foreground h-12 w-12' />
+                    <div className='space-y-2 text-center'>
+                      <h4 className='font-medium'>No Video Ideas</h4>
+                      <p className='text-muted-foreground text-sm'>
+                        Create video ideas to plan engaging content for your AI influencer
+                      </p>
+                    </div>
+                    <Button onClick={() => handleCreateIdea('video')}>
+                      <Plus className='mr-2 h-4 w-4' />
+                      Create First Video Idea
                     </Button>
                   </CardContent>
                 </Card>
@@ -855,6 +1141,51 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
           open={showEditDialog}
           onClose={() => setShowEditDialog(false)}
           onInfluencerUpdated={handleInfluencerUpdated}
+        />
+      )}
+
+      {/* New Idea Management Dialog */}
+      {showIdeaDialog && (
+        <IdeaManagementDialog
+          influencer={influencer}
+          open={showIdeaDialog}
+          onClose={() => {
+            setShowIdeaDialog(false);
+            setEditingImageIdea(null);
+            setEditingVideoIdea(null);
+          }}
+          onIdeaCreated={handleIdeaCreated}
+          initialTab={ideaDialogTab}
+          editingImageIdea={editingImageIdea || undefined}
+          editingVideoIdea={editingVideoIdea || undefined}
+        />
+      )}
+
+      {/* New Image Generation Dialog */}
+      {showNewImageDialog && (
+        <NewImageGenerationDialog
+          influencer={influencer}
+          open={showNewImageDialog}
+          onClose={() => setShowNewImageDialog(false)}
+          onImageGenerated={handleImageGenerated}
+          onCreateIdea={() => {
+            setShowNewImageDialog(false);
+            handleCreateIdea('image');
+          }}
+        />
+      )}
+
+      {/* New Video Generation Dialog */}
+      {showNewVideoDialog && (
+        <NewVideoGenerationDialog
+          influencer={influencer}
+          open={showNewVideoDialog}
+          onClose={() => setShowNewVideoDialog(false)}
+          onVideoGenerated={handleVideoGenerated}
+          onCreateIdea={() => {
+            setShowNewVideoDialog(false);
+            handleCreateIdea('video');
+          }}
         />
       )}
     </div>

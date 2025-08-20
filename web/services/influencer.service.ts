@@ -1,315 +1,252 @@
 import { ApiClient } from '@/lib/api-client';
-import {
-  AIInfluencer,
-  CreateAIInfluencerDto,
-  UpdateAIInfluencerDto,
-  ImageGenerationRequest,
-  VideoGenerationRequest,
-  VideoIdea,
-  ImageIdea,
-  OptimizedPrompt,
-  GenerateImageIdeasRequest,
-  GenerateVideoIdeasRequest,
-  GeneratePromptRequest,
-  UploadMediaRequest,
-  GenerationProgress,
-  InfluencerVideo,
-  LegacyVideoIdea,
-} from '@/types';
+import { AIInfluencer } from '@/types';
+
+// New types for the redesigned API
+export interface ImageIdea {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  visualElements: string[];
+  mood: string;
+  setting: string;
+  styleNotes: string;
+  isUsed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VideoIdea {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  scenario: string;
+  keyMoments: string[];
+  duration: string;
+  mood: string;
+  visualStyle: string;
+  isUsed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateImageIdeaDto {
+  title: string;
+  description: string;
+  category?: string;
+  setting?: string;
+  mood?: string;
+  styleNotes?: string;
+  visualElements?: string[];
+}
+
+export interface CreateVideoIdeaDto {
+  title: string;
+  description: string;
+  scenario: string;
+  category?: string;
+  duration?: string;
+  mood?: string;
+  visualStyle?: string;
+  keyMoments?: string[];
+}
+
+export interface GenerateImageFromIdeaDto {
+  imageIdeaId: string;
+  imageType: 'PORTRAIT' | 'FULL_BODY' | 'BEAUTY_SHOT' | 'LIFESTYLE' | 'REFERENCE';
+  customPrompt?: string;
+  isReference?: boolean;
+}
+
+export interface GenerateVideoFromIdeaDto {
+  videoIdeaId: string;
+  customPrompt?: string;
+  duration?: number;
+}
+
+export interface AnalyzeImageForIdeaDto {
+  analysis: string;
+  suggestedTitle: string;
+  suggestedDescription: string;
+  suggestedCategory: string;
+  suggestedMood: string;
+  suggestedSetting: string;
+  suggestedStyleNotes: string;
+  suggestedVisualElements: string[];
+}
+
+export interface PaginationQueryDto {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  isUsed?: boolean;
+}
+
+export interface PaginatedResponseDto<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
 
 export class InfluencerService {
   // ============================================================================
   // BASIC INFLUENCER CRUD OPERATIONS
   // ============================================================================
 
-  /**
-   * Create a new AI influencer
-   */
-  static async createInfluencer(data: CreateAIInfluencerDto) {
-    return await ApiClient.post<AIInfluencer>('/api/influencers', data);
-  }
-
-  /**
-   * Get all AI influencers for the current user
-   */
   static async getInfluencers() {
     return await ApiClient.get<AIInfluencer[]>('/api/influencers');
   }
 
-  /**
-   * Get a specific AI influencer by ID
-   */
   static async getInfluencer(id: string) {
     return await ApiClient.get<AIInfluencer>(`/api/influencers/${id}`);
   }
 
-  /**
-   * Update an AI influencer
-   */
-  static async updateInfluencer(id: string, data: UpdateAIInfluencerDto) {
+  static async createInfluencer(data: Partial<AIInfluencer>) {
+    return await ApiClient.post<AIInfluencer>('/api/influencers', data);
+  }
+
+  static async updateInfluencer(id: string, data: Partial<AIInfluencer>) {
     return await ApiClient.put<AIInfluencer>(`/api/influencers/${id}`, data);
   }
 
-  /**
-   * Delete an AI influencer
-   */
   static async deleteInfluencer(id: string) {
-    return await ApiClient.delete<{ success: boolean; message: string }>(`/api/influencers/${id}`);
+    return await ApiClient.delete<boolean>(`/api/influencers/${id}`);
   }
 
   // ============================================================================
-  // NEW IMAGE IDEA GENERATION WORKFLOW
+  // IMAGE IDEA MANAGEMENT
   // ============================================================================
 
-  /**
-   * Generate new image ideas for AI influencer
-   */
-  static async generateImageIdeas(influencerId: string, request: GenerateImageIdeasRequest = {}) {
-    return await ApiClient.post<ImageIdea[]>(`/api/influencers/${influencerId}/image-ideas/generate`, request);
+  static async createImageIdea(influencerId: string, data: CreateImageIdeaDto) {
+    return await ApiClient.post<ImageIdea>(`/api/influencers/${influencerId}/image-ideas`, data);
   }
 
-  /**
-   * Get all image ideas for AI influencer
-   */
-  static async getImageIdeas(influencerId: string) {
-    return await ApiClient.get<ImageIdea[]>(`/api/influencers/${influencerId}/image-ideas`);
-  }
-
-  /**
-   * Generate optimized prompt for a specific image idea
-   */
-  static async generateImagePrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
-    return await ApiClient.post<OptimizedPrompt>(
-      `/api/influencers/${influencerId}/image-ideas/${ideaId}/prompt`,
-      request
+  static async analyzeImageForIdea(influencerId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return await ApiClient.postFormData<AnalyzeImageForIdeaDto>(
+      `/api/influencers/${influencerId}/image-ideas/analyze`,
+      formData
     );
   }
 
-  /**
-   * Upload generated image for a specific idea
-   */
-  static async uploadImage(influencerId: string, ideaId: string, file: File, request: UploadMediaRequest) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('generatedPrompt', request.generatedPrompt);
-    if (request.metadata) {
-      formData.append('metadata', JSON.stringify(request.metadata));
-    }
+  static async getImageIdeas(influencerId: string, query?: PaginationQueryDto) {
+    const params = new URLSearchParams();
+    if (query?.page) params.append('page', query.page.toString());
+    if (query?.limit) params.append('limit', query.limit.toString());
+    if (query?.search) params.append('search', query.search);
+    if (query?.category) params.append('category', query.category);
+    if (typeof query?.isUsed === 'boolean') params.append('isUsed', query.isUsed.toString());
 
-    return await ApiClient.postFormData<any>(`/api/influencers/${influencerId}/image-ideas/${ideaId}/upload`, formData);
+    const queryString = params.toString();
+    const url = `/api/influencers/${influencerId}/image-ideas${queryString ? `?${queryString}` : ''}`;
+    
+    return await ApiClient.get<PaginatedResponseDto<ImageIdea>>(url);
+  }
+
+  static async updateImageIdea(influencerId: string, ideaId: string, data: Partial<CreateImageIdeaDto>) {
+    return await ApiClient.put<ImageIdea>(`/api/influencers/${influencerId}/image-ideas/${ideaId}`, data);
+  }
+
+  static async deleteImageIdea(influencerId: string, ideaId: string) {
+    return await ApiClient.delete<void>(`/api/influencers/${influencerId}/image-ideas/${ideaId}`);
+  }
+
+  static async generateImageFromIdea(influencerId: string, data: GenerateImageFromIdeaDto) {
+    return await ApiClient.post<any>(`/api/influencers/${influencerId}/generate-image`, data);
   }
 
   // ============================================================================
-  // NEW VIDEO IDEA GENERATION WORKFLOW
+  // VIDEO IDEA MANAGEMENT
   // ============================================================================
 
-  /**
-   * Generate new video ideas for AI influencer
-   */
-  static async generateVideoIdeas(influencerId: string, request: GenerateVideoIdeasRequest = {}) {
-    return await ApiClient.post<VideoIdea[]>(`/api/influencers/${influencerId}/video-ideas/generate`, request);
+  static async createVideoIdea(influencerId: string, data: CreateVideoIdeaDto) {
+    return await ApiClient.post<VideoIdea>(`/api/influencers/${influencerId}/video-ideas`, data);
   }
 
-  /**
-   * Get all video ideas for AI influencer
-   */
-  static async getVideoIdeas(influencerId: string) {
-    return await ApiClient.get<VideoIdea[]>(`/api/influencers/${influencerId}/video-ideas`);
+  static async getVideoIdeas(influencerId: string, query?: PaginationQueryDto) {
+    const params = new URLSearchParams();
+    if (query?.page) params.append('page', query.page.toString());
+    if (query?.limit) params.append('limit', query.limit.toString());
+    if (query?.search) params.append('search', query.search);
+    if (query?.category) params.append('category', query.category);
+    if (typeof query?.isUsed === 'boolean') params.append('isUsed', query.isUsed.toString());
+
+    const queryString = params.toString();
+    const url = `/api/influencers/${influencerId}/video-ideas${queryString ? `?${queryString}` : ''}`;
+    
+    return await ApiClient.get<PaginatedResponseDto<VideoIdea>>(url);
   }
 
-  /**
-   * Generate optimized prompt for a specific video idea
-   */
-  static async generateVideoPrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
-    return await ApiClient.post<OptimizedPrompt>(
-      `/api/influencers/${influencerId}/video-ideas/${ideaId}/prompt`,
-      request
-    );
+  static async updateVideoIdea(influencerId: string, ideaId: string, data: Partial<CreateVideoIdeaDto>) {
+    return await ApiClient.put<VideoIdea>(`/api/influencers/${influencerId}/video-ideas/${ideaId}`, data);
   }
 
-  /**
-   * Upload generated video for a specific idea
-   */
-  static async uploadVideo(influencerId: string, ideaId: string, file: File, request: UploadMediaRequest) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('generatedPrompt', request.generatedPrompt);
-    if (request.metadata) {
-      formData.append('metadata', JSON.stringify(request.metadata));
-    }
+  static async deleteVideoIdea(influencerId: string, ideaId: string) {
+    return await ApiClient.delete<void>(`/api/influencers/${influencerId}/video-ideas/${ideaId}`);
+  }
 
-    return await ApiClient.postFormData<any>(`/api/influencers/${influencerId}/video-ideas/${ideaId}/upload`, formData);
+  static async generateVideoFromIdea(influencerId: string, data: GenerateVideoFromIdeaDto) {
+    return await ApiClient.post<any>(`/api/influencers/${influencerId}/generate-video`, data);
+  }
+
+  static async checkVideoStatus(influencerId: string, videoId: string) {
+    return await ApiClient.get<any>(`/api/influencers/${influencerId}/videos/${videoId}/status`);
   }
 
   // ============================================================================
-  // LEGACY METHODS (Deprecated but kept for backward compatibility)
+  // LEGACY ENDPOINTS (for backward compatibility)
   // ============================================================================
 
-  /**
-   * Generate image prompt for AI influencer (Legacy)
-   * @deprecated Use generateImagePrompt with ideaId instead
-   */
   static async generateLegacyImagePrompt(influencerId: string, imageType: string) {
-    return await ApiClient.get<{
-      prompt: string;
-      influencer: { id: string; name: string };
-      imageType: string;
-    }>(`/api/influencers/${influencerId}/image-prompt?imageType=${imageType}`);
+    return await ApiClient.post<any>(`/api/influencers/${influencerId}/legacy/image-prompt/${imageType}`, {});
   }
 
-  /**
-   * Generate an image for AI influencer (Legacy)
-   * @deprecated Use the new workflow with ideas instead
-   */
-  static async generateImage(request: ImageGenerationRequest) {
-    return await ApiClient.post<{
-      id: string;
-      imageUrl: string;
-      prompt: string;
-      imageType: string;
-    }>(`/api/influencers/${request.influencerId}/generate-image`, {
-      imageType: request.imageType,
-      customPrompt: request.customPrompt,
-      isReference: false,
-    });
+  static async generateLegacyImage(influencerId: string, data: any) {
+    return await ApiClient.post<any>(`/api/influencers/${influencerId}/legacy/generate-image`, data);
   }
 
-  /**
-   * Generate video ideas for AI influencer (Legacy)
-   * @deprecated Use generateVideoIdeas instead
-   */
-  static async generateLegacyVideoIdeas(influencerId: string) {
-    return await ApiClient.get<LegacyVideoIdea[]>(`/api/influencers/${influencerId}/video-ideas`);
+  static async generateLegacyVideo(influencerId: string, data: any) {
+    return await ApiClient.post<any>(`/api/influencers/${influencerId}/legacy/generate-video`, data);
   }
 
-  /**
-   * Generate a video for AI influencer (Legacy)
-   * @deprecated Use the new workflow with ideas instead
-   */
-  static async generateVideo(request: VideoGenerationRequest) {
-    return await ApiClient.post<InfluencerVideo>(`/api/influencers/${request.influencerId}/generate-video`, {
-      title: request.title,
-      description: request.description,
-      scenario: request.scenario,
-      customPrompt: request.customPrompt,
-    });
+  static async getLegacyVideoIdeas(influencerId: string) {
+    return await ApiClient.get<any>(`/api/influencers/${influencerId}/legacy/video-ideas`);
   }
 
-  /**
-   * Get video generation status (Legacy)
-   * @deprecated Videos are now uploaded directly
-   */
+  static async getLegacyVideoStatus(influencerId: string, videoId: string) {
+    return await ApiClient.get<any>(`/api/influencers/${influencerId}/legacy/video-status/${videoId}`);
+  }
+
+  // Additional legacy methods for backward compatibility
+  static async generateImage(data: any) {
+    return await this.generateLegacyImage(data.influencerId, data);
+  }
+
+  static async generateVideo(data: any) {
+    return await this.generateLegacyVideo(data.influencerId, data);
+  }
+
   static async getVideoStatus(videoId: string) {
-    return await ApiClient.get<InfluencerVideo>(`/api/influencers/video/${videoId}/status`);
+    // This is a simplified version - in reality you'd need the influencer ID
+    // For now, we'll throw an error suggesting to use the new method
+    throw new Error('getVideoStatus is deprecated. Use checkVideoStatus with influencerId instead.');
   }
 
-  /**
-   * Stream video generation progress (Server-Sent Events) (Legacy)
-   * @deprecated Videos are now uploaded directly
-   */
-  static async streamVideoProgress(videoId: string, onProgress: (progress: GenerationProgress) => void) {
-    const eventSource = new EventSource(`/api/influencers/video/${videoId}/stream`);
-
-    eventSource.onmessage = (event) => {
-      try {
-        const progress: GenerationProgress = JSON.parse(event.data);
-        onProgress(progress);
-
-        if (progress.isComplete || progress.error) {
-          eventSource.close();
-        }
-      } catch (error) {
-        console.error('Error parsing progress data:', error);
-      }
-    };
-
-    eventSource.onerror = (error) => {
-      console.error('EventSource error:', error);
-      eventSource.close();
-      onProgress({
-        step: 'Error',
-        progress: 0,
-        message: 'Connection error occurred',
-        isComplete: true,
-        error: 'Connection failed',
-      });
-    };
-
-    return eventSource;
-  }
-
-  /**
-   * Poll video status until completion (Legacy)
-   * @deprecated Videos are now uploaded directly
-   */
-  static async pollVideoStatus(
-    videoId: string,
-    onProgress: (video: InfluencerVideo) => void,
-    intervalMs: number = 2000
-  ): Promise<InfluencerVideo> {
-    return new Promise((resolve, reject) => {
-      const poll = async () => {
-        try {
-          const response = await this.getVideoStatus(videoId);
-
-          if (response.data) {
-            onProgress(response.data);
-
-            if (response.data.status === 'COMPLETED') {
-              resolve(response.data);
-            } else if (response.data.status === 'FAILED') {
-              reject(new Error('Video generation failed'));
-            } else {
-              // Continue polling
-              setTimeout(poll, intervalMs);
-            }
-          } else {
-            reject(new Error(response.error?.message || 'Failed to get video status'));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      poll();
-    });
+  static async generateVideoIdeas(influencerId: string) {
+    return await this.getLegacyVideoIdeas(influencerId);
   }
 
   // ============================================================================
   // UTILITY METHODS
   // ============================================================================
-
-  /**
-   * Create influencer from default template
-   */
-  static async createFromDefault(defaultInfluencer: CreateAIInfluencerDto, customName?: string) {
-    const influencerData = {
-      ...defaultInfluencer,
-      ...(customName && { name: customName }),
-      isDefault: false, // User's copy won't be marked as default
-    };
-
-    return await this.createInfluencer(influencerData);
-  }
-
-  /**
-   * Duplicate an existing influencer
-   */
-  static async duplicateInfluencer(sourceId: string, newName: string) {
-    const sourceResponse = await this.getInfluencer(sourceId);
-
-    if (!sourceResponse.data) {
-      throw new Error('Source influencer not found');
-    }
-
-    const { id, userId, createdAt, updatedAt, images, videos, imageIdeas, videoIdeas, ...influencerData } =
-      sourceResponse.data;
-
-    return await this.createInfluencer({
-      ...influencerData,
-      name: newName,
-    });
-  }
 
   /**
    * Get influencer statistics
@@ -326,10 +263,6 @@ export class InfluencerService {
     return {
       totalImages: influencer.images?.length || 0,
       totalVideos: influencer.videos?.length || 0,
-      totalImageIdeas: influencer.imageIdeas?.length || 0,
-      totalVideoIdeas: influencer.videoIdeas?.length || 0,
-      usedImageIdeas: influencer.imageIdeas?.filter((idea) => idea.isUsed).length || 0,
-      usedVideoIdeas: influencer.videoIdeas?.filter((idea) => idea.isUsed).length || 0,
       referenceImages: influencer.images?.filter((img) => img.isReference).length || 0,
       completedVideos: influencer.videos?.filter((video) => video.status === 'COMPLETED').length || 0,
       pendingVideos:
@@ -339,38 +272,16 @@ export class InfluencerService {
   }
 
   /**
-   * Validate influencer data before creation/update
+   * Create influencer from default template
    */
-  static validateInfluencerData(data: CreateAIInfluencerDto | UpdateAIInfluencerDto): {
-    isValid: boolean;
-    errors: string[];
-  } {
-    const errors: string[] = [];
-
-    // Check required fields for creation
-    if ('name' in data && !data.name?.trim()) {
-      errors.push('Name is required');
-    }
-
-    // Check name length
-    if (data.name && typeof data.name === 'string' && data.name.length > 100) {
-      errors.push('Name must be less than 100 characters');
-    }
-
-    // Check description length
-    if (data.description && typeof data.description === 'string' && data.description.length > 500) {
-      errors.push('Description must be less than 500 characters');
-    }
-
-    // Check age range
-    if (data.age && typeof data.age === 'number' && (data.age < 18 || data.age > 50)) {
-      errors.push('Age must be between 18 and 50');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
+  static async createFromDefault(defaultInfluencer: Partial<AIInfluencer>, customName?: string) {
+    const influencerData = {
+      ...defaultInfluencer,
+      ...(customName && { name: customName }),
+      isDefault: false, // User's copy won't be marked as default
     };
+
+    return await this.createInfluencer(influencerData);
   }
 
   /**
@@ -393,5 +304,42 @@ export class InfluencerService {
       createdDate: new Date(influencer.createdAt).toLocaleDateString(),
       updatedDate: new Date(influencer.updatedAt).toLocaleDateString(),
     };
+  }
+
+  /**
+   * Poll video status until completion
+   */
+  static async pollVideoStatus(
+    influencerId: string,
+    videoId: string,
+    onProgress: (video: any) => void,
+    intervalMs: number = 2000
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const response = await this.checkVideoStatus(influencerId, videoId);
+
+          if (response.data) {
+            onProgress(response.data);
+
+            if (response.data.status === 'COMPLETED') {
+              resolve(response.data);
+            } else if (response.data.status === 'FAILED') {
+              reject(new Error('Video generation failed'));
+            } else {
+              // Continue polling
+              setTimeout(poll, intervalMs);
+            }
+          } else {
+            reject(new Error(response.error?.message || 'Failed to get video status'));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      poll();
+    });
   }
 }

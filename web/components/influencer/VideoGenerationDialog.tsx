@@ -142,7 +142,7 @@ export function VideoGenerationDialog({ influencer, open, onClose, onVideoGenera
           setCurrentStep('Finalizing video output...');
         }
 
-        const response = await InfluencerService.getVideoStatus(videoId);
+        const response = await InfluencerService.getLegacyVideoStatus(influencer.id, videoId);
 
         if (response.data) {
           if (response.data.status === 'COMPLETED') {
@@ -251,7 +251,7 @@ export function VideoGenerationDialog({ influencer, open, onClose, onVideoGenera
                             </div>
                             <div className='text-muted-foreground flex items-center space-x-1 text-xs'>
                               <Clock className='h-3 w-3' />
-                              <span>{idea.estimatedDuration}s</span>
+                              <span>{idea.duration}</span>
                             </div>
                           </div>
                           <CardTitle className='text-base leading-tight'>{idea.title}</CardTitle>
@@ -390,7 +390,7 @@ export function VideoGenerationDialog({ influencer, open, onClose, onVideoGenera
                       <Badge variant='outline'>{selectedIdea.category}</Badge>
                       <div className='text-muted-foreground flex items-center space-x-1 text-sm'>
                         <Clock className='h-4 w-4' />
-                        <span>~{selectedIdea.estimatedDuration} seconds</span>
+                        <span>~{selectedIdea.duration}</span>
                       </div>
                     </div>
                   )}
