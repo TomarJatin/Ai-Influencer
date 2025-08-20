@@ -109,29 +109,29 @@ export function NewVideoGenerationDialog({
     // Generate optimized prompt in the background
     try {
       setIsGeneratingPrompt(true);
-      const promptResponse = await InfluencerService.generateLegacyImagePrompt(influencer.id, 'VIDEO');
-      if (promptResponse.data) {
-        const enhancedPrompt = `Create a high-quality video of ${influencer.name} based on the following concept:
+      
+      const enhancedPrompt = `Create a high-quality ${duration}-second video of ${influencer.name} based on the concept "${idea.title}".
 
-Title: ${idea.title}
-Description: ${idea.description}
-Scenario: ${idea.scenario}
-Duration: ${idea.duration}
-Mood: ${idea.mood || 'Not specified'}
-Visual Style: ${idea.visualStyle || 'Not specified'}
-Key Moments: ${idea.keyMoments?.join(', ') || 'Not specified'}
+VIDEO CONCEPT:
+${idea.description}
 
-Character Details:
-- Age: ${influencer.age || 'Not specified'}
+SCENARIO: ${idea.scenario}
+DURATION: ${idea.duration}
+MOOD: ${idea.mood || 'Professional and engaging'}
+VISUAL STYLE: ${idea.visualStyle || 'Cinematic and polished'}
+KEY MOMENTS: ${idea.keyMoments?.join(', ') || 'Smooth narrative flow'}
+
+INFLUENCER CHARACTERISTICS:
+- Age: ${influencer.age || 'Young adult'}
 - Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
-- Hair: ${influencer.hairColor || 'Not specified'}
-- Eyes: ${influencer.eyeColor || 'Not specified'}
-- Style: ${influencer.styleAesthetic || 'Not specified'}
+- Hair: ${influencer.hairColor || 'Natural hair color'}
+- Eyes: ${influencer.eyeColor || 'Natural eye color'}
+- Style: ${influencer.styleAesthetic || 'Contemporary style'}
+- Key Features: ${influencer.keyFeatures || 'Distinctive features'}
 
-Create a professional, engaging video that authentically represents this AI influencer.`;
+Create a professional, engaging video with smooth camera movements, natural lighting, and authentic expressions that represents this AI influencer's personality and style.`;
 
-        setGeneratedPrompt(enhancedPrompt);
-      }
+      setGeneratedPrompt(enhancedPrompt);
     } catch (error) {
       console.error('Error generating prompt:', error);
       toast.error('Failed to generate optimized prompt');

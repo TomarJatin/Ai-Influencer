@@ -34,6 +34,7 @@ export const config = {
     projectId: process.env.GOOGLE_CLOUD_PROJECT_ID!,
     location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
     serviceAccountKey: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    serviceAccountJson: process.env.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON,
   },
   aws: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,

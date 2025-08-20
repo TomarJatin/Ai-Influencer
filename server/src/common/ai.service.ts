@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { generateObject, generateText } from 'ai';
+import { generateObject, generateText,  experimental_generateImage as generateImage } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { config } from './config';
 import { z } from 'zod';
 import { S3Service } from './s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { google } from '@ai-sdk/google';
 
 // Simplified schemas for structured data generation
 const ImageIdeaItemSchema = z.object({
@@ -436,70 +437,119 @@ Make your suggestions specific and actionable for AI image generation.
   }
 
   /**
-   * Generate image using Google's Imagen model
-   */
-  async generateImageWithGemini(
-    prompt: string,
-    imageType: string = 'LIFESTYLE',
-    aspectRatio: string = '1:1',
-  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
-    try {
-      this.logger.log(`Generating image with Gemini Imagen: ${imageType}`);
+ * Generate image using Google's Gemini 2.0 Flash model with AI SDK
+ */
+async generateImageWithLanguageModel(
+  prompt: string,
+  imageType: string = 'LIFESTYLE',
+  aspectRatio: string = '1:1',
+): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+  try {
+    this.logger.log(`Generating image with Gemini 2.0 Flash: ${imageType}`);
 
-      // Use Google's Imagen API via Vertex AI
-      const response = await axios.post(
-        `https://us-central1-aiplatform.googleapis.com/v1/projects/${config.gcp.projectId}/locations/us-central1/publishers/google/models/imagegeneration@006:predict`,
-        {
-          instances: [
-            {
-              prompt: prompt,
-              aspectRatio: aspectRatio,
-              negativePrompt: 'blurry, low quality, distorted, watermark, text, signature',
-              guidanceScale: 7.5,
-              outputOptions: {
-                mimeType: 'image/jpeg',
-              },
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${await this.getGoogleAccessToken()}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
+    const result = await generateText({
+      model: google('gemini-2.5-flash'),
+      providerOptions: {
+        google: { responseModalities: ['TEXT', 'IMAGE'] },
+      },
+      prompt: `Generate an image: ${prompt}`,
+    });
 
-      if (!response.data.predictions || response.data.predictions.length === 0) {
-        throw new Error('No image generated from Imagen API');
+    // Find the first image file in the response
+    let imageFile: any = null;
+    for (const file of result.files || []) {
+      if (file.mediaType.startsWith('image/')) {
+        imageFile = file;
+        break;
       }
-
-      const prediction = response.data.predictions[0];
-
-      // Upload the generated image to S3
-      const imageBuffer = Buffer.from(prediction.bytesBase64Encoded, 'base64');
-      const filename = `generated-images/${uuidv4()}.jpg`;
-
-      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, 'image/jpeg');
-
-      this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
-
-      return {
-        imageUrl: uploadResult.url,
-        metadata: {
-          model: 'imagen-2.0',
-          prompt: prompt,
-          imageType: imageType,
-          aspectRatio: aspectRatio,
-          generatedAt: new Date().toISOString(),
-          s3Key: uploadResult.key,
-        },
-      };
-    } catch (error) {
-      this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
-      throw new Error('Failed to generate image with Gemini Imagen');
     }
+
+    if (!imageFile) {
+      throw new Error('No image generated from Gemini model');
+    }
+
+    // Upload the generated image to S3
+    const imageBuffer = Buffer.from(imageFile.uint8Array);
+    const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
+    const filename = `generated-images/${uuidv4()}.${fileExtension}`;
+
+    const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
+
+    this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
+
+    return {
+      imageUrl: uploadResult.url,
+      metadata: {
+        model: 'gemini-2.0-flash-exp',
+        prompt: prompt,
+        imageType: imageType,
+        aspectRatio: aspectRatio,
+        mediaType: imageFile.mediaType,
+        generatedAt: new Date().toISOString(),
+        s3Key: uploadResult.key,
+      },
+    };
+  } catch (error) {
+    this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
+    throw new Error('Failed to generate image with Gemini');
   }
+}
+
+async generateImageWithImageModel(
+  prompt: string,
+  imageType: string = 'LIFESTYLE',
+  aspectRatio: string = '1:1',
+): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+  try {
+    this.logger.log(`Generating image with Gemini 2.0 Flash: ${imageType}`);
+
+    const { image } = await generateImage({
+      model: google.image('imagen-3.0-generate-002'),
+      prompt: prompt,
+      aspectRatio: '1:1',
+    });
+
+    // Find the first image file in the response
+    let imageFile: any = image;
+
+    if (!imageFile) {
+      throw new Error('No image generated from Gemini model');
+    }
+
+    // Upload the generated image to S3
+    const imageBuffer = Buffer.from(imageFile.uint8Array);
+    const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
+    const filename = `generated-images/${uuidv4()}.${fileExtension}`;
+
+    const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
+
+    this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
+
+    return {
+      imageUrl: uploadResult.url,
+      metadata: {
+        model: 'gemini-2.0-flash-exp',
+        prompt: prompt,
+        imageType: imageType,
+        aspectRatio: aspectRatio,
+        mediaType: imageFile.mediaType,
+        generatedAt: new Date().toISOString(),
+        s3Key: uploadResult.key,
+      },
+    };
+  } catch (error) {
+    this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
+    throw new Error('Failed to generate image with Gemini');
+  }
+}
+
+async generateImageWithGemini(
+  prompt: string,
+  imageType: string = 'LIFESTYLE',
+  aspectRatio: string = '1:1',
+): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+  return this.generateImageWithImageModel(prompt, imageType, aspectRatio);
+}
 
   /**
    * Generate video using Google's Veo3 model
@@ -650,25 +700,56 @@ Make your suggestions specific and actionable for AI image generation.
    */
   private async getGoogleAccessToken(): Promise<string> {
     try {
-      // In production, use Google Cloud SDK or service account credentials
-      // This is a simplified version - you should use proper authentication
-
-      if (config.gcp.serviceAccountKey) {
-        // Use service account key for authentication
-        const { GoogleAuth } = require('google-auth-library');
-        const auth = new GoogleAuth({
+      const { GoogleAuth } = require('google-auth-library');
+      
+      // Try multiple authentication methods
+      let auth;
+      
+      if (config.gcp.serviceAccountJson) {
+        // Method 1: Use service account JSON content directly
+        this.logger.log('Using service account JSON content for authentication');
+        const credentials = JSON.parse(config.gcp.serviceAccountJson);
+        auth = new GoogleAuth({
+          credentials,
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        });
+      } else if (config.gcp.serviceAccountKey) {
+        // Method 2: Use service account key file
+        this.logger.log('Using service account key file for authentication');
+        auth = new GoogleAuth({
           keyFile: config.gcp.serviceAccountKey,
           scopes: ['https://www.googleapis.com/auth/cloud-platform'],
         });
-
-        const client = await auth.getClient();
-        const accessToken = await client.getAccessToken();
-        return accessToken.token;
+      } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        // Method 3: Use GOOGLE_APPLICATION_CREDENTIALS environment variable
+        this.logger.log('Using GOOGLE_APPLICATION_CREDENTIALS for authentication');
+        auth = new GoogleAuth({
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        });
+      } else {
+        // Method 4: Try default credentials (works in GCP environments)
+        this.logger.log('Attempting to use default credentials');
+        auth = new GoogleAuth({
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        });
       }
 
-      throw new Error('No Google Cloud authentication configured');
+      const client = await auth.getClient();
+      const accessToken = await client.getAccessToken();
+      
+      if (!accessToken.token) {
+        throw new Error('Failed to obtain access token');
+      }
+      
+      this.logger.log('Successfully obtained Google Cloud access token');
+      return accessToken.token;
     } catch (error) {
       this.logger.error(`Failed to get Google access token: ${error.message}`, error);
+      this.logger.error('Google Cloud Authentication Setup Required:');
+      this.logger.error('1. Set GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json');
+      this.logger.error('2. Or set GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON with JSON content');
+      this.logger.error('3. Or run in GCP environment with default credentials');
+      this.logger.error('4. Ensure Vertex AI API is enabled in your GCP project');
       throw new Error('Failed to authenticate with Google Cloud');
     }
   }

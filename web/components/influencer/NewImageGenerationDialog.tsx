@@ -114,13 +114,25 @@ export function NewImageGenerationDialog({
     try {
       setIsGeneratingPrompt(true);
 
-      const enhancedPrompt = `Based on the selected idea "${idea.title}":
+      const enhancedPrompt = `Create a high-quality ${imageType.toLowerCase()} image of ${influencer.name}, based on the concept "${idea.title}".
+
+CONCEPT DETAILS:
 ${idea.description}
 
-Setting: ${idea.setting || 'Not specified'}
-Mood: ${idea.mood || 'Not specified'}
-Style Notes: ${idea.styleNotes || 'Not specified'}
-Visual Elements: ${idea.visualElements?.join(', ') || 'Not specified'}`;
+SETTING: ${idea.setting || 'Professional studio setting'}
+MOOD: ${idea.mood || 'Professional and engaging'}
+STYLE NOTES: ${idea.styleNotes || 'High-quality photography style'}
+VISUAL ELEMENTS: ${idea.visualElements?.join(', ') || 'Professional composition'}
+
+INFLUENCER CHARACTERISTICS:
+- Age: ${influencer.age || 'Young adult'}
+- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
+- Hair: ${influencer.hairColor || 'Natural hair color'}
+- Eyes: ${influencer.eyeColor || 'Natural eye color'}
+- Style: ${influencer.styleAesthetic || 'Contemporary style'}
+- Key Features: ${influencer.keyFeatures || 'Distinctive features'}
+
+Create a professional, high-resolution image that captures the essence of this concept while maintaining the influencer's authentic appearance. Use professional photography techniques, optimal lighting, and composition.`;
 
       setGeneratedPrompt(enhancedPrompt);
     } catch (error) {

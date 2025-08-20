@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AIService, ImageAnalysis } from '../common/ai.service';
+import { AIService, ImageAnalysis, OptimizedPromptSchema } from '../common/ai.service';
 import {
   CreateAIInfluencerDto,
   UpdateAIInfluencerDto,
@@ -361,6 +361,8 @@ export class InfluencerService {
   async generateImageFromIdea(influencerId: string, generateDto: GenerateImageFromIdeaDto, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
+      console.log('influencerId', influencerId);
+      console.log('generateDto', generateDto);
 
       const idea = await this.prismaService.imageIdea.findFirst({
         where: { id: generateDto.imageIdeaId, influencerId },
@@ -386,6 +388,7 @@ export class InfluencerService {
       };
 
       const optimizedPrompt = await this.generateImagePromptFromIdea(promptData);
+      console.log('optimizedPrompt', optimizedPrompt);
       const finalPrompt = generateDto.customPrompt || optimizedPrompt.prompt;
 
       // Generate image using Gemini Imagen
@@ -394,6 +397,7 @@ export class InfluencerService {
         generateDto.imageType,
         '1:1', // Default aspect ratio, could be configurable
       );
+      console.log('result', result);
 
       // Create image record
       const imageRecord = await this.prismaService.influencerImage.create({
@@ -428,6 +432,7 @@ export class InfluencerService {
       if (error instanceof NotFoundException) {
         throw error;
       }
+      console.log('failed to generate image from idea', error);
       this.logger.error(`Failed to generate image from idea: ${error.message}`, error);
       throw new BadRequestException('Failed to generate image from idea');
     }
@@ -473,16 +478,9 @@ OPTIMIZATION REQUIREMENTS:
 Generate an optimized prompt that will produce a stunning, professional-quality image that authentically represents this AI influencer.
     `;
 
-    return await this.aiService.generateObject(prompt, {
-      type: 'object',
-      properties: {
-        prompt: { type: 'string' },
-        reasoning: { type: 'string' },
-        technicalNotes: { type: 'string' },
-        alternativePrompts: { type: 'array', items: { type: 'string' } },
-      },
-      required: ['prompt', 'reasoning', 'technicalNotes', 'alternativePrompts'],
-    });
+    // Use the imported OptimizedPromptSchema
+    const result = await this.aiService.generateObject(prompt, OptimizedPromptSchema);
+    return result as OptimizedPromptDto;
   }
 
   // ============================================================================
@@ -804,16 +802,9 @@ OPTIMIZATION REQUIREMENTS:
 Generate an optimized prompt that will produce a compelling, professional-quality video that authentically represents this AI influencer.
     `;
 
-    return await this.aiService.generateObject(prompt, {
-      type: 'object',
-      properties: {
-        prompt: { type: 'string' },
-        reasoning: { type: 'string' },
-        technicalNotes: { type: 'string' },
-        alternativePrompts: { type: 'array', items: { type: 'string' } },
-      },
-      required: ['prompt', 'reasoning', 'technicalNotes', 'alternativePrompts'],
-    });
+    // Use the imported OptimizedPromptSchema
+    const result = await this.aiService.generateObject(prompt, OptimizedPromptSchema);
+    return result as OptimizedPromptDto;
   }
 
   // ============================================================================
