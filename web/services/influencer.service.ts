@@ -79,7 +79,10 @@ export class InfluencerService {
    * Generate optimized prompt for a specific image idea
    */
   static async generateImagePrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
-    return await ApiClient.post<OptimizedPrompt>(`/api/influencers/${influencerId}/image-ideas/${ideaId}/prompt`, request);
+    return await ApiClient.post<OptimizedPrompt>(
+      `/api/influencers/${influencerId}/image-ideas/${ideaId}/prompt`,
+      request
+    );
   }
 
   /**
@@ -118,7 +121,10 @@ export class InfluencerService {
    * Generate optimized prompt for a specific video idea
    */
   static async generateVideoPrompt(influencerId: string, ideaId: string, request: GeneratePromptRequest = {}) {
-    return await ApiClient.post<OptimizedPrompt>(`/api/influencers/${influencerId}/video-ideas/${ideaId}/prompt`, request);
+    return await ApiClient.post<OptimizedPrompt>(
+      `/api/influencers/${influencerId}/video-ideas/${ideaId}/prompt`,
+      request
+    );
   }
 
   /**
@@ -296,7 +302,8 @@ export class InfluencerService {
       throw new Error('Source influencer not found');
     }
 
-    const { id, userId, createdAt, updatedAt, images, videos, imageIdeas, videoIdeas, ...influencerData } = sourceResponse.data;
+    const { id, userId, createdAt, updatedAt, images, videos, imageIdeas, videoIdeas, ...influencerData } =
+      sourceResponse.data;
 
     return await this.createInfluencer({
       ...influencerData,

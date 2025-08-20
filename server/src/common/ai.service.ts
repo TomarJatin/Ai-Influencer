@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { generateObject, generateText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { config } from './config';
 import { z } from 'zod';
 import { S3Service } from './s3.service';
@@ -15,11 +15,11 @@ const ImageIdeaItemSchema = z.object({
   visualElements: z.array(z.string()),
   mood: z.string(),
   setting: z.string(),
-  styleNotes: z.string()
+  styleNotes: z.string(),
 });
 
 export const ImageIdeaSchema = z.object({
-  ideas: z.array(ImageIdeaItemSchema)
+  ideas: z.array(ImageIdeaItemSchema),
 });
 
 const VideoIdeaItemSchema = z.object({
@@ -31,18 +31,18 @@ const VideoIdeaItemSchema = z.object({
   keyMoments: z.array(z.string()),
   duration: z.string(),
   mood: z.string(),
-  visualStyle: z.string()
+  visualStyle: z.string(),
 });
 
 export const VideoIdeaSchema = z.object({
-  ideas: z.array(VideoIdeaItemSchema)
+  ideas: z.array(VideoIdeaItemSchema),
 });
 
 export const OptimizedPromptSchema = z.object({
   prompt: z.string(),
   reasoning: z.string(),
   technicalNotes: z.string(),
-  alternativePrompts: z.array(z.string())
+  alternativePrompts: z.array(z.string()),
 });
 
 export type ImageIdea = z.infer<typeof ImageIdeaSchema>['ideas'][0];
@@ -55,27 +55,30 @@ export class AIService {
   private readonly model;
 
   constructor(private readonly s3Service: S3Service) {
-    // Set the Google API key for Vercel AI SDK
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY = config.llm.geminiApiKey;
-    
+    // Create Google AI provider with API key
+    const google = createGoogleGenerativeAI({
+      apiKey: config.llm.geminiApiKey,
+    });
+
     // Use Google's Gemini model via Vercel AI SDK
-    this.model = google('gemini-1.5-pro-latest');
+    this.model = google('gemini-1.5-pro');
   }
 
   /**
    * Generate image ideas for an AI influencer
    */
   async generateImageIdeas(
-    influencerData: Record<string, unknown>, 
+    influencerData: Record<string, unknown>,
     count: number = 6,
-    usedIdeaIds: string[] = []
+    usedIdeaIds: string[] = [],
   ): Promise<ImageIdea[]> {
     try {
       this.logger.log(`Generating ${count} image ideas for influencer`);
 
-      const usedIdeasContext = usedIdeaIds.length > 0 
-        ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
-        : '';
+      const usedIdeasContext =
+        usedIdeaIds.length > 0
+          ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
+          : '';
 
       const prompt = `
 Generate ${count} creative and visually compelling image ideas for an AI influencer with the following characteristics:
@@ -113,7 +116,6 @@ Generate exactly ${count} unique and inspiring image ideas that would showcase t
 
       this.logger.log(`Successfully generated ${result.object.ideas.length} image ideas`);
       return result.object.ideas;
-
     } catch (error) {
       this.logger.error(`Failed to generate image ideas: ${error.message}`, error);
       throw new Error('Failed to generate image ideas');
@@ -124,16 +126,17 @@ Generate exactly ${count} unique and inspiring image ideas that would showcase t
    * Generate video ideas for an AI influencer
    */
   async generateVideoIdeas(
-    influencerData: Record<string, unknown>, 
+    influencerData: Record<string, unknown>,
     count: number = 6,
-    usedIdeaIds: string[] = []
+    usedIdeaIds: string[] = [],
   ): Promise<VideoIdea[]> {
     try {
       this.logger.log(`Generating ${count} video ideas for influencer`);
 
-      const usedIdeasContext = usedIdeaIds.length > 0 
-        ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
-        : '';
+      const usedIdeasContext =
+        usedIdeaIds.length > 0
+          ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
+          : '';
 
       const prompt = `
 Generate ${count} engaging and creative video ideas for an AI influencer with the following characteristics:
@@ -172,7 +175,6 @@ Generate exactly ${count} unique and compelling video ideas that would engage th
 
       this.logger.log(`Successfully generated ${result.object.ideas.length} video ideas`);
       return result.object.ideas;
-
     } catch (error) {
       this.logger.error(`Failed to generate video ideas: ${error.message}`, error);
       throw new Error('Failed to generate video ideas');
@@ -185,14 +187,12 @@ Generate exactly ${count} unique and compelling video ideas that would engage th
   async generateImagePrompt(
     influencerData: Record<string, unknown>,
     imageIdea: ImageIdea,
-    customInstructions?: string
+    customInstructions?: string,
   ): Promise<OptimizedPrompt> {
     try {
       this.logger.log(`Generating optimized image prompt for idea: ${imageIdea.title}`);
 
-      const customContext = customInstructions 
-        ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` 
-        : '';
+      const customContext = customInstructions ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` : '';
 
       const prompt = `
 You are an expert prompt engineer specializing in AI image generation. Create an optimized prompt for generating a high-quality image based on the following:
@@ -239,7 +239,6 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
 
       this.logger.log(`Successfully generated optimized image prompt`);
       return result.object;
-
     } catch (error) {
       this.logger.error(`Failed to generate image prompt: ${error.message}`, error);
       throw new Error('Failed to generate optimized image prompt');
@@ -252,14 +251,12 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
   async generateVideoPrompt(
     influencerData: Record<string, unknown>,
     videoIdea: VideoIdea,
-    customInstructions?: string
+    customInstructions?: string,
   ): Promise<OptimizedPrompt> {
     try {
       this.logger.log(`Generating optimized video prompt for idea: ${videoIdea.title}`);
 
-      const customContext = customInstructions 
-        ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` 
-        : '';
+      const customContext = customInstructions ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` : '';
 
       const prompt = `
 You are an expert prompt engineer specializing in AI video generation. Create an optimized prompt for generating a high-quality video based on the following:
@@ -308,7 +305,6 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
 
       this.logger.log(`Successfully generated optimized video prompt`);
       return result.object;
-
     } catch (error) {
       this.logger.error(`Failed to generate video prompt: ${error.message}`, error);
       throw new Error('Failed to generate optimized video prompt');
@@ -322,14 +318,13 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
     try {
       const fileExtension = file.originalname.split('.').pop() || 'bin';
       const filename = `${type}s/${uuidv4()}.${fileExtension}`;
-      
+
       this.logger.log(`Uploading ${type} file: ${filename}`);
-      
+
       const result = await this.s3Service.uploadFile(file, filename);
-      
+
       this.logger.log(`Successfully uploaded ${type} to S3: ${result.url}`);
       return result;
-      
     } catch (error) {
       this.logger.error(`Failed to upload ${type} file: ${error.message}`, error);
       throw new Error(`Failed to upload ${type} file`);

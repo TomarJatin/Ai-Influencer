@@ -45,10 +45,7 @@ export class InfluencerController {
   @ApiOperation({ summary: 'Create a new AI influencer' })
   @ApiResponse({ status: 201, description: 'AI influencer created successfully', type: AIInfluencerResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  async createInfluencer(
-    @Body() createInfluencerDto: CreateAIInfluencerDto,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async createInfluencer(@Body() createInfluencerDto: CreateAIInfluencerDto, @CurrentUser() user: RequestUser) {
     this.logger.log(`Creating AI influencer for user ${user.id}`);
     return await this.influencerService.createInfluencer(createInfluencerDto, user);
   }
@@ -249,10 +246,10 @@ export class InfluencerController {
   // ============================================================================
 
   @Get(':id/image-prompt')
-  @ApiOperation({ 
-    summary: 'Generate image prompt (Legacy)', 
+  @ApiOperation({
+    summary: 'Generate image prompt (Legacy)',
     deprecated: true,
-    description: 'Use POST /api/influencers/:id/image-ideas/:ideaId/prompt instead'
+    description: 'Use POST /api/influencers/:id/image-ideas/:ideaId/prompt instead',
   })
   @ApiResponse({ status: 200, description: 'Image prompt generated' })
   async generateImagePromptLegacy(
@@ -271,19 +268,19 @@ export class InfluencerController {
   }
 
   @Get(':id/video-ideas')
-  @ApiOperation({ 
-    summary: 'Generate video ideas (Legacy)', 
+  @ApiOperation({
+    summary: 'Generate video ideas (Legacy)',
     deprecated: true,
-    description: 'Use POST /api/influencers/:id/video-ideas/generate instead'
+    description: 'Use POST /api/influencers/:id/video-ideas/generate instead',
   })
   @ApiResponse({ status: 200, description: 'Video ideas generated' })
   async generateVideoIdeasLegacy(@Param('id') influencerId: string, @CurrentUser() user: RequestUser) {
     this.logger.warn(`Using deprecated video ideas endpoint for influencer ${influencerId}`);
     // Generate ideas using the new method but return in legacy format
     const ideas = await this.influencerService.generateVideoIdeas(influencerId, { count: 5 }, user);
-    
+
     // Convert to legacy format
-    return ideas.map(idea => ({
+    return ideas.map((idea) => ({
       id: idea.id,
       title: idea.title,
       description: idea.description,

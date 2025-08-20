@@ -7,7 +7,3 @@ import { S3Service } from './s3.service';
   exports: [AIService, S3Service],
 })
 export class CommonModule {}
-
-
-
-

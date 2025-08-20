@@ -193,9 +193,9 @@ export class InfluencerService {
   // ============================================================================
 
   async generateImageIdeas(
-    influencerId: string, 
-    generateDto: GenerateImageIdeasDto, 
-    user: RequestUser
+    influencerId: string,
+    generateDto: GenerateImageIdeasDto,
+    user: RequestUser,
   ): Promise<ImageIdeaDto[]> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
@@ -205,14 +205,10 @@ export class InfluencerService {
         where: { influencerId, isUsed: true },
         select: { ideaId: true },
       });
-      const usedIdeaIds = usedIdeas.map(idea => idea.ideaId);
+      const usedIdeaIds = usedIdeas.map((idea) => idea.ideaId);
 
       // Generate new ideas using AI
-      const aiIdeas = await this.aiService.generateImageIdeas(
-        influencer, 
-        generateDto.count || 6, 
-        usedIdeaIds
-      );
+      const aiIdeas = await this.aiService.generateImageIdeas(influencer, generateDto.count || 6, usedIdeaIds);
 
       // Save ideas to database
       const savedIdeas = await Promise.all(
@@ -232,7 +228,7 @@ export class InfluencerService {
           });
 
           return this.mapImageIdeaToDto(savedIdea);
-        })
+        }),
       );
 
       this.logger.log(`Generated ${savedIdeas.length} image ideas for influencer ${influencerId}`);
@@ -252,7 +248,7 @@ export class InfluencerService {
         orderBy: { createdAt: 'desc' },
       });
 
-      return ideas.map(idea => this.mapImageIdeaToDto(idea));
+      return ideas.map((idea) => this.mapImageIdeaToDto(idea));
     } catch (error) {
       this.logger.error(`Failed to get image ideas: ${error.message}`, error);
       throw new BadRequestException('Failed to retrieve image ideas');
@@ -260,14 +256,14 @@ export class InfluencerService {
   }
 
   async generateImagePrompt(
-    influencerId: string, 
-    ideaId: string, 
-    promptDto: GeneratePromptDto, 
-    user: RequestUser
+    influencerId: string,
+    ideaId: string,
+    promptDto: GeneratePromptDto,
+    user: RequestUser,
   ): Promise<OptimizedPromptDto> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       const idea = await this.prismaService.imageIdea.findFirst({
         where: { influencerId, ideaId },
       });
@@ -291,7 +287,7 @@ export class InfluencerService {
       const optimizedPrompt = await this.aiService.generateImagePrompt(
         influencer,
         imageIdea,
-        promptDto.customInstructions
+        promptDto.customInstructions,
       );
 
       this.logger.log(`Generated optimized image prompt for idea ${ideaId}`);
@@ -310,11 +306,11 @@ export class InfluencerService {
     ideaId: string,
     file: Express.Multer.File,
     uploadDto: UploadMediaDto,
-    user: RequestUser
+    user: RequestUser,
   ) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       const idea = await this.prismaService.imageIdea.findFirst({
         where: { influencerId, ideaId },
       });
@@ -371,9 +367,9 @@ export class InfluencerService {
   // ============================================================================
 
   async generateVideoIdeas(
-    influencerId: string, 
-    generateDto: GenerateVideoIdeasDto, 
-    user: RequestUser
+    influencerId: string,
+    generateDto: GenerateVideoIdeasDto,
+    user: RequestUser,
   ): Promise<VideoIdeaDto[]> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
@@ -383,14 +379,10 @@ export class InfluencerService {
         where: { influencerId, isUsed: true },
         select: { ideaId: true },
       });
-      const usedIdeaIds = usedIdeas.map(idea => idea.ideaId);
+      const usedIdeaIds = usedIdeas.map((idea) => idea.ideaId);
 
       // Generate new ideas using AI
-      const aiIdeas = await this.aiService.generateVideoIdeas(
-        influencer, 
-        generateDto.count || 6, 
-        usedIdeaIds
-      );
+      const aiIdeas = await this.aiService.generateVideoIdeas(influencer, generateDto.count || 6, usedIdeaIds);
 
       // Save ideas to database
       const savedIdeas = await Promise.all(
@@ -411,7 +403,7 @@ export class InfluencerService {
           });
 
           return this.mapVideoIdeaToDto(savedIdea);
-        })
+        }),
       );
 
       this.logger.log(`Generated ${savedIdeas.length} video ideas for influencer ${influencerId}`);
@@ -431,7 +423,7 @@ export class InfluencerService {
         orderBy: { createdAt: 'desc' },
       });
 
-      return ideas.map(idea => this.mapVideoIdeaToDto(idea));
+      return ideas.map((idea) => this.mapVideoIdeaToDto(idea));
     } catch (error) {
       this.logger.error(`Failed to get video ideas: ${error.message}`, error);
       throw new BadRequestException('Failed to retrieve video ideas');
@@ -439,14 +431,14 @@ export class InfluencerService {
   }
 
   async generateVideoPrompt(
-    influencerId: string, 
-    ideaId: string, 
-    promptDto: GeneratePromptDto, 
-    user: RequestUser
+    influencerId: string,
+    ideaId: string,
+    promptDto: GeneratePromptDto,
+    user: RequestUser,
   ): Promise<OptimizedPromptDto> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       const idea = await this.prismaService.videoIdea.findFirst({
         where: { influencerId, ideaId },
       });
@@ -471,7 +463,7 @@ export class InfluencerService {
       const optimizedPrompt = await this.aiService.generateVideoPrompt(
         influencer,
         videoIdea,
-        promptDto.customInstructions
+        promptDto.customInstructions,
       );
 
       this.logger.log(`Generated optimized video prompt for idea ${ideaId}`);
@@ -490,11 +482,11 @@ export class InfluencerService {
     ideaId: string,
     file: Express.Multer.File,
     uploadDto: UploadMediaDto,
-    user: RequestUser
+    user: RequestUser,
   ) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
-      
+
       const idea = await this.prismaService.videoIdea.findFirst({
         where: { influencerId, ideaId },
       });

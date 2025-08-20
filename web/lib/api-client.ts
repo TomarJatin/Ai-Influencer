@@ -77,9 +77,9 @@ export class ApiClient {
   }
 
   static async postFormData<T>(url: string, formData: FormData): Promise<ApiResult<T>> {
-    return this.request<T>({ 
-      method: 'POST', 
-      url, 
+    return this.request<T>({
+      method: 'POST',
+      url,
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',
