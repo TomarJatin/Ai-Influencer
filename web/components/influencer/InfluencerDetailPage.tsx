@@ -28,7 +28,7 @@ interface InfluencerDetailPageProps {
 export default function InfluencerDetailPage({ influencerId }: InfluencerDetailPageProps) {
   const [influencer, setInfluencer] = useState<AIInfluencer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Dialog states
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
@@ -36,18 +36,18 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
   const [showIdeaDialog, setShowIdeaDialog] = useState(false);
   const [showNewImageDialog, setShowNewImageDialog] = useState(false);
   const [showNewVideoDialog, setShowNewVideoDialog] = useState(false);
-  
+
   // Idea management states
   const [ideaDialogTab, setIdeaDialogTab] = useState<'image' | 'video'>('image');
   const [editingImageIdea, setEditingImageIdea] = useState<ImageIdea | null>(null);
   const [editingVideoIdea, setEditingVideoIdea] = useState<VideoIdea | null>(null);
-  
+
   // Ideas data
   const [imageIdeas, setImageIdeas] = useState<ImageIdea[]>([]);
   const [videoIdeas, setVideoIdeas] = useState<VideoIdea[]>([]);
   const [isLoadingImageIdeas, setIsLoadingImageIdeas] = useState(false);
   const [isLoadingVideoIdeas, setIsLoadingVideoIdeas] = useState(false);
-  
+
   // Pagination states
   const [imagePagination, setImagePagination] = useState({
     page: 1,
@@ -80,56 +80,62 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
   }, [influencerId]);
 
   // Load image ideas
-  const loadImageIdeas = useCallback(async (query: PaginationQueryDto = {}) => {
-    try {
-      setIsLoadingImageIdeas(true);
-      const response = await InfluencerService.getImageIdeas(influencerId, {
-        page: imagePagination.page,
-        limit: imagePagination.limit,
-        ...query,
-      });
+  const loadImageIdeas = useCallback(
+    async (query: PaginationQueryDto = {}) => {
+      try {
+        setIsLoadingImageIdeas(true);
+        const response = await InfluencerService.getImageIdeas(influencerId, {
+          page: imagePagination.page,
+          limit: imagePagination.limit,
+          ...query,
+        });
 
-      if (response.data) {
-        setImageIdeas(response.data.items);
-        setImagePagination(prev => ({
-          ...prev,
-          total: response.data.total,
-          totalPages: response.data.totalPages,
-          page: response.data.page,
-        }));
+        if (response.data) {
+          setImageIdeas(response.data.items);
+          setImagePagination((prev) => ({
+            ...prev,
+            total: response.data.total,
+            totalPages: response.data.totalPages,
+            page: response.data.page,
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading image ideas:', error);
+      } finally {
+        setIsLoadingImageIdeas(false);
       }
-    } catch (error) {
-      console.error('Error loading image ideas:', error);
-    } finally {
-      setIsLoadingImageIdeas(false);
-    }
-  }, [influencerId, imagePagination.page, imagePagination.limit]);
+    },
+    [influencerId, imagePagination.page, imagePagination.limit]
+  );
 
   // Load video ideas
-  const loadVideoIdeas = useCallback(async (query: PaginationQueryDto = {}) => {
-    try {
-      setIsLoadingVideoIdeas(true);
-      const response = await InfluencerService.getVideoIdeas(influencerId, {
-        page: videoPagination.page,
-        limit: videoPagination.limit,
-        ...query,
-      });
+  const loadVideoIdeas = useCallback(
+    async (query: PaginationQueryDto = {}) => {
+      try {
+        setIsLoadingVideoIdeas(true);
+        const response = await InfluencerService.getVideoIdeas(influencerId, {
+          page: videoPagination.page,
+          limit: videoPagination.limit,
+          ...query,
+        });
 
-      if (response.data) {
-        setVideoIdeas(response.data.items);
-        setVideoPagination(prev => ({
-          ...prev,
-          total: response.data.total,
-          totalPages: response.data.totalPages,
-          page: response.data.page,
-        }));
+        if (response.data) {
+          setVideoIdeas(response.data.items);
+          setVideoPagination((prev) => ({
+            ...prev,
+            total: response.data.total,
+            totalPages: response.data.totalPages,
+            page: response.data.page,
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading video ideas:', error);
+      } finally {
+        setIsLoadingVideoIdeas(false);
       }
-    } catch (error) {
-      console.error('Error loading video ideas:', error);
-    } finally {
-      setIsLoadingVideoIdeas(false);
-    }
-  }, [influencerId, videoPagination.page, videoPagination.limit]);
+    },
+    [influencerId, videoPagination.page, videoPagination.limit]
+  );
 
   useEffect(() => {
     loadInfluencer();
@@ -174,11 +180,11 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
 
   const handleDeleteIdea = (ideaId: string, type: 'image' | 'video') => {
     if (type === 'image') {
-      setImageIdeas(prev => prev.filter(idea => idea.id !== ideaId));
-      setImagePagination(prev => ({ ...prev, total: prev.total - 1 }));
+      setImageIdeas((prev) => prev.filter((idea) => idea.id !== ideaId));
+      setImagePagination((prev) => ({ ...prev, total: prev.total - 1 }));
     } else {
-      setVideoIdeas(prev => prev.filter(idea => idea.id !== ideaId));
-      setVideoPagination(prev => ({ ...prev, total: prev.total - 1 }));
+      setVideoIdeas((prev) => prev.filter((idea) => idea.id !== ideaId));
+      setVideoPagination((prev) => ({ ...prev, total: prev.total - 1 }));
     }
   };
 
@@ -372,7 +378,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
         {/* Right Column - Content */}
         <div className='md:col-span-2'>
           <Tabs defaultValue='images' className='space-y-4'>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className='grid w-full grid-cols-5'>
               <TabsTrigger value='images' className='flex items-center space-x-2'>
                 <ImageIcon className='h-4 w-4' />
                 <span>Images ({stats.totalImages})</span>
@@ -543,8 +549,8 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
             <TabsContent value='image-ideas' className='space-y-4'>
               <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-medium'>Image Ideas</h3>
-                <div className="flex space-x-2">
-                  <Button onClick={() => handleCreateIdea('image')} variant="outline">
+                <div className='flex space-x-2'>
+                  <Button onClick={() => handleCreateIdea('image')} variant='outline'>
                     <Plus className='mr-2 h-4 w-4' />
                     Add Idea
                   </Button>
@@ -556,18 +562,18 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               </div>
 
               {isLoadingImageIdeas ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                <div className='flex items-center justify-center py-12'>
+                  <Loader2 className='mr-2 h-8 w-8 animate-spin' />
                   <span>Loading image ideas...</span>
                 </div>
               ) : imageIdeas.length > 0 ? (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
                     {imageIdeas.map((idea) => (
                       <IdeaCard
                         key={idea.id}
                         idea={idea}
-                        type="image"
+                        type='image'
                         influencerId={influencer.id}
                         onEdit={(idea) => handleEditIdea(idea, 'image')}
                         onDelete={(ideaId) => handleDeleteIdea(ideaId, 'image')}
@@ -575,18 +581,18 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                       />
                     ))}
                   </div>
-                  
+
                   <IdeaPagination
                     currentPage={imagePagination.page}
                     totalPages={imagePagination.totalPages}
                     totalItems={imagePagination.total}
                     itemsPerPage={imagePagination.limit}
                     onPageChange={(page) => {
-                      setImagePagination(prev => ({ ...prev, page }));
+                      setImagePagination((prev) => ({ ...prev, page }));
                       loadImageIdeas({ page });
                     }}
                     onItemsPerPageChange={(limit) => {
-                      setImagePagination(prev => ({ ...prev, limit, page: 1 }));
+                      setImagePagination((prev) => ({ ...prev, limit, page: 1 }));
                       loadImageIdeas({ page: 1, limit });
                     }}
                   />
@@ -613,8 +619,8 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
             <TabsContent value='video-ideas' className='space-y-4'>
               <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-medium'>Video Ideas</h3>
-                <div className="flex space-x-2">
-                  <Button onClick={() => handleCreateIdea('video')} variant="outline">
+                <div className='flex space-x-2'>
+                  <Button onClick={() => handleCreateIdea('video')} variant='outline'>
                     <Plus className='mr-2 h-4 w-4' />
                     Add Idea
                   </Button>
@@ -626,18 +632,18 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               </div>
 
               {isLoadingVideoIdeas ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                <div className='flex items-center justify-center py-12'>
+                  <Loader2 className='mr-2 h-8 w-8 animate-spin' />
                   <span>Loading video ideas...</span>
                 </div>
               ) : videoIdeas.length > 0 ? (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
                     {videoIdeas.map((idea) => (
                       <IdeaCard
                         key={idea.id}
                         idea={idea}
-                        type="video"
+                        type='video'
                         influencerId={influencer.id}
                         onEdit={(idea) => handleEditIdea(idea, 'video')}
                         onDelete={(ideaId) => handleDeleteIdea(ideaId, 'video')}
@@ -645,18 +651,18 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
                       />
                     ))}
                   </div>
-                  
+
                   <IdeaPagination
                     currentPage={videoPagination.page}
                     totalPages={videoPagination.totalPages}
                     totalItems={videoPagination.total}
                     itemsPerPage={videoPagination.limit}
                     onPageChange={(page) => {
-                      setVideoPagination(prev => ({ ...prev, page }));
+                      setVideoPagination((prev) => ({ ...prev, page }));
                       loadVideoIdeas({ page });
                     }}
                     onItemsPerPageChange={(limit) => {
-                      setVideoPagination(prev => ({ ...prev, limit, page: 1 }));
+                      setVideoPagination((prev) => ({ ...prev, limit, page: 1 }));
                       loadVideoIdeas({ page: 1, limit });
                     }}
                   />

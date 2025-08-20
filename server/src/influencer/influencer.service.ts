@@ -197,11 +197,7 @@ export class InfluencerService {
   // IMAGE IDEA MANAGEMENT
   // ============================================================================
 
-  async createImageIdea(
-    influencerId: string,
-    createDto: CreateImageIdeaDto,
-    user: RequestUser,
-  ): Promise<ImageIdeaDto> {
+  async createImageIdea(influencerId: string, createDto: CreateImageIdeaDto, user: RequestUser): Promise<ImageIdeaDto> {
     try {
       await this.getInfluencer(influencerId, user); // Verify access
 
@@ -362,11 +358,7 @@ export class InfluencerService {
     }
   }
 
-  async generateImageFromIdea(
-    influencerId: string,
-    generateDto: GenerateImageFromIdeaDto,
-    user: RequestUser,
-  ) {
+  async generateImageFromIdea(influencerId: string, generateDto: GenerateImageFromIdeaDto, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
 
@@ -400,7 +392,7 @@ export class InfluencerService {
       const result = await this.aiService.generateImageWithGemini(
         finalPrompt,
         generateDto.imageType,
-        '1:1' // Default aspect ratio, could be configurable
+        '1:1', // Default aspect ratio, could be configurable
       );
 
       // Create image record
@@ -497,11 +489,7 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
   // VIDEO IDEA MANAGEMENT
   // ============================================================================
 
-  async createVideoIdea(
-    influencerId: string,
-    createDto: CreateVideoIdeaDto,
-    user: RequestUser,
-  ): Promise<VideoIdeaDto> {
+  async createVideoIdea(influencerId: string, createDto: CreateVideoIdeaDto, user: RequestUser): Promise<VideoIdeaDto> {
     try {
       await this.getInfluencer(influencerId, user); // Verify access
 
@@ -646,11 +634,7 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
     }
   }
 
-  async generateVideoFromIdea(
-    influencerId: string,
-    generateDto: GenerateVideoFromIdeaDto,
-    user: RequestUser,
-  ) {
+  async generateVideoFromIdea(influencerId: string, generateDto: GenerateVideoFromIdeaDto, user: RequestUser) {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
 
@@ -681,10 +665,7 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
       const finalPrompt = generateDto.customPrompt || optimizedPrompt.prompt;
 
       // Generate video using Veo3
-      const result = await this.aiService.generateVideoWithVeo3(
-        finalPrompt,
-        generateDto.duration || 5
-      );
+      const result = await this.aiService.generateVideoWithVeo3(finalPrompt, generateDto.duration || 5);
 
       // Create video record
       const videoRecord = await this.prismaService.influencerVideo.create({

@@ -36,7 +36,7 @@ const IMAGE_CATEGORIES = [
   'Art',
   'Professional',
   'Casual',
-  'Custom'
+  'Custom',
 ];
 
 const VIDEO_CATEGORIES = [
@@ -50,7 +50,7 @@ const VIDEO_CATEGORIES = [
   'Comedy',
   'Vlog',
   'Review',
-  'Custom'
+  'Custom',
 ];
 
 const MOOD_OPTIONS = [
@@ -63,7 +63,7 @@ const MOOD_OPTIONS = [
   'Romantic',
   'Energetic',
   'Serene',
-  'Bold'
+  'Bold',
 ];
 
 export function IdeaManagementDialog({
@@ -209,35 +209,35 @@ export function IdeaManagementDialog({
 
   const addVisualElement = () => {
     if (newVisualElement.trim() && !imageForm.visualElements?.includes(newVisualElement.trim())) {
-      setImageForm(prev => ({
+      setImageForm((prev) => ({
         ...prev,
-        visualElements: [...(prev.visualElements || []), newVisualElement.trim()]
+        visualElements: [...(prev.visualElements || []), newVisualElement.trim()],
       }));
       setNewVisualElement('');
     }
   };
 
   const removeVisualElement = (element: string) => {
-    setImageForm(prev => ({
+    setImageForm((prev) => ({
       ...prev,
-      visualElements: prev.visualElements?.filter(el => el !== element) || []
+      visualElements: prev.visualElements?.filter((el) => el !== element) || [],
     }));
   };
 
   const addKeyMoment = () => {
     if (newKeyMoment.trim() && !videoForm.keyMoments?.includes(newKeyMoment.trim())) {
-      setVideoForm(prev => ({
+      setVideoForm((prev) => ({
         ...prev,
-        keyMoments: [...(prev.keyMoments || []), newKeyMoment.trim()]
+        keyMoments: [...(prev.keyMoments || []), newKeyMoment.trim()],
       }));
       setNewKeyMoment('');
     }
   };
 
   const removeKeyMoment = (moment: string) => {
-    setVideoForm(prev => ({
+    setVideoForm((prev) => ({
       ...prev,
-      keyMoments: prev.keyMoments?.filter(m => m !== moment) || []
+      keyMoments: prev.keyMoments?.filter((m) => m !== moment) || [],
     }));
   };
 
@@ -249,32 +249,35 @@ export function IdeaManagementDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+      <DialogContent className='max-h-[90vh] max-w-4xl overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>
             {editingImageIdea || editingVideoIdea ? 'Edit' : 'Create'} Idea for {influencer.name}
           </DialogTitle>
           <DialogDescription>
-            {editingImageIdea || editingVideoIdea 
+            {editingImageIdea || editingVideoIdea
               ? 'Update the details of your idea'
-              : 'Create a new idea that can be used to generate images or videos'
-            }
+              : 'Create a new idea that can be used to generate images or videos'}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'image' | 'video')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="image" disabled={!!editingVideoIdea}>Image Idea</TabsTrigger>
-            <TabsTrigger value="video" disabled={!!editingImageIdea}>Video Idea</TabsTrigger>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='image' disabled={!!editingVideoIdea}>
+              Image Idea
+            </TabsTrigger>
+            <TabsTrigger value='video' disabled={!!editingImageIdea}>
+              Video Idea
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="image" className="space-y-6">
+          <TabsContent value='image' className='space-y-6'>
             {/* Image Upload Analyzer */}
             {!editingImageIdea && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Wand2 className="h-5 w-5" />
+                  <CardTitle className='flex items-center space-x-2'>
+                    <Wand2 className='h-5 w-5' />
                     <span>AI-Powered Idea Generator</span>
                   </CardTitle>
                   <CardDescription>
@@ -282,30 +285,30 @@ export function IdeaManagementDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <div className='rounded-lg border-2 border-dashed border-gray-300 p-6 text-center'>
                     <input
-                      type="file"
-                      accept="image/*"
+                      type='file'
+                      accept='image/*'
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleImageUpload(file);
                       }}
-                      className="hidden"
-                      id="image-upload"
+                      className='hidden'
+                      id='image-upload'
                       disabled={isAnalyzing}
                     />
                     <label
-                      htmlFor="image-upload"
-                      className={`cursor-pointer flex flex-col items-center space-y-2 ${
-                        isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
+                      htmlFor='image-upload'
+                      className={`flex cursor-pointer flex-col items-center space-y-2 ${
+                        isAnalyzing ? 'cursor-not-allowed opacity-50' : ''
                       }`}
                     >
                       {isAnalyzing ? (
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <Loader2 className='text-primary h-8 w-8 animate-spin' />
                       ) : (
-                        <Upload className="h-8 w-8 text-gray-400" />
+                        <Upload className='h-8 w-8 text-gray-400' />
                       )}
-                      <span className="text-sm text-gray-600">
+                      <span className='text-sm text-gray-600'>
                         {isAnalyzing ? 'Analyzing image...' : 'Click to upload an image for AI analysis'}
                       </span>
                     </label>
@@ -315,25 +318,25 @@ export function IdeaManagementDialog({
             )}
 
             {/* Image Idea Form */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="image-title">Title *</Label>
+            <div className='space-y-4'>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-title'>Title *</Label>
                   <Input
-                    id="image-title"
-                    placeholder="e.g., Golden Hour Portrait"
+                    id='image-title'
+                    placeholder='e.g., Golden Hour Portrait'
                     value={imageForm.title}
-                    onChange={(e) => setImageForm(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setImageForm((prev) => ({ ...prev, title: e.target.value }))}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image-category">Category</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-category'>Category</Label>
                   <Select
                     value={imageForm.category}
-                    onValueChange={(value) => setImageForm(prev => ({ ...prev, category: value }))}
+                    onValueChange={(value) => setImageForm((prev) => ({ ...prev, category: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder='Select category' />
                     </SelectTrigger>
                     <SelectContent>
                       {IMAGE_CATEGORIES.map((category) => (
@@ -346,35 +349,35 @@ export function IdeaManagementDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image-description">Description *</Label>
+              <div className='space-y-2'>
+                <Label htmlFor='image-description'>Description *</Label>
                 <Textarea
-                  id="image-description"
-                  placeholder="Describe the concept and visual style of this image idea..."
+                  id='image-description'
+                  placeholder='Describe the concept and visual style of this image idea...'
                   value={imageForm.description}
-                  onChange={(e) => setImageForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="min-h-[80px]"
+                  onChange={(e) => setImageForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className='min-h-[80px]'
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="image-setting">Setting/Location</Label>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-setting'>Setting/Location</Label>
                   <Input
-                    id="image-setting"
-                    placeholder="e.g., Urban rooftop, Beach, Studio"
+                    id='image-setting'
+                    placeholder='e.g., Urban rooftop, Beach, Studio'
                     value={imageForm.setting}
-                    onChange={(e) => setImageForm(prev => ({ ...prev, setting: e.target.value }))}
+                    onChange={(e) => setImageForm((prev) => ({ ...prev, setting: e.target.value }))}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image-mood">Mood</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-mood'>Mood</Label>
                   <Select
                     value={imageForm.mood}
-                    onValueChange={(value) => setImageForm(prev => ({ ...prev, mood: value }))}
+                    onValueChange={(value) => setImageForm((prev) => ({ ...prev, mood: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select mood" />
+                      <SelectValue placeholder='Select mood' />
                     </SelectTrigger>
                     <SelectContent>
                       {MOOD_OPTIONS.map((mood) => (
@@ -387,39 +390,36 @@ export function IdeaManagementDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image-style-notes">Style Notes</Label>
+              <div className='space-y-2'>
+                <Label htmlFor='image-style-notes'>Style Notes</Label>
                 <Textarea
-                  id="image-style-notes"
-                  placeholder="Additional style notes, lighting preferences, composition details..."
+                  id='image-style-notes'
+                  placeholder='Additional style notes, lighting preferences, composition details...'
                   value={imageForm.styleNotes}
-                  onChange={(e) => setImageForm(prev => ({ ...prev, styleNotes: e.target.value }))}
-                  className="min-h-[60px]"
+                  onChange={(e) => setImageForm((prev) => ({ ...prev, styleNotes: e.target.value }))}
+                  className='min-h-[60px]'
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>Visual Elements</Label>
-                <div className="flex space-x-2">
+                <div className='flex space-x-2'>
                   <Input
-                    placeholder="Add visual element..."
+                    placeholder='Add visual element...'
                     value={newVisualElement}
                     onChange={(e) => setNewVisualElement(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addVisualElement()}
                   />
-                  <Button type="button" onClick={addVisualElement} size="sm">
-                    <Plus className="h-4 w-4" />
+                  <Button type='button' onClick={addVisualElement} size='sm'>
+                    <Plus className='h-4 w-4' />
                   </Button>
                 </div>
                 {imageForm.visualElements && imageForm.visualElements.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className='mt-2 flex flex-wrap gap-2'>
                     {imageForm.visualElements.map((element, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center space-x-1">
+                      <Badge key={index} variant='secondary' className='flex items-center space-x-1'>
                         <span>{element}</span>
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeVisualElement(element)}
-                        />
+                        <X className='h-3 w-3 cursor-pointer' onClick={() => removeVisualElement(element)} />
                       </Badge>
                     ))}
                   </div>
@@ -427,37 +427,37 @@ export function IdeaManagementDialog({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            <div className='flex justify-end space-x-2'>
+              <Button variant='outline' onClick={handleClose} disabled={isLoading}>
                 Cancel
               </Button>
               <Button onClick={handleImageSubmit} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 {editingImageIdea ? 'Update' : 'Create'} Image Idea
               </Button>
             </div>
           </TabsContent>
 
-          <TabsContent value="video" className="space-y-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="video-title">Title *</Label>
+          <TabsContent value='video' className='space-y-6'>
+            <div className='space-y-4'>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label htmlFor='video-title'>Title *</Label>
                   <Input
-                    id="video-title"
-                    placeholder="e.g., Morning Routine Vlog"
+                    id='video-title'
+                    placeholder='e.g., Morning Routine Vlog'
                     value={videoForm.title}
-                    onChange={(e) => setVideoForm(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setVideoForm((prev) => ({ ...prev, title: e.target.value }))}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="video-category">Category</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='video-category'>Category</Label>
                   <Select
                     value={videoForm.category}
-                    onValueChange={(value) => setVideoForm(prev => ({ ...prev, category: value }))}
+                    onValueChange={(value) => setVideoForm((prev) => ({ ...prev, category: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder='Select category' />
                     </SelectTrigger>
                     <SelectContent>
                       {VIDEO_CATEGORIES.map((category) => (
@@ -470,54 +470,54 @@ export function IdeaManagementDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="video-description">Description *</Label>
+              <div className='space-y-2'>
+                <Label htmlFor='video-description'>Description *</Label>
                 <Textarea
-                  id="video-description"
-                  placeholder="Describe what happens in this video..."
+                  id='video-description'
+                  placeholder='Describe what happens in this video...'
                   value={videoForm.description}
-                  onChange={(e) => setVideoForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="min-h-[80px]"
+                  onChange={(e) => setVideoForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className='min-h-[80px]'
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="video-scenario">Scenario/Setting *</Label>
+              <div className='space-y-2'>
+                <Label htmlFor='video-scenario'>Scenario/Setting *</Label>
                 <Textarea
-                  id="video-scenario"
-                  placeholder="Describe the setting, environment, and what the influencer is doing..."
+                  id='video-scenario'
+                  placeholder='Describe the setting, environment, and what the influencer is doing...'
                   value={videoForm.scenario}
-                  onChange={(e) => setVideoForm(prev => ({ ...prev, scenario: e.target.value }))}
-                  className="min-h-[100px]"
+                  onChange={(e) => setVideoForm((prev) => ({ ...prev, scenario: e.target.value }))}
+                  className='min-h-[100px]'
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="video-duration">Duration</Label>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+                <div className='space-y-2'>
+                  <Label htmlFor='video-duration'>Duration</Label>
                   <Select
                     value={videoForm.duration}
-                    onValueChange={(value) => setVideoForm(prev => ({ ...prev, duration: value }))}
+                    onValueChange={(value) => setVideoForm((prev) => ({ ...prev, duration: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="3-5 seconds">3-5 seconds</SelectItem>
-                      <SelectItem value="5-10 seconds">5-10 seconds</SelectItem>
-                      <SelectItem value="10-15 seconds">10-15 seconds</SelectItem>
-                      <SelectItem value="15-30 seconds">15-30 seconds</SelectItem>
+                      <SelectItem value='3-5 seconds'>3-5 seconds</SelectItem>
+                      <SelectItem value='5-10 seconds'>5-10 seconds</SelectItem>
+                      <SelectItem value='10-15 seconds'>10-15 seconds</SelectItem>
+                      <SelectItem value='15-30 seconds'>15-30 seconds</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="video-mood">Mood</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='video-mood'>Mood</Label>
                   <Select
                     value={videoForm.mood}
-                    onValueChange={(value) => setVideoForm(prev => ({ ...prev, mood: value }))}
+                    onValueChange={(value) => setVideoForm((prev) => ({ ...prev, mood: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select mood" />
+                      <SelectValue placeholder='Select mood' />
                     </SelectTrigger>
                     <SelectContent>
                       {MOOD_OPTIONS.map((mood) => (
@@ -528,39 +528,36 @@ export function IdeaManagementDialog({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="video-visual-style">Visual Style</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='video-visual-style'>Visual Style</Label>
                   <Input
-                    id="video-visual-style"
-                    placeholder="e.g., Cinematic, Documentary"
+                    id='video-visual-style'
+                    placeholder='e.g., Cinematic, Documentary'
                     value={videoForm.visualStyle}
-                    onChange={(e) => setVideoForm(prev => ({ ...prev, visualStyle: e.target.value }))}
+                    onChange={(e) => setVideoForm((prev) => ({ ...prev, visualStyle: e.target.value }))}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>Key Moments</Label>
-                <div className="flex space-x-2">
+                <div className='flex space-x-2'>
                   <Input
-                    placeholder="Add key moment..."
+                    placeholder='Add key moment...'
                     value={newKeyMoment}
                     onChange={(e) => setNewKeyMoment(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addKeyMoment()}
                   />
-                  <Button type="button" onClick={addKeyMoment} size="sm">
-                    <Plus className="h-4 w-4" />
+                  <Button type='button' onClick={addKeyMoment} size='sm'>
+                    <Plus className='h-4 w-4' />
                   </Button>
                 </div>
                 {videoForm.keyMoments && videoForm.keyMoments.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className='mt-2 flex flex-wrap gap-2'>
                     {videoForm.keyMoments.map((moment, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center space-x-1">
+                      <Badge key={index} variant='secondary' className='flex items-center space-x-1'>
                         <span>{moment}</span>
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeKeyMoment(moment)}
-                        />
+                        <X className='h-3 w-3 cursor-pointer' onClick={() => removeKeyMoment(moment)} />
                       </Badge>
                     ))}
                   </div>
@@ -568,12 +565,12 @@ export function IdeaManagementDialog({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            <div className='flex justify-end space-x-2'>
+              <Button variant='outline' onClick={handleClose} disabled={isLoading}>
                 Cancel
               </Button>
               <Button onClick={handleVideoSubmit} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 {editingVideoIdea ? 'Update' : 'Create'} Video Idea
               </Button>
             </div>

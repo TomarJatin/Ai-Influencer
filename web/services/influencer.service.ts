@@ -130,7 +130,7 @@ export class InfluencerService {
   static async analyzeImageForIdea(influencerId: string, file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return await ApiClient.postFormData<AnalyzeImageForIdeaDto>(
       `/api/influencers/${influencerId}/image-ideas/analyze`,
       formData
@@ -147,7 +147,7 @@ export class InfluencerService {
 
     const queryString = params.toString();
     const url = `/api/influencers/${influencerId}/image-ideas${queryString ? `?${queryString}` : ''}`;
-    
+
     return await ApiClient.get<PaginatedResponseDto<ImageIdea>>(url);
   }
 
@@ -181,7 +181,7 @@ export class InfluencerService {
 
     const queryString = params.toString();
     const url = `/api/influencers/${influencerId}/video-ideas${queryString ? `?${queryString}` : ''}`;
-    
+
     return await ApiClient.get<PaginatedResponseDto<VideoIdea>>(url);
   }
 

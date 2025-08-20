@@ -287,7 +287,7 @@ export class InfluencerController {
     @CurrentUser() user: RequestUser,
   ) {
     this.logger.log(`Generating legacy image prompt for influencer ${influencerId}, type: ${imageType}`);
-    
+
     // Create a simple prompt based on influencer data
     const influencer = await this.influencerService.getInfluencer(influencerId, user);
     if (!influencer) {
@@ -295,80 +295,85 @@ export class InfluencerController {
     }
 
     const prompt = `Create a high-quality ${imageType} image of ${influencer.name}, a ${influencer.age}-year-old AI influencer with ${influencer.hairColor} hair and ${influencer.eyeColor} eyes. Style: ${influencer.styleAesthetic}. Professional photography, high resolution, realistic.`;
-    
+
     return {
       data: {
         prompt,
         reasoning: 'Generated from influencer characteristics',
         technicalNotes: 'Legacy endpoint - consider using new idea-based generation',
-        alternativePrompts: [prompt]
-      }
+        alternativePrompts: [prompt],
+      },
     };
   }
 
   @Post(':id/legacy/generate-image')
   @ApiOperation({ summary: 'Legacy: Generate image (for backward compatibility)' })
   @ApiResponse({ status: 201, description: 'Legacy image generation started' })
-  async generateLegacyImage(
-    @Param('id') influencerId: string,
-    @Body() body: any,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async generateLegacyImage(@Param('id') influencerId: string, @Body() body: any, @CurrentUser() user: RequestUser) {
     this.logger.log(`Legacy image generation for influencer ${influencerId}`);
-    
-    // For legacy compatibility, create a temporary idea and generate from it
-    const tempIdea = await this.influencerService.createImageIdea(influencerId, {
-      title: `Legacy ${body.imageType} Image`,
-      description: body.customPrompt || `Generated ${body.imageType} image`,
-      category: body.imageType,
-    }, user);
 
-    return await this.influencerService.generateImageFromIdea(influencerId, {
-      imageIdeaId: tempIdea.id,
-      imageType: body.imageType,
-      customPrompt: body.customPrompt,
-      isReference: body.isReference,
-    }, user);
+    // For legacy compatibility, create a temporary idea and generate from it
+    const tempIdea = await this.influencerService.createImageIdea(
+      influencerId,
+      {
+        title: `Legacy ${body.imageType} Image`,
+        description: body.customPrompt || `Generated ${body.imageType} image`,
+        category: body.imageType,
+      },
+      user,
+    );
+
+    return await this.influencerService.generateImageFromIdea(
+      influencerId,
+      {
+        imageIdeaId: tempIdea.id,
+        imageType: body.imageType,
+        customPrompt: body.customPrompt,
+        isReference: body.isReference,
+      },
+      user,
+    );
   }
 
   @Post(':id/legacy/generate-video')
   @ApiOperation({ summary: 'Legacy: Generate video (for backward compatibility)' })
   @ApiResponse({ status: 201, description: 'Legacy video generation started' })
-  async generateLegacyVideo(
-    @Param('id') influencerId: string,
-    @Body() body: any,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async generateLegacyVideo(@Param('id') influencerId: string, @Body() body: any, @CurrentUser() user: RequestUser) {
     this.logger.log(`Legacy video generation for influencer ${influencerId}`);
-    
-    // For legacy compatibility, create a temporary idea and generate from it
-    const tempIdea = await this.influencerService.createVideoIdea(influencerId, {
-      title: body.title,
-      description: body.description || body.title,
-      scenario: body.scenario,
-      category: 'Custom',
-    }, user);
 
-    return await this.influencerService.generateVideoFromIdea(influencerId, {
-      videoIdeaId: tempIdea.id,
-      customPrompt: body.customPrompt,
-      duration: body.duration,
-    }, user);
+    // For legacy compatibility, create a temporary idea and generate from it
+    const tempIdea = await this.influencerService.createVideoIdea(
+      influencerId,
+      {
+        title: body.title,
+        description: body.description || body.title,
+        scenario: body.scenario,
+        category: 'Custom',
+      },
+      user,
+    );
+
+    return await this.influencerService.generateVideoFromIdea(
+      influencerId,
+      {
+        videoIdeaId: tempIdea.id,
+        customPrompt: body.customPrompt,
+        duration: body.duration,
+      },
+      user,
+    );
   }
 
   @Get(':id/legacy/video-ideas')
   @ApiOperation({ summary: 'Legacy: Get video ideas (for backward compatibility)' })
   @ApiResponse({ status: 200, description: 'Legacy video ideas retrieved' })
-  async getLegacyVideoIdeas(
-    @Param('id') influencerId: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async getLegacyVideoIdeas(@Param('id') influencerId: string, @CurrentUser() user: RequestUser) {
     this.logger.log(`Legacy video ideas retrieval for influencer ${influencerId}`);
-    
+
     const result = await this.influencerService.getVideoIdeas(influencerId, { page: 1, limit: 50 }, user);
-    
+
     // Transform to legacy format
-    return result.items.map(idea => ({
+    return result.items.map((idea) => ({
       id: idea.id,
       title: idea.title,
       description: idea.description,

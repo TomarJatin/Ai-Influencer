@@ -421,10 +421,10 @@ Make your suggestions specific and actionable for AI image generation.
             role: 'user',
             content: [
               { type: 'text', text: prompt },
-              { type: 'image', image: dataUrl }
-            ]
-          }
-        ]
+              { type: 'image', image: dataUrl },
+            ],
+          },
+        ],
       });
 
       this.logger.log('Successfully analyzed image for idea generation');
@@ -441,7 +441,7 @@ Make your suggestions specific and actionable for AI image generation.
   async generateImageWithGemini(
     prompt: string,
     imageType: string = 'LIFESTYLE',
-    aspectRatio: string = '1:1'
+    aspectRatio: string = '1:1',
   ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
     try {
       this.logger.log(`Generating image with Gemini Imagen: ${imageType}`);
@@ -457,17 +457,17 @@ Make your suggestions specific and actionable for AI image generation.
               negativePrompt: 'blurry, low quality, distorted, watermark, text, signature',
               guidanceScale: 7.5,
               outputOptions: {
-                mimeType: 'image/jpeg'
-              }
-            }
-          ]
+                mimeType: 'image/jpeg',
+              },
+            },
+          ],
         },
         {
           headers: {
-            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            Authorization: `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json',
+          },
+        },
       );
 
       if (!response.data.predictions || response.data.predictions.length === 0) {
@@ -475,15 +475,15 @@ Make your suggestions specific and actionable for AI image generation.
       }
 
       const prediction = response.data.predictions[0];
-      
+
       // Upload the generated image to S3
       const imageBuffer = Buffer.from(prediction.bytesBase64Encoded, 'base64');
       const filename = `generated-images/${uuidv4()}.jpg`;
-      
+
       const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, 'image/jpeg');
 
       this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
-      
+
       return {
         imageUrl: uploadResult.url,
         metadata: {
@@ -492,8 +492,8 @@ Make your suggestions specific and actionable for AI image generation.
           imageType: imageType,
           aspectRatio: aspectRatio,
           generatedAt: new Date().toISOString(),
-          s3Key: uploadResult.key
-        }
+          s3Key: uploadResult.key,
+        },
       };
     } catch (error) {
       this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
@@ -506,7 +506,7 @@ Make your suggestions specific and actionable for AI image generation.
    */
   async generateVideoWithVeo3(
     prompt: string,
-    duration: number = 5
+    duration: number = 5,
   ): Promise<{ videoId: string; status: string; metadata: Record<string, unknown> }> {
     try {
       this.logger.log(`Generating video with Veo3, duration: ${duration}s`);
@@ -522,17 +522,17 @@ Make your suggestions specific and actionable for AI image generation.
               resolution: '1280x720',
               frameRate: 24,
               outputOptions: {
-                mimeType: 'video/mp4'
-              }
-            }
-          ]
+                mimeType: 'video/mp4',
+              },
+            },
+          ],
         },
         {
           headers: {
-            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            Authorization: `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json',
+          },
+        },
       );
 
       if (!response.data.predictions || response.data.predictions.length === 0) {
@@ -543,7 +543,7 @@ Make your suggestions specific and actionable for AI image generation.
       const videoId = prediction.operationId || uuidv4();
 
       this.logger.log(`Successfully started video generation with ID: ${videoId}`);
-      
+
       return {
         videoId,
         status: 'GENERATING',
@@ -554,8 +554,8 @@ Make your suggestions specific and actionable for AI image generation.
           resolution: '1280x720',
           frameRate: 24,
           generatedAt: new Date().toISOString(),
-          operationId: prediction.operationId
-        }
+          operationId: prediction.operationId,
+        },
       };
     } catch (error) {
       this.logger.error(`Failed to generate video with Veo3: ${error.message}`, error);
@@ -566,7 +566,10 @@ Make your suggestions specific and actionable for AI image generation.
   /**
    * Check video generation status and retrieve result
    */
-  async checkVideoStatus(videoId: string, operationId: string): Promise<{
+  async checkVideoStatus(
+    videoId: string,
+    operationId: string,
+  ): Promise<{
     status: string;
     videoUrl?: string;
     thumbnailUrl?: string;
@@ -579,10 +582,10 @@ Make your suggestions specific and actionable for AI image generation.
         `https://us-central1-aiplatform.googleapis.com/v1/projects/${config.gcp.projectId}/locations/us-central1/operations/${operationId}`,
         {
           headers: {
-            'Authorization': `Bearer ${await this.getGoogleAccessToken()}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            Authorization: `Bearer ${await this.getGoogleAccessToken()}`,
+            'Content-Type': 'application/json',
+          },
+        },
       );
 
       const operation = response.data;
@@ -605,14 +608,14 @@ Make your suggestions specific and actionable for AI image generation.
       // Upload the generated video to S3
       const videoBuffer = Buffer.from(result.bytesBase64Encoded, 'base64');
       const filename = `generated-videos/${videoId}.mp4`;
-      
+
       const uploadResult = await this.s3Service.uploadBuffer(videoBuffer, filename, 'video/mp4');
 
       // Generate thumbnail (optional - could be done later)
       const thumbnailUrl = await this.generateVideoThumbnail(uploadResult.url);
 
       this.logger.log(`Successfully completed video generation: ${uploadResult.url}`);
-      
+
       return {
         status: 'COMPLETED',
         videoUrl: uploadResult.url,
@@ -620,8 +623,8 @@ Make your suggestions specific and actionable for AI image generation.
         metadata: {
           s3Key: uploadResult.key,
           completedAt: new Date().toISOString(),
-          duration: result.duration || 5
-        }
+          duration: result.duration || 5,
+        },
       };
     } catch (error) {
       this.logger.error(`Failed to check video status: ${error.message}`, error);
@@ -636,7 +639,7 @@ Make your suggestions specific and actionable for AI image generation.
     // This is a placeholder - in a real implementation, you'd use a video processing service
     // to extract a frame from the video and create a thumbnail
     this.logger.log(`Generating thumbnail for video: ${videoUrl}`);
-    
+
     // For now, return a placeholder thumbnail URL
     // In production, you'd use services like AWS MediaConvert, FFmpeg, etc.
     return videoUrl.replace('.mp4', '_thumbnail.jpg');
@@ -649,20 +652,20 @@ Make your suggestions specific and actionable for AI image generation.
     try {
       // In production, use Google Cloud SDK or service account credentials
       // This is a simplified version - you should use proper authentication
-      
+
       if (config.gcp.serviceAccountKey) {
         // Use service account key for authentication
         const { GoogleAuth } = require('google-auth-library');
         const auth = new GoogleAuth({
           keyFile: config.gcp.serviceAccountKey,
-          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
         });
-        
+
         const client = await auth.getClient();
         const accessToken = await client.getAccessToken();
         return accessToken.token;
       }
-      
+
       throw new Error('No Google Cloud authentication configured');
     } catch (error) {
       this.logger.error(`Failed to get Google access token: ${error.message}`, error);
