@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ interface GeneratedImagesSectionProps {
 }
 
 export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh }: GeneratedImagesSectionProps) {
+  const { data: session } = useSession();
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
@@ -54,9 +56,27 @@ export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh 
     }
   };
 
-  const handleDownloadImage = async (imageUrl: string, imageName?: string) => {
+  const handleDownloadImage = async (imageId: string, imageName?: string) => {
     try {
-      const response = await fetch(imageUrl);
+      if (!session?.user?.token) {
+        toast.error('You must be logged in to download images');
+        return;
+      }
+
+      // Use the full API URL instead of relative path
+      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/influencers/${influencer.id}/images/${imageId}/download`;
+
+      const response = await fetch(downloadUrl, {
+        headers: {
+          // Include authentication headers
+          Authorization: `Bearer ${session.user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText} (${response.status})`);
+      }
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -69,7 +89,7 @@ export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh 
       toast.success('Image downloaded successfully');
     } catch (error) {
       console.error('Error downloading image:', error);
-      toast.error('Failed to download image');
+      toast.error(`Failed to download image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -122,7 +142,7 @@ export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh 
                       size='sm'
                       variant='secondary'
                       onClick={() =>
-                        handleDownloadImage(image.imageUrl, `${influencer.name}-${image.imageType}-${image.id}`)
+                        handleDownloadImage(image.id, `${influencer.name}-${image.imageType}-${image.id}`)
                       }
                       className='h-8 w-8 p-0'
                     >

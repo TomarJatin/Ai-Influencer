@@ -10,8 +10,10 @@ import {
   UseInterceptors,
   UploadedFile,
   Logger,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { InfluencerService } from './influencer.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
@@ -223,6 +225,20 @@ export class InfluencerController {
   ) {
     this.logger.log(`Deleting image ${imageId} for influencer ${influencerId}`);
     return await this.influencerService.deleteImage(influencerId, imageId, user);
+  }
+
+  @Get(':id/images/:imageId/download')
+  @ApiOperation({ summary: 'Download a generated image' })
+  @ApiResponse({ status: 200, description: 'Image downloaded successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer or image not found' })
+  async downloadImage(
+    @Param('id') influencerId: string,
+    @Param('imageId') imageId: string,
+    @CurrentUser() user: RequestUser,
+    @Res() res: Response,
+  ) {
+    this.logger.log(`Downloading image ${imageId} for influencer ${influencerId}`);
+    return await this.influencerService.downloadImage(influencerId, imageId, user, res);
   }
 
   // ============================================================================

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { AIService, OptimizedPromptSchema } from '../common/ai.service';
+import { S3Service } from '../common/s3.service';
 import {
   CreateAIInfluencerDto,
   UpdateAIInfluencerDto,
@@ -27,6 +29,7 @@ export class InfluencerService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly aiService: AIService,
+    private readonly s3Service: S3Service,
   ) {}
 
   // ============================================================================
@@ -466,6 +469,49 @@ export class InfluencerService {
       }
       this.logger.error(`Failed to delete image: ${error.message}`, error);
       throw new BadRequestException('Failed to delete image');
+    }
+  }
+
+  async downloadImage(influencerId: string, imageId: string, user: RequestUser, res: Response): Promise<void> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const image = await this.prismaService.influencerImage.findFirst({
+        where: { id: imageId, influencerId },
+      });
+
+      if (!image) {
+        throw new NotFoundException('Image not found');
+      }
+
+      // Extract the S3 key from the image URL
+      const s3Url = image.imageUrl;
+      const s3Key = s3Url.split('/').slice(-2).join('/'); // Get the last two parts of the URL path
+
+      // Fetch the image from S3
+      const imageResponse = await fetch(s3Url);
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch image from S3: ${imageResponse.statusText}`);
+      }
+
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+      // Set appropriate headers for download
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Length', imageBuffer.byteLength);
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+
+      // Send the image buffer
+      res.send(Buffer.from(imageBuffer));
+
+      this.logger.log(`Downloaded image ${imageId} for influencer ${influencerId}`);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to download image: ${error.message}`, error);
+      throw new BadRequestException('Failed to download image');
     }
   }
 
