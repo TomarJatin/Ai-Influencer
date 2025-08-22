@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { generateObject, generateText,  experimental_generateImage as generateImage } from 'ai';
+import { generateObject, generateText, experimental_generateImage as generateImage } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { config } from './config';
 import { z } from 'zod';
@@ -76,6 +76,78 @@ export class AIService {
 
     // Use Google's Gemini model via Vercel AI SDK
     this.model = google('gemini-1.5-pro');
+
+    this.logger.log('AI Service initialized with Gemini API');
+    this.logger.log(`Gemini API Key configured: ${!!config.llm.geminiApiKey}`);
+    this.logger.log(`S3 Service available: ${!!this.s3Service}`);
+  }
+
+  /**
+   * Diagnostic method to test API configuration and connectivity
+   */
+  async diagnoseImageGeneration(): Promise<{ status: string; message: string; details?: any }> {
+    try {
+      this.logger.log('Running image generation diagnostics...');
+
+      // Check if API key is configured
+      if (!config.llm.geminiApiKey) {
+        return {
+          status: 'ERROR',
+          message: 'Gemini API key is not configured',
+          details: { envVar: 'GOOGLE_GENERATIVE_AI_API_KEY' }
+        };
+      }
+
+      // Check S3 configuration
+      if (!config.aws.accessKeyId || !config.aws.secretAccessKey || !config.aws.s3.bucket) {
+        return {
+          status: 'ERROR',
+          message: 'S3 configuration is incomplete',
+          details: {
+            accessKeyConfigured: !!config.aws.accessKeyId,
+            secretKeyConfigured: !!config.aws.secretAccessKey,
+            bucketConfigured: !!config.aws.s3.bucket,
+            regionConfigured: !!config.aws.s3.region
+          }
+        };
+      }
+
+      // Test basic text generation to check API connectivity
+      const testPrompt = 'Hello, this is a test.';
+      const result = await generateText({
+        model: this.model,
+        prompt: testPrompt,
+      });
+
+      if (!result.text) {
+        return {
+          status: 'ERROR',
+          message: 'Text generation failed - API connectivity issue',
+          details: { testPrompt }
+        };
+      }
+
+      return {
+        status: 'SUCCESS',
+        message: 'All configurations and API connectivity tests passed',
+        details: {
+          apiKeyConfigured: true,
+          s3Configured: true,
+          textGenerationWorking: true,
+          testResponse: result.text.substring(0, 50) + '...'
+        }
+      };
+    } catch (error) {
+      this.logger.error('Diagnostic failed:', error);
+      return {
+        status: 'ERROR',
+        message: `Diagnostic failed: ${error.message}`,
+        details: {
+          error: error.message,
+          stack: error.stack
+        }
+      };
+    }
   }
 
   /**
@@ -437,119 +509,160 @@ Make your suggestions specific and actionable for AI image generation.
   }
 
   /**
- * Generate image using Google's Gemini 2.0 Flash model with AI SDK
- */
-async generateImageWithLanguageModel(
-  prompt: string,
-  imageType: string = 'LIFESTYLE',
-  aspectRatio: string = '1:1',
-): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
-  try {
-    this.logger.log(`Generating image with Gemini 2.0 Flash: ${imageType}`);
+   * Generate image using Google's Gemini 2.0 Flash model with AI SDK
+   */
+  async generateImageWithLanguageModel(
+    prompt: string,
+    imageType: string = 'LIFESTYLE',
+    aspectRatio: string = '1:1',
+  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+    try {
+      this.logger.log(`Generating image with Gemini 2.0 Flash: ${imageType}`);
 
-    const result = await generateText({
-      model: google('gemini-2.5-flash'),
-      providerOptions: {
-        google: { responseModalities: ['TEXT', 'IMAGE'] },
-      },
-      prompt: `Generate an image: ${prompt}`,
-    });
+      const result = await generateText({
+        model: google('gemini-2.5-flash'),
+        providerOptions: {
+          google: { responseModalities: ['TEXT', 'IMAGE'] },
+        },
+        prompt: `Generate an image: ${prompt}`,
+      });
 
-    // Find the first image file in the response
-    let imageFile: any = null;
-    for (const file of result.files || []) {
-      if (file.mediaType.startsWith('image/')) {
-        imageFile = file;
-        break;
+      // Find the first image file in the response
+      let imageFile: any = null;
+      for (const file of result.files || []) {
+        if (file.mediaType.startsWith('image/')) {
+          imageFile = file;
+          break;
+        }
       }
+
+      if (!imageFile) {
+        throw new Error('No image generated from Gemini model');
+      }
+
+      // Upload the generated image to S3
+      const imageBuffer = Buffer.from(imageFile.uint8Array);
+      const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
+      const filename = `generated-images/${uuidv4()}.${fileExtension}`;
+
+      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
+
+      this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
+
+      return {
+        imageUrl: uploadResult.url,
+        metadata: {
+          model: 'gemini-2.0-flash-exp',
+          prompt: prompt,
+          imageType: imageType,
+          aspectRatio: aspectRatio,
+          mediaType: imageFile.mediaType,
+          generatedAt: new Date().toISOString(),
+          s3Key: uploadResult.key,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
+      throw new Error('Failed to generate image with Gemini');
     }
-
-    if (!imageFile) {
-      throw new Error('No image generated from Gemini model');
-    }
-
-    // Upload the generated image to S3
-    const imageBuffer = Buffer.from(imageFile.uint8Array);
-    const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
-    const filename = `generated-images/${uuidv4()}.${fileExtension}`;
-
-    const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
-
-    this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
-
-    return {
-      imageUrl: uploadResult.url,
-      metadata: {
-        model: 'gemini-2.0-flash-exp',
-        prompt: prompt,
-        imageType: imageType,
-        aspectRatio: aspectRatio,
-        mediaType: imageFile.mediaType,
-        generatedAt: new Date().toISOString(),
-        s3Key: uploadResult.key,
-      },
-    };
-  } catch (error) {
-    this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
-    throw new Error('Failed to generate image with Gemini');
   }
-}
 
-async generateImageWithImageModel(
-  prompt: string,
-  imageType: string = 'LIFESTYLE',
-  aspectRatio: string = '1:1',
-): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
-  try {
-    this.logger.log(`Generating image with Gemini 2.0 Flash: ${imageType}`);
+  async generateImageWithImageModel(
+    prompt: string,
+    imageType: string = 'LIFESTYLE',
+    aspectRatio: string = '1:1',
+  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+    try {
+      this.logger.log(`Generating image with Gemini Image Model: ${imageType}`);
+      this.logger.log(`Prompt: ${prompt.substring(0, 100)}...`);
 
-    const { image } = await generateImage({
-      model: google.image('imagen-3.0-generate-002'),
-      prompt: prompt,
-      aspectRatio: '1:1',
-    });
+      const { image } = await generateImage({
+        model: google.image('imagen-3.0-generate-002'),
+        prompt: prompt,
+        aspectRatio: '1:1',
+      });
 
-    // Find the first image file in the response
-    let imageFile: any = image;
+      this.logger.log(`Raw image response:`, image);
 
-    if (!imageFile) {
-      throw new Error('No image generated from Gemini model');
+      // Handle the response structure properly
+      if (!image) {
+        throw new Error('No image returned from Gemini model');
+      }
+
+      // Check if image has the expected structure
+      if (!image.uint8Array) {
+        this.logger.error('Image response missing uint8Array:', image);
+        throw new Error('Image response does not contain image data');
+      }
+
+      // Upload the generated image to S3
+      const imageBuffer = Buffer.from(image.uint8Array);
+      const fileExtension = image.mediaType?.split('/')[1] || 'png';
+      const filename = `generated-images/${uuidv4()}.${fileExtension}`;
+
+      this.logger.log(`Uploading image buffer of size: ${imageBuffer.length} bytes`);
+
+      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, image.mediaType || 'image/png');
+
+      this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
+
+      return {
+        imageUrl: uploadResult.url,
+        metadata: {
+          model: 'imagen-3.0-generate-002',
+          prompt: prompt,
+          imageType: imageType,
+          aspectRatio: aspectRatio,
+          mediaType: image.mediaType || 'image/png',
+          generatedAt: new Date().toISOString(),
+          s3Key: uploadResult.key,
+          bufferSize: imageBuffer.length,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to generate image with Gemini Image Model:`, {
+        error: error.message,
+        prompt: prompt.substring(0, 200),
+        imageType,
+        aspectRatio,
+        stack: error.stack
+      });
+      throw new Error(`Failed to generate image with Gemini: ${error.message}`);
+    }
+  }
+
+  async generateImageWithGemini(
+    prompt: string,
+    imageType: string = 'LIFESTYLE',
+    aspectRatio: string = '1:1',
+  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+    let lastError: Error | null = null;
+
+    try {
+      // Try the image model first
+      this.logger.log(`Attempting image generation with Image Model for ${imageType}`);
+      return await this.generateImageWithImageModel(prompt, imageType, aspectRatio);
+    } catch (error) {
+      lastError = error as Error;
+      this.logger.warn(`Image model failed: ${error.message}`);
     }
 
-    // Upload the generated image to S3
-    const imageBuffer = Buffer.from(imageFile.uint8Array);
-    const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
-    const filename = `generated-images/${uuidv4()}.${fileExtension}`;
+    try {
+      // Fallback to language model with image generation
+      this.logger.log(`Falling back to Language Model for ${imageType}`);
+      return await this.generateImageWithLanguageModel(prompt, imageType, aspectRatio);
+    } catch (fallbackError) {
+      this.logger.error(`Both image generation methods failed:`, {
+        imageModelError: lastError?.message,
+        languageModelError: (fallbackError as Error).message,
+        prompt: prompt.substring(0, 100) + '...',
+        imageType,
+        aspectRatio
+      });
 
-    const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
-
-    this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
-
-    return {
-      imageUrl: uploadResult.url,
-      metadata: {
-        model: 'gemini-2.0-flash-exp',
-        prompt: prompt,
-        imageType: imageType,
-        aspectRatio: aspectRatio,
-        mediaType: imageFile.mediaType,
-        generatedAt: new Date().toISOString(),
-        s3Key: uploadResult.key,
-      },
-    };
-  } catch (error) {
-    this.logger.error(`Failed to generate image with Gemini: ${error.message}`, error);
-    throw new Error('Failed to generate image with Gemini');
+      throw new Error(`Image generation failed: ${lastError?.message || 'Unknown error'}. Fallback also failed: ${(fallbackError as Error).message}`);
+    }
   }
-}
-
-async generateImageWithGemini(
-  prompt: string,
-  imageType: string = 'LIFESTYLE',
-  aspectRatio: string = '1:1',
-): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
-  return this.generateImageWithImageModel(prompt, imageType, aspectRatio);
-}
 
   /**
    * Generate video using Google's Veo3 model
@@ -701,10 +814,10 @@ async generateImageWithGemini(
   private async getGoogleAccessToken(): Promise<string> {
     try {
       const { GoogleAuth } = require('google-auth-library');
-      
+
       // Try multiple authentication methods
       let auth;
-      
+
       if (config.gcp.serviceAccountJson) {
         // Method 1: Use service account JSON content directly
         this.logger.log('Using service account JSON content for authentication');
@@ -736,11 +849,11 @@ async generateImageWithGemini(
 
       const client = await auth.getClient();
       const accessToken = await client.getAccessToken();
-      
+
       if (!accessToken.token) {
         throw new Error('Failed to obtain access token');
       }
-      
+
       this.logger.log('Successfully obtained Google Cloud access token');
       return accessToken.token;
     } catch (error) {

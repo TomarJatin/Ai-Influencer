@@ -438,11 +438,97 @@ export class InfluencerService {
     }
   }
 
+  async deleteImage(influencerId: string, imageId: string, user: RequestUser): Promise<void> {
+    try {
+      await this.getInfluencer(influencerId, user); // Verify access
+
+      const image = await this.prismaService.influencerImage.findFirst({
+        where: { id: imageId, influencerId },
+      });
+
+      if (!image) {
+        throw new NotFoundException('Image not found');
+      }
+
+      await this.prismaService.influencerImage.delete({
+        where: { id: imageId },
+      });
+
+      this.logger.log(`Deleted image ${imageId} for influencer ${influencerId}`);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to delete image: ${error.message}`, error);
+      throw new BadRequestException('Failed to delete image');
+    }
+  }
+
+  async generateImagePrompt(
+    influencerId: string,
+    body: { imageIdeaId: string; imageType: string; customInstructions?: string },
+    user: RequestUser,
+  ) {
+    try {
+      const influencer = await this.getInfluencer(influencerId, user);
+
+      const idea = await this.prismaService.imageIdea.findFirst({
+        where: { id: body.imageIdeaId, influencerId },
+      });
+
+      if (!idea) {
+        throw new NotFoundException('Image idea not found');
+      }
+
+      const promptData = {
+        influencer,
+        idea: {
+          title: idea.title,
+          description: idea.description,
+          category: idea.category,
+          visualElements: idea.visualElements as string[],
+          mood: idea.mood,
+          setting: idea.setting,
+          styleNotes: idea.styleNotes,
+        },
+        imageType: body.imageType,
+      };
+
+      const optimizedPrompt = await this.generateImagePromptFromIdea(promptData);
+      console.log('Generated optimized prompt:', optimizedPrompt);
+
+      return {
+        data: {
+          prompt: optimizedPrompt.prompt,
+          reasoning: optimizedPrompt.reasoning,
+          technicalNotes: optimizedPrompt.technicalNotes,
+          alternativePrompts: optimizedPrompt.alternativePrompts,
+          ideaUsed: {
+            id: idea.id,
+            title: idea.title,
+            category: idea.category,
+          },
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.log('Failed to generate image prompt:', error);
+      this.logger.error(`Failed to generate image prompt: ${error.message}`, error);
+      throw new BadRequestException('Failed to generate image prompt');
+    }
+  }
+
+  async diagnoseImageGeneration() {
+    return await this.aiService.diagnoseImageGeneration();
+  }
+
   private async generateImagePromptFromIdea(data: any): Promise<OptimizedPromptDto> {
     const { influencer, idea, imageType } = data;
 
     const prompt = `
-You are an expert prompt engineer specializing in AI image generation. Create an optimized prompt for generating a high-quality ${imageType} image based on the following:
+You are an expert prompt engineer specializing in ultra-realistic, natural-looking AI image generation. Create an optimized prompt for generating a realistic ${imageType} image that looks like it was taken by a real person, not AI-generated.
 
 INFLUENCER CHARACTERISTICS:
 - Name: ${influencer.name || 'AI Influencer'}
@@ -465,17 +551,43 @@ SELECTED IMAGE IDEA:
 - Setting: ${idea.setting}
 - Style Notes: ${idea.styleNotes}
 
-OPTIMIZATION REQUIREMENTS:
-1. Create a detailed, specific prompt optimized for AI image generation
-2. Include physical characteristics that match the influencer
-3. Specify lighting, composition, and camera angles
-4. Add professional photography terminology
-5. Include style and mood descriptors
-6. Ensure the prompt is clear and unambiguous
-7. Optimize for high-quality, realistic results
-8. Keep the prompt focused and not overly complex
+REALISM OPTIMIZATION REQUIREMENTS:
+1. Make the image look like it was taken by a real person, not AI-generated
+2. Include natural imperfections and human elements:
+   - Slightly imperfect skin texture with natural pores, minor blemishes
+   - Natural, asymmetrical facial features and expressions
+   - Realistic hair with individual strands, natural texture, slight flyaways
+   - Authentic body language and poses that feel candid
+   - Natural lighting with realistic shadows and highlights
 
-Generate an optimized prompt that will produce a stunning, professional-quality image that authentically represents this AI influencer.
+3. Environmental realism:
+   - Real-world backgrounds with lived-in details
+   - Natural clutter or imperfections in the environment
+   - Realistic depth of field and camera perspective
+   - Authentic materials and textures
+
+4. Photography style:
+   - Amateur or semi-professional photography quality
+   - Natural camera angles (not perfectly centered)
+   - Realistic depth of field with natural bokeh
+   - Natural color grading, not oversaturated
+   - Slight grain or natural photo artifacts
+
+5. Pose and expression authenticity:
+   - Natural, unposed expressions and micro-expressions
+   - Realistic body positioning and weight distribution
+   - Authentic hand and finger positioning
+   - Natural eye contact or gaze direction
+   - Candid, in-the-moment feeling
+
+6. Avoid AI-tell signs:
+   - No overly perfect symmetry
+   - No plastic or artificial-looking skin
+   - No unrealistic proportions or features
+   - No overly dramatic lighting or poses
+   - No oversaturated colors or HDR effects
+
+Generate an optimized prompt that will produce an ultra-realistic, natural-looking image that could pass for a real photograph taken by a person.
     `;
 
     // Use the imported OptimizedPromptSchema

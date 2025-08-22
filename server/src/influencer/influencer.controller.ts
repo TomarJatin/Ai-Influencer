@@ -191,6 +191,40 @@ export class InfluencerController {
     return await this.influencerService.generateImageFromIdea(influencerId, generateDto, user);
   }
 
+  @Post(':id/generate-prompt')
+  @ApiOperation({ summary: 'Generate optimized AI prompt for image generation' })
+  @ApiResponse({ status: 200, description: 'Optimized prompt generated successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer or idea not found' })
+  async generateImagePrompt(
+    @Param('id') influencerId: string,
+    @Body() body: { imageIdeaId: string; imageType: string; customInstructions?: string },
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Generating optimized prompt for influencer ${influencerId}`);
+    return await this.influencerService.generateImagePrompt(influencerId, body, user);
+  }
+
+  @Get('diagnose')
+  @ApiOperation({ summary: 'Diagnose image generation configuration and connectivity' })
+  @ApiResponse({ status: 200, description: 'Diagnostic information' })
+  async diagnoseImageGeneration() {
+    this.logger.log('Running image generation diagnostics');
+    return await this.influencerService.diagnoseImageGeneration();
+  }
+
+  @Delete(':id/images/:imageId')
+  @ApiOperation({ summary: 'Delete a generated image' })
+  @ApiResponse({ status: 200, description: 'Image deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer or image not found' })
+  async deleteImage(
+    @Param('id') influencerId: string,
+    @Param('imageId') imageId: string,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Deleting image ${imageId} for influencer ${influencerId}`);
+    return await this.influencerService.deleteImage(influencerId, imageId, user);
+  }
+
   // ============================================================================
   // VIDEO IDEA MANAGEMENT
   // ============================================================================

@@ -59,6 +59,24 @@ export interface GenerateImageFromIdeaDto {
   isReference?: boolean;
 }
 
+export interface GenerateImagePromptDto {
+  imageIdeaId: string;
+  imageType: string;
+  customInstructions?: string;
+}
+
+export interface OptimizedPromptResponse {
+  prompt: string;
+  reasoning: string;
+  technicalNotes: string;
+  alternativePrompts: string[];
+  ideaUsed: {
+    id: string;
+    title: string;
+    category: string;
+  };
+}
+
 export interface GenerateVideoFromIdeaDto {
   videoIdeaId: string;
   customPrompt?: string;
@@ -163,6 +181,14 @@ export class InfluencerService {
     return await ApiClient.post<any>(`/api/influencers/${influencerId}/generate-image`, data);
   }
 
+  static async generateImagePrompt(influencerId: string, data: GenerateImagePromptDto) {
+    return await ApiClient.post<{ data: OptimizedPromptResponse }>(`/api/influencers/${influencerId}/generate-prompt`, data);
+  }
+
+  static async deleteImage(influencerId: string, imageId: string) {
+    return await ApiClient.delete<void>(`/api/influencers/${influencerId}/images/${imageId}`);
+  }
+
   // ============================================================================
   // VIDEO IDEA MANAGEMENT
   // ============================================================================
@@ -199,6 +225,10 @@ export class InfluencerService {
 
   static async checkVideoStatus(influencerId: string, videoId: string) {
     return await ApiClient.get<any>(`/api/influencers/${influencerId}/videos/${videoId}/status`);
+  }
+
+  static async diagnoseImageGeneration() {
+    return await ApiClient.get<any>('/api/influencers/diagnose');
   }
 
   // ============================================================================

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AIInfluencer } from '@/types';
-import { InfluencerService, ImageIdea, PaginationQueryDto, GenerateImageFromIdeaDto } from '@/services';
+import { InfluencerService, ImageIdea, PaginationQueryDto, GenerateImageFromIdeaDto, GenerateImagePromptDto, OptimizedPromptResponse } from '@/services';
 import { toast } from 'sonner';
 import { Wand2, Loader2, Image as ImageIcon, Search, Plus, ArrowLeft, Eye, Sparkles } from 'lucide-react';
 
@@ -61,6 +61,7 @@ export function NewImageGenerationDialog({
   const [isReference, setIsReference] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [optimizedPromptData, setOptimizedPromptData] = useState<OptimizedPromptResponse | null>(null);
 
   const loadIdeas = useCallback(
     async (query: PaginationQueryDto = {}) => {
@@ -110,31 +111,26 @@ export function NewImageGenerationDialog({
     setSelectedIdea(idea);
     setStep('configure-generation');
 
-    // Generate optimized prompt in the background
+    // Generate optimized prompt using AI API
     try {
       setIsGeneratingPrompt(true);
+      setOptimizedPromptData(null);
 
-      const enhancedPrompt = `Create a high-quality ${imageType.toLowerCase()} image of ${influencer.name}, based on the concept "${idea.title}".
+      const promptData: GenerateImagePromptDto = {
+        imageIdeaId: idea.id,
+        imageType: imageType,
+        customInstructions: undefined, // Can be extended to include custom instructions
+      };
 
-CONCEPT DETAILS:
-${idea.description}
+      const response = await InfluencerService.generateImagePrompt(influencer.id, promptData);
 
-SETTING: ${idea.setting || 'Professional studio setting'}
-MOOD: ${idea.mood || 'Professional and engaging'}
-STYLE NOTES: ${idea.styleNotes || 'High-quality photography style'}
-VISUAL ELEMENTS: ${idea.visualElements?.join(', ') || 'Professional composition'}
-
-INFLUENCER CHARACTERISTICS:
-- Age: ${influencer.age || 'Young adult'}
-- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
-- Hair: ${influencer.hairColor || 'Natural hair color'}
-- Eyes: ${influencer.eyeColor || 'Natural eye color'}
-- Style: ${influencer.styleAesthetic || 'Contemporary style'}
-- Key Features: ${influencer.keyFeatures || 'Distinctive features'}
-
-Create a professional, high-resolution image that captures the essence of this concept while maintaining the influencer's authentic appearance. Use professional photography techniques, optimal lighting, and composition.`;
-
-      setGeneratedPrompt(enhancedPrompt);
+      if (response.data) {
+        setOptimizedPromptData(response.data.data);
+        setGeneratedPrompt(response.data.data.prompt);
+        toast.success('AI prompt generated successfully!');
+      } else {
+        toast.error(response.error?.message || 'Failed to generate optimized prompt');
+      }
     } catch (error) {
       console.error('Error generating prompt:', error);
       toast.error('Failed to generate optimized prompt');
@@ -153,7 +149,7 @@ Create a professional, high-resolution image that captures the essence of this c
       const generateData: GenerateImageFromIdeaDto = {
         imageIdeaId: selectedIdea.id,
         imageType,
-        customPrompt: customPrompt || undefined,
+        customPrompt: customPrompt || (optimizedPromptData ? optimizedPromptData.prompt : undefined),
         isReference,
       };
 
@@ -182,6 +178,7 @@ Create a professional, high-resolution image that captures the essence of this c
       setSelectedIdea(null);
       setCustomPrompt('');
       setGeneratedPrompt('');
+      setOptimizedPromptData(null);
       onClose();
     }
   };
@@ -619,12 +616,67 @@ Create a professional, high-resolution image that captures the essence of this c
                     </div>
                   ) : (
                     <div className='space-y-4'>
-                      <div className='max-h-32 overflow-y-auto rounded-lg border border-amber-200/30 bg-gradient-to-br from-amber-50/50 to-orange-50/50 p-4 dark:border-amber-800/30 dark:from-amber-950/20 dark:to-orange-950/20'>
-                        <p className='text-foreground text-sm leading-relaxed whitespace-pre-wrap'>
-                          {generatedPrompt || 'Prompt will be generated when you select an idea...'}
-                        </p>
-                      </div>
-                      {generatedPrompt && (
+                      {optimizedPromptData ? (
+                        <div className='space-y-4'>
+                          <div className='max-h-32 overflow-y-auto rounded-lg border border-amber-200/30 bg-gradient-to-br from-amber-50/50 to-orange-50/50 p-4 dark:border-amber-800/30 dark:from-amber-950/20 dark:to-orange-950/20'>
+                            <p className='text-foreground text-sm leading-relaxed whitespace-pre-wrap'>
+                              {optimizedPromptData.prompt}
+                            </p>
+                          </div>
+
+                          {/* AI Reasoning */}
+                          {optimizedPromptData.reasoning && (
+                            <div className='rounded-lg border border-blue-200/30 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 p-3 dark:border-blue-800/30 dark:from-blue-950/20 dark:to-indigo-950/20'>
+                              <h5 className='text-blue-800 text-xs font-medium dark:text-blue-200'>
+                                🤖 AI Reasoning
+                              </h5>
+                              <p className='text-blue-700 text-xs leading-relaxed dark:text-blue-300'>
+                                {optimizedPromptData.reasoning}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Technical Notes */}
+                          {optimizedPromptData.technicalNotes && (
+                            <div className='rounded-lg border border-green-200/30 bg-gradient-to-br from-green-50/50 to-emerald-50/50 p-3 dark:border-green-800/30 dark:from-green-950/20 dark:to-emerald-950/20'>
+                              <h5 className='text-green-800 text-xs font-medium dark:text-green-200'>
+                                ⚙️ Technical Notes
+                              </h5>
+                              <p className='text-green-700 text-xs leading-relaxed dark:text-green-300'>
+                                {optimizedPromptData.technicalNotes}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Alternative Prompts */}
+                          {optimizedPromptData.alternativePrompts && optimizedPromptData.alternativePrompts.length > 0 && (
+                            <div className='rounded-lg border border-purple-200/30 bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-3 dark:border-purple-800/30 dark:from-purple-950/20 dark:to-pink-950/20'>
+                              <h5 className='text-purple-800 text-xs font-medium dark:text-purple-200'>
+                                🔄 Alternative Prompts ({optimizedPromptData.alternativePrompts.length})
+                              </h5>
+                              <div className='mt-2 space-y-2'>
+                                {optimizedPromptData.alternativePrompts.slice(0, 2).map((altPrompt, index) => (
+                                  <button
+                                    key={index}
+                                    onClick={() => setGeneratedPrompt(altPrompt)}
+                                    className='w-full rounded border border-purple-200/50 bg-white/50 p-2 text-left text-xs text-purple-700 transition-colors hover:bg-white/80 dark:border-purple-800/50 dark:bg-black/20 dark:text-purple-300 dark:hover:bg-black/40'
+                                  >
+                                    {altPrompt}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className='max-h-32 overflow-y-auto rounded-lg border border-amber-200/30 bg-gradient-to-br from-amber-50/50 to-orange-50/50 p-4 dark:border-amber-800/30 dark:from-amber-950/20 dark:to-orange-950/20'>
+                          <p className='text-foreground text-sm leading-relaxed whitespace-pre-wrap'>
+                            {generatedPrompt || 'Prompt will be generated when you select an idea...'}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedIdea && (
                         <Button
                           variant='outline'
                           size='sm'
@@ -633,7 +685,7 @@ Create a professional, high-resolution image that captures the essence of this c
                           className='w-full'
                         >
                           <Sparkles className='mr-2 h-4 w-4' />
-                          Regenerate Prompt
+                          {isGeneratingPrompt ? 'Regenerating...' : 'Regenerate Prompt'}
                         </Button>
                       )}
                     </div>
@@ -670,7 +722,7 @@ Create a professional, high-resolution image that captures the essence of this c
               </Button>
               <Button
                 onClick={handleGenerate}
-                disabled={isGeneratingPrompt || !generatedPrompt}
+                disabled={isGeneratingPrompt || (!generatedPrompt && !optimizedPromptData)}
                 className='min-w-[140px]'
               >
                 {isGeneratingPrompt ? (

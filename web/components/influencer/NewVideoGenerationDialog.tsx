@@ -109,7 +109,7 @@ export function NewVideoGenerationDialog({
     // Generate optimized prompt in the background
     try {
       setIsGeneratingPrompt(true);
-      
+
       const enhancedPrompt = `Create a high-quality ${duration}-second video of ${influencer.name} based on the concept "${idea.title}".
 
 VIDEO CONCEPT:
