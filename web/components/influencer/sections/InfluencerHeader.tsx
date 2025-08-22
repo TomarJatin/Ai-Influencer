@@ -13,45 +13,36 @@ interface InfluencerHeaderProps {
   onVideoGenerate: () => void;
 }
 
-export function InfluencerHeader({ 
-  influencer, 
-  onEdit, 
-  onImageGenerate, 
-  onVideoGenerate 
-}: InfluencerHeaderProps) {
+export function InfluencerHeader({ influencer, onEdit, onImageGenerate, onVideoGenerate }: InfluencerHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <Link href="/dashboard">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+    <div className='flex items-center justify-between'>
+      <div className='flex items-center space-x-4'>
+        <Link href='/dashboard'>
+          <Button variant='outline' size='sm'>
+            <ArrowLeft className='mr-2 h-4 w-4' />
             Back
           </Button>
         </Link>
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-3xl font-bold tracking-tight">{influencer.name}</h1>
-            {influencer.isDefault && (
-              <Badge variant="secondary">Default Template</Badge>
-            )}
+          <div className='flex items-center space-x-2'>
+            <h1 className='text-3xl font-bold tracking-tight'>{influencer.name}</h1>
+            {influencer.isDefault && <Badge variant='secondary'>Default Template</Badge>}
           </div>
-          <p className="text-muted-foreground">
-            {influencer.description || 'No description provided'}
-          </p>
+          <p className='text-muted-foreground'>{influencer.description || 'No description provided'}</p>
         </div>
       </div>
-      
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" onClick={onEdit}>
-          <Edit className="mr-2 h-4 w-4" />
+
+      <div className='flex items-center space-x-2'>
+        <Button variant='outline' onClick={onEdit}>
+          <Edit className='mr-2 h-4 w-4' />
           Edit
         </Button>
         <Button onClick={onImageGenerate}>
-          <ImageIcon className="mr-2 h-4 w-4" />
+          <ImageIcon className='mr-2 h-4 w-4' />
           Generate Image
         </Button>
         <Button onClick={onVideoGenerate}>
-          <Video className="mr-2 h-4 w-4" />
+          <Video className='mr-2 h-4 w-4' />
           Generate Video
         </Button>
       </div>

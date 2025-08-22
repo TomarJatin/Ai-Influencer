@@ -10,7 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AIInfluencer } from '@/types';
-import { InfluencerService, ImageIdea, PaginationQueryDto, GenerateImageFromIdeaDto, GenerateImagePromptDto, OptimizedPromptResponse } from '@/services';
+import {
+  InfluencerService,
+  ImageIdea,
+  PaginationQueryDto,
+  GenerateImageFromIdeaDto,
+  GenerateImagePromptDto,
+  OptimizedPromptResponse,
+} from '@/services';
 import { toast } from 'sonner';
 import { Wand2, Loader2, Image as ImageIcon, Search, Plus, ArrowLeft, Eye, Sparkles } from 'lucide-react';
 
@@ -627,10 +634,8 @@ export function NewImageGenerationDialog({
                           {/* AI Reasoning */}
                           {optimizedPromptData.reasoning && (
                             <div className='rounded-lg border border-blue-200/30 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 p-3 dark:border-blue-800/30 dark:from-blue-950/20 dark:to-indigo-950/20'>
-                              <h5 className='text-blue-800 text-xs font-medium dark:text-blue-200'>
-                                🤖 AI Reasoning
-                              </h5>
-                              <p className='text-blue-700 text-xs leading-relaxed dark:text-blue-300'>
+                              <h5 className='text-xs font-medium text-blue-800 dark:text-blue-200'>🤖 AI Reasoning</h5>
+                              <p className='text-xs leading-relaxed text-blue-700 dark:text-blue-300'>
                                 {optimizedPromptData.reasoning}
                               </p>
                             </div>
@@ -639,34 +644,35 @@ export function NewImageGenerationDialog({
                           {/* Technical Notes */}
                           {optimizedPromptData.technicalNotes && (
                             <div className='rounded-lg border border-green-200/30 bg-gradient-to-br from-green-50/50 to-emerald-50/50 p-3 dark:border-green-800/30 dark:from-green-950/20 dark:to-emerald-950/20'>
-                              <h5 className='text-green-800 text-xs font-medium dark:text-green-200'>
+                              <h5 className='text-xs font-medium text-green-800 dark:text-green-200'>
                                 ⚙️ Technical Notes
                               </h5>
-                              <p className='text-green-700 text-xs leading-relaxed dark:text-green-300'>
+                              <p className='text-xs leading-relaxed text-green-700 dark:text-green-300'>
                                 {optimizedPromptData.technicalNotes}
                               </p>
                             </div>
                           )}
 
                           {/* Alternative Prompts */}
-                          {optimizedPromptData.alternativePrompts && optimizedPromptData.alternativePrompts.length > 0 && (
-                            <div className='rounded-lg border border-purple-200/30 bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-3 dark:border-purple-800/30 dark:from-purple-950/20 dark:to-pink-950/20'>
-                              <h5 className='text-purple-800 text-xs font-medium dark:text-purple-200'>
-                                🔄 Alternative Prompts ({optimizedPromptData.alternativePrompts.length})
-                              </h5>
-                              <div className='mt-2 space-y-2'>
-                                {optimizedPromptData.alternativePrompts.slice(0, 2).map((altPrompt, index) => (
-                                  <button
-                                    key={index}
-                                    onClick={() => setGeneratedPrompt(altPrompt)}
-                                    className='w-full rounded border border-purple-200/50 bg-white/50 p-2 text-left text-xs text-purple-700 transition-colors hover:bg-white/80 dark:border-purple-800/50 dark:bg-black/20 dark:text-purple-300 dark:hover:bg-black/40'
-                                  >
-                                    {altPrompt}
-                                  </button>
-                                ))}
+                          {optimizedPromptData.alternativePrompts &&
+                            optimizedPromptData.alternativePrompts.length > 0 && (
+                              <div className='rounded-lg border border-purple-200/30 bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-3 dark:border-purple-800/30 dark:from-purple-950/20 dark:to-pink-950/20'>
+                                <h5 className='text-xs font-medium text-purple-800 dark:text-purple-200'>
+                                  🔄 Alternative Prompts ({optimizedPromptData.alternativePrompts.length})
+                                </h5>
+                                <div className='mt-2 space-y-2'>
+                                  {optimizedPromptData.alternativePrompts.slice(0, 2).map((altPrompt, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() => setGeneratedPrompt(altPrompt)}
+                                      className='w-full rounded border border-purple-200/50 bg-white/50 p-2 text-left text-xs text-purple-700 transition-colors hover:bg-white/80 dark:border-purple-800/50 dark:bg-black/20 dark:text-purple-300 dark:hover:bg-black/40'
+                                    >
+                                      {altPrompt}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                         </div>
                       ) : (
                         <div className='max-h-32 overflow-y-auto rounded-lg border border-amber-200/30 bg-gradient-to-br from-amber-50/50 to-orange-50/50 p-4 dark:border-amber-800/30 dark:from-amber-950/20 dark:to-orange-950/20'>

@@ -182,7 +182,10 @@ export class InfluencerService {
   }
 
   static async generateImagePrompt(influencerId: string, data: GenerateImagePromptDto) {
-    return await ApiClient.post<{ data: OptimizedPromptResponse }>(`/api/influencers/${influencerId}/generate-prompt`, data);
+    return await ApiClient.post<{ data: OptimizedPromptResponse }>(
+      `/api/influencers/${influencerId}/generate-prompt`,
+      data
+    );
   }
 
   static async deleteImage(influencerId: string, imageId: string) {

@@ -224,22 +224,22 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-10 w-24" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-96" />
+      <div className='flex-1 space-y-4 p-8 pt-6'>
+        <div className='flex items-center space-x-4'>
+          <Skeleton className='h-10 w-24' />
+          <div className='space-y-2'>
+            <Skeleton className='h-8 w-48' />
+            <Skeleton className='h-4 w-96' />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="space-y-4">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-32 w-full" />
+        <div className='grid gap-6 md:grid-cols-3'>
+          <div className='space-y-4'>
+            <Skeleton className='h-64 w-full' />
+            <Skeleton className='h-32 w-full' />
           </div>
-          <div className="space-y-4 md:col-span-2">
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-64 w-full" />
+          <div className='space-y-4 md:col-span-2'>
+            <Skeleton className='h-40 w-full' />
+            <Skeleton className='h-64 w-full' />
           </div>
         </div>
       </div>
@@ -248,13 +248,13 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
 
   if (!influencer) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-bold">Influencer Not Found</h2>
-          <p className="text-muted-foreground">The requested AI influencer could not be found.</p>
-          <Link href="/dashboard" className="inline-block">
+      <div className='flex flex-1 items-center justify-center'>
+        <div className='space-y-4 text-center'>
+          <h2 className='text-2xl font-bold'>Influencer Not Found</h2>
+          <p className='text-muted-foreground'>The requested AI influencer could not be found.</p>
+          <Link href='/dashboard' className='inline-block'>
             <Button>
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className='mr-2 h-4 w-4' />
               Back to Dashboard
             </Button>
           </Link>
@@ -269,7 +269,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className='flex-1 space-y-4 p-8 pt-6'>
       {/* Header */}
       <InfluencerHeader
         influencer={influencer}
@@ -278,37 +278,37 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
         onVideoGenerate={() => setShowVideoDialog(true)}
       />
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className='grid gap-6 md:grid-cols-3'>
         {/* Left Column - Profile & Stats */}
         <ProfileSection influencer={influencer} />
 
         {/* Right Column - Content */}
-        <div className="md:col-span-2">
-          <Tabs defaultValue="images" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="images" className="flex items-center space-x-2">
-                <ImageIcon className="h-4 w-4" />
+        <div className='md:col-span-2'>
+          <Tabs defaultValue='images' className='space-y-4'>
+            <TabsList className='grid w-full grid-cols-5'>
+              <TabsTrigger value='images' className='flex items-center space-x-2'>
+                <ImageIcon className='h-4 w-4' />
                 <span>Images ({stats.totalImages})</span>
               </TabsTrigger>
-              <TabsTrigger value="videos" className="flex items-center space-x-2">
-                <Video className="h-4 w-4" />
+              <TabsTrigger value='videos' className='flex items-center space-x-2'>
+                <Video className='h-4 w-4' />
                 <span>Videos ({stats.totalVideos})</span>
               </TabsTrigger>
-              <TabsTrigger value="image-ideas" className="flex items-center space-x-2">
-                <Plus className="h-4 w-4" />
+              <TabsTrigger value='image-ideas' className='flex items-center space-x-2'>
+                <Plus className='h-4 w-4' />
                 <span>Image Ideas</span>
               </TabsTrigger>
-              <TabsTrigger value="video-ideas" className="flex items-center space-x-2">
-                <Plus className="h-4 w-4" />
+              <TabsTrigger value='video-ideas' className='flex items-center space-x-2'>
+                <Plus className='h-4 w-4' />
                 <span>Video Ideas</span>
               </TabsTrigger>
-              <TabsTrigger value="details" className="flex items-center space-x-2">
-                <Settings className="h-4 w-4" />
+              <TabsTrigger value='details' className='flex items-center space-x-2'>
+                <Settings className='h-4 w-4' />
                 <span>Details</span>
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="images" className="space-y-4">
+            <TabsContent value='images' className='space-y-4'>
               <GeneratedImagesSection
                 influencer={influencer}
                 onImageGenerate={() => setShowImageDialog(true)}
@@ -316,14 +316,11 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               />
             </TabsContent>
 
-            <TabsContent value="videos" className="space-y-4">
-              <GeneratedVideosSection
-                influencer={influencer}
-                onVideoGenerate={() => setShowVideoDialog(true)}
-              />
+            <TabsContent value='videos' className='space-y-4'>
+              <GeneratedVideosSection influencer={influencer} onVideoGenerate={() => setShowVideoDialog(true)} />
             </TabsContent>
 
-            <TabsContent value="image-ideas" className="space-y-4">
+            <TabsContent value='image-ideas' className='space-y-4'>
               <ImageIdeasSection
                 influencer={influencer}
                 imageIdeas={imageIdeas}
@@ -346,7 +343,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               />
             </TabsContent>
 
-            <TabsContent value="video-ideas" className="space-y-4">
+            <TabsContent value='video-ideas' className='space-y-4'>
               <VideoIdeasSection
                 influencer={influencer}
                 videoIdeas={videoIdeas}
@@ -369,7 +366,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
               />
             </TabsContent>
 
-            <TabsContent value="details" className="space-y-4">
+            <TabsContent value='details' className='space-y-4'>
               <DetailsSection influencer={influencer} />
             </TabsContent>
           </Tabs>

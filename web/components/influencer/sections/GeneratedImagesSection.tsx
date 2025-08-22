@@ -26,11 +26,7 @@ interface GeneratedImagesSectionProps {
   onRefresh: () => void;
 }
 
-export function GeneratedImagesSection({ 
-  influencer, 
-  onImageGenerate, 
-  onRefresh 
-}: GeneratedImagesSectionProps) {
+export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh }: GeneratedImagesSectionProps) {
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
@@ -42,7 +38,7 @@ export function GeneratedImagesSection({
     try {
       setDeletingImageId(imageId);
       const response = await InfluencerService.deleteImage(influencer.id, imageId);
-      
+
       if (response.error) {
         toast.error(response.error.message || 'Failed to delete image');
       } else {
@@ -83,75 +79,75 @@ export function GeneratedImagesSection({
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Generated Images ({stats.totalImages})</h3>
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-medium'>Generated Images ({stats.totalImages})</h3>
         </div>
 
         {influencer.images && influencer.images.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
             {influencer.images.map((image) => (
-              <Card key={image.id} className="group overflow-hidden transition-all hover:shadow-md">
-                <div className="relative h-48 bg-muted overflow-hidden">
-                  <Image 
-                    src={image.imageUrl} 
-                    alt="Generated image" 
-                    fill 
-                    className="object-cover transition-transform group-hover:scale-105" 
+              <Card key={image.id} className='group overflow-hidden transition-all hover:shadow-md'>
+                <div className='bg-muted relative h-48 overflow-hidden'>
+                  <Image
+                    src={image.imageUrl}
+                    alt='Generated image'
+                    fill
+                    className='object-cover transition-transform group-hover:scale-105'
                   />
-                  
+
                   {/* Overlay badges */}
-                  <div className="absolute top-2 left-2 flex gap-1">
+                  <div className='absolute top-2 left-2 flex gap-1'>
                     {image.isReference && (
-                      <Badge variant="default" className="text-xs">
+                      <Badge variant='default' className='text-xs'>
                         Reference
                       </Badge>
                     )}
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant='outline' className='text-xs'>
                       {image.imageType}
                     </Badge>
                   </div>
 
                   {/* Hover overlay with actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <div className='absolute inset-0 flex items-center justify-center gap-2 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100'>
                     <Button
-                      size="sm"
-                      variant="secondary"
+                      size='sm'
+                      variant='secondary'
                       onClick={() => handleViewImage(image.imageUrl)}
-                      className="h-8 w-8 p-0"
+                      className='h-8 w-8 p-0'
                     >
-                      <Eye className="h-3 w-3" />
+                      <Eye className='h-3 w-3' />
                     </Button>
                     <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleDownloadImage(image.imageUrl, `${influencer.name}-${image.imageType}-${image.id}`)}
-                      className="h-8 w-8 p-0"
+                      size='sm'
+                      variant='secondary'
+                      onClick={() =>
+                        handleDownloadImage(image.imageUrl, `${influencer.name}-${image.imageType}-${image.id}`)
+                      }
+                      className='h-8 w-8 p-0'
                     >
-                      <Download className="h-3 w-3" />
+                      <Download className='h-3 w-3' />
                     </Button>
                     <Button
-                      size="sm"
-                      variant="destructive"
+                      size='sm'
+                      variant='destructive'
                       onClick={() => setImageToDelete(image.id)}
                       disabled={deletingImageId === image.id}
-                      className="h-8 w-8 p-0"
+                      className='h-8 w-8 p-0'
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className='h-3 w-3' />
                     </Button>
                   </div>
                 </div>
-                
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {new Date(image.createdAt).toLocaleDateString()}
-                    </span>
+
+                <CardContent className='p-3'>
+                  <div className='flex items-center justify-between text-sm'>
+                    <span className='text-muted-foreground'>{new Date(image.createdAt).toLocaleDateString()}</span>
                     {image.prompt && (
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                        variant='ghost'
+                        size='sm'
+                        className='text-muted-foreground hover:text-foreground h-auto p-0 text-xs'
                         onClick={() => {
                           if (image.prompt) {
                             navigator.clipboard.writeText(image.prompt);
@@ -171,18 +167,19 @@ export function GeneratedImagesSection({
           </div>
         ) : (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center space-y-4 py-12">
-              <div className="rounded-full bg-muted p-4">
-                <Plus className="h-8 w-8 text-muted-foreground" />
+            <CardContent className='flex flex-col items-center justify-center space-y-4 py-12'>
+              <div className='bg-muted rounded-full p-4'>
+                <Plus className='text-muted-foreground h-8 w-8' />
               </div>
-              <div className="space-y-2 text-center">
-                <h4 className="font-medium">No Images Generated</h4>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Start by generating reference images for your AI influencer. These will help establish their look and style.
+              <div className='space-y-2 text-center'>
+                <h4 className='font-medium'>No Images Generated</h4>
+                <p className='text-muted-foreground max-w-md text-sm'>
+                  Start by generating reference images for your AI influencer. These will help establish their look and
+                  style.
                 </p>
               </div>
               <Button onClick={onImageGenerate}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className='mr-2 h-4 w-4' />
                 Generate First Image
               </Button>
             </CardContent>
@@ -194,8 +191,8 @@ export function GeneratedImagesSection({
       <AlertDialog open={!!imageToDelete} onOpenChange={() => setImageToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+            <AlertDialogTitle className='flex items-center gap-2'>
+              <AlertTriangle className='text-destructive h-5 w-5' />
               Delete Image
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -206,7 +203,7 @@ export function GeneratedImagesSection({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => imageToDelete && handleDeleteImage(imageToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
               disabled={!!deletingImageId}
             >
               {deletingImageId ? 'Deleting...' : 'Delete'}

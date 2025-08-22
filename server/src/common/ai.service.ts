@@ -94,7 +94,7 @@ export class AIService {
         return {
           status: 'ERROR',
           message: 'Gemini API key is not configured',
-          details: { envVar: 'GOOGLE_GENERATIVE_AI_API_KEY' }
+          details: { envVar: 'GOOGLE_GENERATIVE_AI_API_KEY' },
         };
       }
 
@@ -107,8 +107,8 @@ export class AIService {
             accessKeyConfigured: !!config.aws.accessKeyId,
             secretKeyConfigured: !!config.aws.secretAccessKey,
             bucketConfigured: !!config.aws.s3.bucket,
-            regionConfigured: !!config.aws.s3.region
-          }
+            regionConfigured: !!config.aws.s3.region,
+          },
         };
       }
 
@@ -123,7 +123,7 @@ export class AIService {
         return {
           status: 'ERROR',
           message: 'Text generation failed - API connectivity issue',
-          details: { testPrompt }
+          details: { testPrompt },
         };
       }
 
@@ -134,8 +134,8 @@ export class AIService {
           apiKeyConfigured: true,
           s3Configured: true,
           textGenerationWorking: true,
-          testResponse: result.text.substring(0, 50) + '...'
-        }
+          testResponse: result.text.substring(0, 50) + '...',
+        },
       };
     } catch (error) {
       this.logger.error('Diagnostic failed:', error);
@@ -144,8 +144,8 @@ export class AIService {
         message: `Diagnostic failed: ${error.message}`,
         details: {
           error: error.message,
-          stack: error.stack
-        }
+          stack: error.stack,
+        },
       };
     }
   }
@@ -625,7 +625,7 @@ Make your suggestions specific and actionable for AI image generation.
         prompt: prompt.substring(0, 200),
         imageType,
         aspectRatio,
-        stack: error.stack
+        stack: error.stack,
       });
       throw new Error(`Failed to generate image with Gemini: ${error.message}`);
     }
@@ -657,10 +657,12 @@ Make your suggestions specific and actionable for AI image generation.
         languageModelError: (fallbackError as Error).message,
         prompt: prompt.substring(0, 100) + '...',
         imageType,
-        aspectRatio
+        aspectRatio,
       });
 
-      throw new Error(`Image generation failed: ${lastError?.message || 'Unknown error'}. Fallback also failed: ${(fallbackError as Error).message}`);
+      throw new Error(
+        `Image generation failed: ${lastError?.message || 'Unknown error'}. Fallback also failed: ${(fallbackError as Error).message}`,
+      );
     }
   }
 
