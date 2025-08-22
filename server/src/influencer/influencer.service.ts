@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AIService, ImageAnalysis, OptimizedPromptSchema } from '../common/ai.service';
+import { AIService, OptimizedPromptSchema } from '../common/ai.service';
 import {
   CreateAIInfluencerDto,
   UpdateAIInfluencerDto,
@@ -252,7 +253,7 @@ export class InfluencerService {
       const { page = 1, limit = 10, search, category, isUsed } = query;
       const skip = (page - 1) * limit;
 
-      const where: any = { influencerId };
+      const where: Record<string, unknown> = { influencerId };
 
       if (search) {
         where.OR = [
@@ -358,7 +359,11 @@ export class InfluencerService {
     }
   }
 
-  async generateImageFromIdea(influencerId: string, generateDto: GenerateImageFromIdeaDto, user: RequestUser) {
+  async generateImageFromIdea(
+    influencerId: string,
+    generateDto: GenerateImageFromIdeaDto,
+    user: RequestUser,
+  ): Promise<unknown> {
     try {
       const influencer = await this.getInfluencer(influencerId, user);
       console.log('influencerId', influencerId);
@@ -524,32 +529,37 @@ export class InfluencerService {
     return await this.aiService.diagnoseImageGeneration();
   }
 
-  private async generateImagePromptFromIdea(data: any): Promise<OptimizedPromptDto> {
+  private async generateImagePromptFromIdea(data: Record<string, unknown>): Promise<OptimizedPromptDto> {
     const { influencer, idea, imageType } = data;
 
-    const prompt = `
-You are an expert prompt engineer specializing in ultra-realistic, natural-looking AI image generation. Create an optimized prompt for generating a realistic ${imageType} image that looks like it was taken by a real person, not AI-generated.
+    // Type assertions for the extracted data
+    const typedInfluencer = influencer as Record<string, unknown>;
+    const typedIdea = idea as Record<string, unknown>;
+
+    const imageTypeStr = String(imageType || 'LIFESTYLE');
+    const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
+You are an expert prompt engineer specializing in ultra-realistic, natural-looking AI image generation. Create an optimized prompt for generating a realistic ${imageTypeStr} image that looks like it was taken by a real person, not AI-generated.
 
 INFLUENCER CHARACTERISTICS:
-- Name: ${influencer.name || 'AI Influencer'}
-- Personality: ${influencer.personalityArchetype || 'Not specified'}
-- Style: ${influencer.styleAesthetic || 'Not specified'}
-- Age: ${influencer.age || 'Not specified'}
-- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
-- Height: ${influencer.height || 'Not specified'}
-- Body Type: ${influencer.bodyType || 'Not specified'}
-- Hair: ${influencer.hairColor || 'Not specified'}
-- Eyes: ${influencer.eyeColor || 'Not specified'}
-- Key Features: ${influencer.keyFeatures || 'Not specified'}
+- Name: ${String(typedInfluencer.name || 'AI Influencer')}
+- Personality: ${String(typedInfluencer.personalityArchetype || 'Not specified')}
+- Style: ${String(typedInfluencer.styleAesthetic || 'Not specified')}
+- Age: ${String(typedInfluencer.age || 'Not specified')}
+- Ethnicity: ${String(typedInfluencer.primaryEthnicity || 'Not specified')}
+- Height: ${String(typedInfluencer.height || 'Not specified')}
+- Body Type: ${String(typedInfluencer.bodyType || 'Not specified')}
+- Hair: ${String(typedInfluencer.hairColor || 'Not specified')}
+- Eyes: ${String(typedInfluencer.eyeColor || 'Not specified')}
+- Key Features: ${String(typedInfluencer.keyFeatures || 'Not specified')}
 
 SELECTED IMAGE IDEA:
-- Title: ${idea.title}
-- Description: ${idea.description}
-- Category: ${idea.category}
-- Visual Elements: ${idea.visualElements.join(', ')}
-- Mood: ${idea.mood}
-- Setting: ${idea.setting}
-- Style Notes: ${idea.styleNotes}
+- Title: ${String(String(typedIdea.title || 'Untitled'))}
+- Description: ${String(String(typedIdea.description || 'No description'))}
+- Category: ${String(String(typedIdea.category || 'Uncategorized'))}
+- Visual Elements: ${String((typedIdea.visualElements as string[])?.join(', ') || 'None specified')}
+- Mood: ${String(String(typedIdea.mood || 'Not specified'))}
+- Setting: ${String(String(typedIdea.setting || 'Not specified'))}
+- Style Notes: ${String(String(typedIdea.styleNotes || 'Not specified'))}
 
 REALISM OPTIMIZATION REQUIREMENTS:
 1. Make the image look like it was taken by a real person, not AI-generated
@@ -637,7 +647,7 @@ Generate an optimized prompt that will produce an ultra-realistic, natural-looki
       const { page = 1, limit = 10, search, category, isUsed } = query;
       const skip = (page - 1) * limit;
 
-      const where: any = { influencerId };
+      const where: Record<string, unknown> = { influencerId };
 
       if (search) {
         where.OR = [
@@ -838,7 +848,7 @@ Generate an optimized prompt that will produce an ultra-realistic, natural-looki
       }
 
       // Check status with AI service
-      const metadata = video.metadata as any;
+      const metadata = video.metadata as Record<string, unknown>;
       const operationId = metadata?.operationId as string;
       if (!operationId) {
         throw new BadRequestException('No operation ID found for video generation');
@@ -850,12 +860,12 @@ Generate an optimized prompt that will produce an ultra-realistic, natural-looki
       const updatedVideo = await this.prismaService.influencerVideo.update({
         where: { id: videoId },
         data: {
-          status: status.status as any,
+          status: status.status as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           videoUrl: status.videoUrl,
           thumbnailUrl: status.thumbnailUrl,
           duration: status.metadata?.duration as number,
           metadata: {
-            ...(video.metadata as any),
+            ...(video.metadata as any), // eslint-disable-line @typescript-eslint/no-explicit-any
             ...(status.metadata || {}),
           },
         },
@@ -872,33 +882,37 @@ Generate an optimized prompt that will produce an ultra-realistic, natural-looki
     }
   }
 
-  private async generateVideoPromptFromIdea(data: any): Promise<OptimizedPromptDto> {
+  private async generateVideoPromptFromIdea(data: Record<string, unknown>): Promise<OptimizedPromptDto> {
     const { influencer, idea } = data;
 
-    const prompt = `
+    // Type assertions for the extracted data
+    const typedInfluencer = influencer as Record<string, unknown>;
+    const typedIdea = idea as Record<string, unknown>;
+
+    const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
 You are an expert prompt engineer specializing in AI video generation. Create an optimized prompt for generating a high-quality video based on the following:
 
 INFLUENCER CHARACTERISTICS:
-- Name: ${influencer.name || 'AI Influencer'}
-- Personality: ${influencer.personalityArchetype || 'Not specified'}
-- Style: ${influencer.styleAesthetic || 'Not specified'}
-- Age: ${influencer.age || 'Not specified'}
-- Ethnicity: ${influencer.primaryEthnicity || 'Not specified'}
-- Height: ${influencer.height || 'Not specified'}
-- Body Type: ${influencer.bodyType || 'Not specified'}
-- Hair: ${influencer.hairColor || 'Not specified'}
-- Eyes: ${influencer.eyeColor || 'Not specified'}
-- Key Features: ${influencer.keyFeatures || 'Not specified'}
+- Name: ${String(typedInfluencer.name || 'AI Influencer')}
+- Personality: ${String(typedInfluencer.personalityArchetype || 'Not specified')}
+- Style: ${String(typedInfluencer.styleAesthetic || 'Not specified')}
+- Age: ${String(typedInfluencer.age || 'Not specified')}
+- Ethnicity: ${String(typedInfluencer.primaryEthnicity || 'Not specified')}
+- Height: ${String(typedInfluencer.height || 'Not specified')}
+- Body Type: ${String(typedInfluencer.bodyType || 'Not specified')}
+- Hair: ${String(typedInfluencer.hairColor || 'Not specified')}
+- Eyes: ${String(typedInfluencer.eyeColor || 'Not specified')}
+- Key Features: ${String(typedInfluencer.keyFeatures || 'Not specified')}
 
 SELECTED VIDEO IDEA:
-- Title: ${idea.title}
-- Description: ${idea.description}
-- Category: ${idea.category}
-- Scenario: ${idea.scenario}
-- Key Moments: ${idea.keyMoments.join(', ')}
-- Duration: ${idea.duration}
-- Mood: ${idea.mood}
-- Visual Style: ${idea.visualStyle}
+- Title: ${String(String(typedIdea.title || 'Untitled'))}
+- Description: ${String(String(typedIdea.description || 'No description'))}
+- Category: ${String(String(typedIdea.category || 'Uncategorized'))}
+- Scenario: ${String(String(typedIdea.scenario || 'No scenario'))}
+- Key Moments: ${String((typedIdea.keyMoments as string[])?.join(', ') || 'None specified')}
+- Duration: ${String(String(typedIdea.duration || 'Not specified'))}
+- Mood: ${String(String(typedIdea.mood || 'Not specified'))}
+- Visual Style: ${String(String(typedIdea.visualStyle || 'Not specified'))}
 
 OPTIMIZATION REQUIREMENTS:
 1. Create a detailed, specific prompt optimized for AI video generation
@@ -923,36 +937,36 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
   // HELPER METHODS
   // ============================================================================
 
-  private mapImageIdeaToDto(idea: any): ImageIdeaDto {
+  private mapImageIdeaToDto(idea: Record<string, unknown>): ImageIdeaDto {
     return {
-      id: idea.id, // Use database ID instead of ideaId
-      title: idea.title,
-      description: idea.description,
-      category: idea.category,
-      visualElements: Array.isArray(idea.visualElements) ? idea.visualElements : [],
-      mood: idea.mood,
-      setting: idea.setting,
-      styleNotes: idea.styleNotes,
-      isUsed: idea.isUsed,
-      createdAt: idea.createdAt.toISOString(),
-      updatedAt: idea.updatedAt.toISOString(),
+      id: String(idea.id), // Use database ID instead of ideaId
+      title: String(idea.title),
+      description: String(idea.description),
+      category: String(idea.category),
+      visualElements: Array.isArray(idea.visualElements) ? (idea.visualElements as string[]) : [],
+      mood: String(idea.mood),
+      setting: String(idea.setting),
+      styleNotes: String(idea.styleNotes),
+      isUsed: Boolean(idea.isUsed),
+      createdAt: (idea.createdAt as Date).toISOString(),
+      updatedAt: (idea.updatedAt as Date).toISOString(),
     };
   }
 
-  private mapVideoIdeaToDto(idea: any): VideoIdeaDto {
+  private mapVideoIdeaToDto(idea: Record<string, unknown>): VideoIdeaDto {
     return {
-      id: idea.id, // Use database ID instead of ideaId
-      title: idea.title,
-      description: idea.description,
-      category: idea.category,
-      scenario: idea.scenario,
-      keyMoments: Array.isArray(idea.keyMoments) ? idea.keyMoments : [],
-      duration: idea.duration,
-      mood: idea.mood,
-      visualStyle: idea.visualStyle,
-      isUsed: idea.isUsed,
-      createdAt: idea.createdAt.toISOString(),
-      updatedAt: idea.updatedAt.toISOString(),
+      id: String(idea.id), // Use database ID instead of ideaId
+      title: String(idea.title),
+      description: String(idea.description),
+      category: String(idea.category),
+      scenario: String(idea.scenario),
+      keyMoments: Array.isArray(idea.keyMoments) ? (idea.keyMoments as string[]) : [],
+      duration: String(idea.duration),
+      mood: String(idea.mood),
+      visualStyle: String(idea.visualStyle),
+      isUsed: Boolean(idea.isUsed),
+      createdAt: (idea.createdAt as Date).toISOString(),
+      updatedAt: (idea.updatedAt as Date).toISOString(),
     };
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-base-to-string, @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from '@nestjs/common';
 import { generateObject, generateText, experimental_generateImage as generateImage } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
@@ -85,7 +86,7 @@ export class AIService {
   /**
    * Diagnostic method to test API configuration and connectivity
    */
-  async diagnoseImageGeneration(): Promise<{ status: string; message: string; details?: any }> {
+  async diagnoseImageGeneration(): Promise<{ status: string; message: string; details?: Record<string, unknown> }> {
     try {
       this.logger.log('Running image generation diagnostics...');
 
@@ -166,22 +167,22 @@ export class AIService {
           ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
           : '';
 
-      const prompt = `
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
 Generate ${count} creative and visually compelling image ideas for an AI influencer with the following characteristics:
 
 INFLUENCER PROFILE:
-- Name: ${influencerData.name || 'AI Influencer'}
-- Personality: ${influencerData.personalityArchetype || 'Not specified'}
-- Style Aesthetic: ${influencerData.styleAesthetic || 'Not specified'}
-- Age: ${influencerData.age || 'Not specified'}
-- Ethnicity: ${influencerData.primaryEthnicity || 'Not specified'}
-- Height: ${influencerData.height || 'Not specified'}
-- Body Type: ${influencerData.bodyType || 'Not specified'}
-- Hair Color: ${influencerData.hairColor || 'Not specified'}
-- Eye Color: ${influencerData.eyeColor || 'Not specified'}
-- Key Features: ${influencerData.keyFeatures || 'Not specified'}
-- Style Icons: ${influencerData.styleIcons || 'Not specified'}
-- Personality Traits: ${influencerData.personalityTraits || 'Not specified'}${usedIdeasContext}
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Personality: ${String(influencerData.personalityArchetype || 'Not specified')}
+- Style Aesthetic: ${String(influencerData.styleAesthetic || 'Not specified')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+- Height: ${String(influencerData.height || 'Not specified')}
+- Body Type: ${String(influencerData.bodyType || 'Not specified')}
+- Hair Color: ${String(influencerData.hairColor || 'Not specified')}
+- Eye Color: ${String(influencerData.eyeColor || 'Not specified')}
+- Key Features: ${String(influencerData.keyFeatures || 'Not specified')}
+- Style Icons: ${String(influencerData.styleIcons || 'Not specified')}
+- Personality Traits: ${String(influencerData.personalityTraits || 'Not specified')}${usedIdeasContext}
 
 REQUIREMENTS:
 1. Each idea should be authentic to the influencer's characteristics
@@ -224,22 +225,22 @@ Generate exactly ${count} unique and inspiring image ideas that would showcase t
           ? `\n\nIMPORTANT: Avoid generating ideas similar to these already used concepts (IDs: ${usedIdeaIds.join(', ')}). Create fresh, unique ideas.`
           : '';
 
-      const prompt = `
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
 Generate ${count} engaging and creative video ideas for an AI influencer with the following characteristics:
 
 INFLUENCER PROFILE:
-- Name: ${influencerData.name || 'AI Influencer'}
-- Personality: ${influencerData.personalityArchetype || 'Not specified'}
-- Style Aesthetic: ${influencerData.styleAesthetic || 'Not specified'}
-- Age: ${influencerData.age || 'Not specified'}
-- Ethnicity: ${influencerData.primaryEthnicity || 'Not specified'}
-- Height: ${influencerData.height || 'Not specified'}
-- Body Type: ${influencerData.bodyType || 'Not specified'}
-- Hair Color: ${influencerData.hairColor || 'Not specified'}
-- Eye Color: ${influencerData.eyeColor || 'Not specified'}
-- Key Features: ${influencerData.keyFeatures || 'Not specified'}
-- Style Icons: ${influencerData.styleIcons || 'Not specified'}
-- Personality Traits: ${influencerData.personalityTraits || 'Not specified'}${usedIdeasContext}
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Personality: ${String(influencerData.personalityArchetype || 'Not specified')}
+- Style Aesthetic: ${String(influencerData.styleAesthetic || 'Not specified')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+- Height: ${String(influencerData.height || 'Not specified')}
+- Body Type: ${String(influencerData.bodyType || 'Not specified')}
+- Hair Color: ${String(influencerData.hairColor || 'Not specified')}
+- Eye Color: ${String(influencerData.eyeColor || 'Not specified')}
+- Key Features: ${String(influencerData.keyFeatures || 'Not specified')}
+- Style Icons: ${String(influencerData.styleIcons || 'Not specified')}
+- Personality Traits: ${String(influencerData.personalityTraits || 'Not specified')}${usedIdeasContext}
 
 REQUIREMENTS:
 1. Each video should be authentic to the influencer's personality and style
@@ -280,20 +281,20 @@ Generate exactly ${count} unique and compelling video ideas that would engage th
 
       const customContext = customInstructions ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` : '';
 
-      const prompt = `
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
 You are an expert prompt engineer specializing in AI image generation. Create an optimized prompt for generating a high-quality image based on the following:
 
 INFLUENCER CHARACTERISTICS:
-- Name: ${influencerData.name || 'AI Influencer'}
-- Personality: ${influencerData.personalityArchetype || 'Not specified'}
-- Style: ${influencerData.styleAesthetic || 'Not specified'}
-- Age: ${influencerData.age || 'Not specified'}
-- Ethnicity: ${influencerData.primaryEthnicity || 'Not specified'}
-- Height: ${influencerData.height || 'Not specified'}
-- Body Type: ${influencerData.bodyType || 'Not specified'}
-- Hair: ${influencerData.hairColor || 'Not specified'}
-- Eyes: ${influencerData.eyeColor || 'Not specified'}
-- Key Features: ${influencerData.keyFeatures || 'Not specified'}
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Personality: ${String(influencerData.personalityArchetype || 'Not specified')}
+- Style: ${String(influencerData.styleAesthetic || 'Not specified')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+- Height: ${String(influencerData.height || 'Not specified')}
+- Body Type: ${String(influencerData.bodyType || 'Not specified')}
+- Hair: ${String(influencerData.hairColor || 'Not specified')}
+- Eyes: ${String(influencerData.eyeColor || 'Not specified')}
+- Key Features: ${String(influencerData.keyFeatures || 'Not specified')}
 
 SELECTED IMAGE IDEA:
 - Title: ${imageIdea.title}
@@ -344,20 +345,20 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
 
       const customContext = customInstructions ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` : '';
 
-      const prompt = `
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
 You are an expert prompt engineer specializing in AI video generation. Create an optimized prompt for generating a high-quality video based on the following:
 
 INFLUENCER CHARACTERISTICS:
-- Name: ${influencerData.name || 'AI Influencer'}
-- Personality: ${influencerData.personalityArchetype || 'Not specified'}
-- Style: ${influencerData.styleAesthetic || 'Not specified'}
-- Age: ${influencerData.age || 'Not specified'}
-- Ethnicity: ${influencerData.primaryEthnicity || 'Not specified'}
-- Height: ${influencerData.height || 'Not specified'}
-- Body Type: ${influencerData.bodyType || 'Not specified'}
-- Hair: ${influencerData.hairColor || 'Not specified'}
-- Eyes: ${influencerData.eyeColor || 'Not specified'}
-- Key Features: ${influencerData.keyFeatures || 'Not specified'}
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Personality: ${String(influencerData.personalityArchetype || 'Not specified')}
+- Style: ${String(influencerData.styleAesthetic || 'Not specified')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+- Height: ${String(influencerData.height || 'Not specified')}
+- Body Type: ${String(influencerData.bodyType || 'Not specified')}
+- Hair: ${String(influencerData.hairColor || 'Not specified')}
+- Eyes: ${String(influencerData.eyeColor || 'Not specified')}
+- Key Features: ${String(influencerData.keyFeatures || 'Not specified')}
 
 SELECTED VIDEO IDEA:
 - Title: ${videoIdea.title}
@@ -541,11 +542,11 @@ Make your suggestions specific and actionable for AI image generation.
       }
 
       // Upload the generated image to S3
-      const imageBuffer = Buffer.from(imageFile.uint8Array);
-      const fileExtension = imageFile.mediaType.split('/')[1] || 'png';
+      const imageBuffer = Buffer.from(imageFile.uint8Array as Uint8Array);
+      const fileExtension = String(imageFile.mediaType).split('/')[1] || 'png';
       const filename = `generated-images/${uuidv4()}.${fileExtension}`;
 
-      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, imageFile.mediaType);
+      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, String(imageFile.mediaType));
 
       this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
 
@@ -602,7 +603,11 @@ Make your suggestions specific and actionable for AI image generation.
 
       this.logger.log(`Uploading image buffer of size: ${imageBuffer.length} bytes`);
 
-      const uploadResult = await this.s3Service.uploadBuffer(imageBuffer, filename, image.mediaType || 'image/png');
+      const uploadResult = await this.s3Service.uploadBuffer(
+        imageBuffer,
+        filename,
+        String(image.mediaType || 'image/png'),
+      );
 
       this.logger.log(`Successfully generated and uploaded image: ${uploadResult.url}`);
 
@@ -613,7 +618,7 @@ Make your suggestions specific and actionable for AI image generation.
           prompt: prompt,
           imageType: imageType,
           aspectRatio: aspectRatio,
-          mediaType: image.mediaType || 'image/png',
+          mediaType: String(image.mediaType || 'image/png'),
           generatedAt: new Date().toISOString(),
           s3Key: uploadResult.key,
           bufferSize: imageBuffer.length,
@@ -777,7 +782,7 @@ Make your suggestions specific and actionable for AI image generation.
       const uploadResult = await this.s3Service.uploadBuffer(videoBuffer, filename, 'video/mp4');
 
       // Generate thumbnail (optional - could be done later)
-      const thumbnailUrl = await this.generateVideoThumbnail(uploadResult.url);
+      const thumbnailUrl = this.generateVideoThumbnail(uploadResult.url);
 
       this.logger.log(`Successfully completed video generation: ${uploadResult.url}`);
 
@@ -800,7 +805,7 @@ Make your suggestions specific and actionable for AI image generation.
   /**
    * Generate video thumbnail (placeholder implementation)
    */
-  private async generateVideoThumbnail(videoUrl: string): Promise<string> {
+  private generateVideoThumbnail(videoUrl: string): string {
     // This is a placeholder - in a real implementation, you'd use a video processing service
     // to extract a frame from the video and create a thumbnail
     this.logger.log(`Generating thumbnail for video: ${videoUrl}`);
@@ -815,7 +820,7 @@ Make your suggestions specific and actionable for AI image generation.
    */
   private async getGoogleAccessToken(): Promise<string> {
     try {
-      const { GoogleAuth } = require('google-auth-library');
+      const { GoogleAuth } = await import('google-auth-library');
 
       // Try multiple authentication methods
       let auth;

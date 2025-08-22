@@ -343,16 +343,20 @@ export class InfluencerController {
   @Post(':id/legacy/generate-image')
   @ApiOperation({ summary: 'Legacy: Generate image (for backward compatibility)' })
   @ApiResponse({ status: 201, description: 'Legacy image generation started' })
-  async generateLegacyImage(@Param('id') influencerId: string, @Body() body: any, @CurrentUser() user: RequestUser) {
+  async generateLegacyImage(
+    @Param('id') influencerId: string,
+    @Body() body: Record<string, unknown>,
+    @CurrentUser() user: RequestUser,
+  ) {
     this.logger.log(`Legacy image generation for influencer ${influencerId}`);
 
     // For legacy compatibility, create a temporary idea and generate from it
     const tempIdea = await this.influencerService.createImageIdea(
       influencerId,
       {
-        title: `Legacy ${body.imageType} Image`,
-        description: body.customPrompt || `Generated ${body.imageType} image`,
-        category: body.imageType,
+        title: `Legacy ${String(body.imageType || 'Unknown')} Image`, // eslint-disable-line @typescript-eslint/no-base-to-string
+        description: String(body.customPrompt || `Generated ${String(body.imageType || 'Unknown')} image`), // eslint-disable-line @typescript-eslint/no-base-to-string
+        category: String(body.imageType || 'Unknown'), // eslint-disable-line @typescript-eslint/no-base-to-string
       },
       user,
     );
@@ -361,9 +365,9 @@ export class InfluencerController {
       influencerId,
       {
         imageIdeaId: tempIdea.id,
-        imageType: body.imageType,
-        customPrompt: body.customPrompt,
-        isReference: body.isReference,
+        imageType: body.imageType as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        customPrompt: body.customPrompt as string,
+        isReference: body.isReference as boolean,
       },
       user,
     );
@@ -372,16 +376,20 @@ export class InfluencerController {
   @Post(':id/legacy/generate-video')
   @ApiOperation({ summary: 'Legacy: Generate video (for backward compatibility)' })
   @ApiResponse({ status: 201, description: 'Legacy video generation started' })
-  async generateLegacyVideo(@Param('id') influencerId: string, @Body() body: any, @CurrentUser() user: RequestUser) {
+  async generateLegacyVideo(
+    @Param('id') influencerId: string,
+    @Body() body: Record<string, unknown>,
+    @CurrentUser() user: RequestUser,
+  ) {
     this.logger.log(`Legacy video generation for influencer ${influencerId}`);
 
     // For legacy compatibility, create a temporary idea and generate from it
     const tempIdea = await this.influencerService.createVideoIdea(
       influencerId,
       {
-        title: body.title,
-        description: body.description || body.title,
-        scenario: body.scenario,
+        title: body.title as string,
+        description: (body.description || body.title) as string,
+        scenario: body.scenario as string,
         category: 'Custom',
       },
       user,
@@ -391,8 +399,8 @@ export class InfluencerController {
       influencerId,
       {
         videoIdeaId: tempIdea.id,
-        customPrompt: body.customPrompt,
-        duration: body.duration,
+        customPrompt: body.customPrompt as string,
+        duration: body.duration as number,
       },
       user,
     );
