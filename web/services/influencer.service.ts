@@ -441,14 +441,9 @@ export class InfluencerService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return await ApiClient.post<BaseImageGenerationResponse>(
+    return await ApiClient.postFormData<BaseImageGenerationResponse>(
       `/api/influencers/${influencerId}/base-image/upload`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
   }
 

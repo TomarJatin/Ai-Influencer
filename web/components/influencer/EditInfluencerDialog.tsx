@@ -261,7 +261,19 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
       setIsUpdating(true);
       console.log('Submitting form data:', data);
 
-      const response = await InfluencerService.updateInfluencer(influencer.id, data as UpdateAIInfluencerDto);
+      // Filter out empty strings and undefined values to reduce payload size
+      const filteredData: Record<string, unknown> = {};
+
+      Object.entries(data).forEach(([key, value]) => {
+        // Only include fields that have meaningful values
+        if (value !== null && value !== undefined && value !== '') {
+          filteredData[key] = value;
+        }
+      });
+
+      console.log('Filtered form data:', Object.keys(filteredData).length, 'fields');
+
+      const response = await InfluencerService.updateInfluencer(influencer.id, filteredData as UpdateAIInfluencerDto);
 
       if (response.data) {
         toast.success('Influencer updated successfully!');
