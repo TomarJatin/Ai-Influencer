@@ -1,5 +1,12 @@
 import { ApiClient } from '@/lib/api-client';
-import { AIInfluencer } from '@/types';
+import { AIInfluencer, OptimizedPrompt } from '@/types';
+import {
+  GenerateBaseImagePromptRequest,
+  RegenerateBaseImagePromptRequest,
+  GenerateBaseImageRequest,
+  SaveBaseImageRequest,
+  BaseImageGenerationResponse,
+} from '@/types/influencer.type';
 
 // New types for the redesigned API
 export interface ImageIdea {
@@ -374,5 +381,82 @@ export class InfluencerService {
 
       poll();
     });
+  }
+
+  // ============================================================================
+  // BASE IMAGE MANAGEMENT METHODS
+  // ============================================================================
+
+  static async generateBaseImagePrompt(
+    request: GenerateBaseImagePromptRequest,
+  ): Promise<{ data?: OptimizedPrompt; error?: { message: string; status: number } }> {
+    return await ApiClient.post<OptimizedPrompt>(
+      `/api/influencers/${request.influencerId}/base-image/generate-prompt`,
+      {
+        customInstructions: request.customInstructions,
+      },
+    );
+  }
+
+  static async regenerateBaseImagePrompt(
+    request: RegenerateBaseImagePromptRequest,
+  ): Promise<{ data?: OptimizedPrompt; error?: { message: string; status: number } }> {
+    return await ApiClient.post<OptimizedPrompt>(
+      `/api/influencers/${request.influencerId}/base-image/regenerate-prompt`,
+      {
+        currentPrompt: request.currentPrompt,
+        customInstructions: request.customInstructions,
+      },
+    );
+  }
+
+  static async generateBaseImage(
+    request: GenerateBaseImageRequest,
+  ): Promise<{ data?: BaseImageGenerationResponse; error?: { message: string; status: number } }> {
+    return await ApiClient.post<BaseImageGenerationResponse>(
+      `/api/influencers/${request.influencerId}/base-image/generate`,
+      {
+        prompt: request.prompt,
+        imageType: request.imageType || 'PORTRAIT',
+      },
+    );
+  }
+
+  static async saveBaseImage(
+    request: SaveBaseImageRequest,
+  ): Promise<{ data?: { success: boolean; message: string }; error?: { message: string; status: number } }> {
+    return await ApiClient.post<{ success: boolean; message: string }>(
+      `/api/influencers/${request.influencerId}/base-image/save`,
+      {
+        imageUrl: request.imageUrl,
+        prompt: request.prompt,
+      },
+    );
+  }
+
+  static async uploadBaseImage(
+    influencerId: string,
+    file: File,
+  ): Promise<{ data?: BaseImageGenerationResponse; error?: { message: string; status: number } }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return await ApiClient.post<BaseImageGenerationResponse>(
+      `/api/influencers/${influencerId}/base-image/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+  }
+
+  static async removeBaseImage(
+    influencerId: string,
+  ): Promise<{ data?: { success: boolean; message: string }; error?: { message: string; status: number } }> {
+    return await ApiClient.delete<{ success: boolean; message: string }>(
+      `/api/influencers/${influencerId}/base-image`,
+    );
   }
 }

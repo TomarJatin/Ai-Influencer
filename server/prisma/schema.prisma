@@ -155,7 +155,11 @@ model AIInfluencer {
   keyFeatures          String? @map("key_features")
   acceptableVariations String? @map("acceptable_variations")
   referenceImages      String? @map("reference_images") // Placeholder for reference image URLs
-  
+
+  // Base Image for Face Consistency
+  baseImageUrl     String? @map("base_image_url") // S3 URL of the base face image
+  baseImagePrompt  String? @map("base_image_prompt") // Prompt used to generate the base image
+
   isDefault Boolean @default(false) @map("is_default")
   isActive  Boolean @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")

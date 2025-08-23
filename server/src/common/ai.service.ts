@@ -333,6 +333,156 @@ Generate an optimized prompt that will produce a stunning, professional-quality 
   }
 
   /**
+   * Generate optimized prompt for base image (face-only) generation
+   */
+  async generateBaseImagePrompt(
+    influencerData: Record<string, unknown>,
+    customInstructions?: string,
+  ): Promise<OptimizedPrompt> {
+    try {
+      this.logger.log(`Generating base image prompt for influencer: ${String(influencerData.name)}`);
+
+      const customContext = customInstructions ? `\n\nCUSTOM INSTRUCTIONS: ${customInstructions}` : '';
+
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
+You are an expert prompt engineer specializing in ultra-realistic face generation for AI influencers. Create an optimized prompt for generating a high-quality, face-only image that will serve as the base reference for maintaining consistent facial features across all generated images.
+
+INFLUENCER CHARACTERISTICS:
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+- Personality: ${String(influencerData.personalityArchetype || 'Not specified')}
+
+FACIAL FEATURES:
+- Face Shape: ${String(influencerData.faceShape || 'Not specified')}
+- Jawline: ${String(influencerData.jawline || 'Not specified')}
+- Cheekbones: ${String(influencerData.cheekbones || 'Not specified')}
+- Forehead: ${String(influencerData.forehead || 'Not specified')}
+- Chin: ${String(influencerData.chin || 'Not specified')}
+
+EYES:
+- Eye Shape: ${String(influencerData.eyeShape || 'Not specified')}
+- Eye Color: ${String(influencerData.eyeColor || 'Not specified')}
+- Eye Size: ${String(influencerData.eyeSize || 'Not specified')}
+- Eyebrow Shape: ${String(influencerData.eyebrowShape || 'Not specified')}
+- Eyebrow Color: ${String(influencerData.eyebrowColor || 'Not specified')}
+- Eyelashes: ${String(influencerData.eyelashes || 'Not specified')}
+
+NOSE:
+- Nose Shape: ${String(influencerData.noseShape || 'Not specified')}
+- Nose Size: ${String(influencerData.noseSize || 'Not specified')}
+- Nostril Shape: ${String(influencerData.nostrilShape || 'Not specified')}
+
+LIPS:
+- Lip Shape: ${String(influencerData.lipShape || 'Not specified')}
+- Lip Size: ${String(influencerData.lipSize || 'Not specified')}
+- Natural Lip Color: ${String(influencerData.naturalLipColor || 'Not specified')}
+
+SKIN:
+- Skin Tone: ${String(influencerData.skinTone || 'Not specified')}
+- Skin Texture: ${String(influencerData.skinTexture || 'Not specified')}
+- Skin Condition: ${String(influencerData.skinCondition || 'Not specified')}
+- Complexion: ${String(influencerData.complexion || 'Not specified')}
+
+HAIR:
+- Hair Color: ${String(influencerData.hairColor || 'Not specified')}
+- Hair Texture: ${String(influencerData.hairTexture || 'Not specified')}
+- Hair Length: ${String(influencerData.hairLength || 'Not specified')}
+- Hair Volume: ${String(influencerData.hairVolume || 'Not specified')}
+- Hair Style: ${String(influencerData.hairStyle || 'Not specified')}
+
+EXPRESSIONS:
+- Signature Smile: ${String(influencerData.signatureSmile || 'Not specified')}
+- Eye Expression: ${String(influencerData.eyeExpression || 'Not specified')}
+- Resting Face: ${String(influencerData.restingFace || 'Not specified')}
+
+BASE IMAGE REQUIREMENTS:
+1. Generate ONLY the face and head - no body, no background, no clothing
+2. Focus on creating an ultra-realistic, neutral expression face reference
+3. The face should be centered and well-lit for consistency
+4. Include subtle, natural skin texture and imperfections
+5. Maintain the exact facial proportions and features described
+6. Use neutral lighting that works for compositing with other images
+7. Ensure the face is captured from a standard portrait angle
+8. The image should be suitable for use as a consistent face reference
+
+TECHNICAL SPECIFICATIONS:
+- Portrait orientation with face taking up significant portion of frame
+- Clean, uniform background (solid color preferred)
+- Even, soft lighting that minimizes harsh shadows
+- High detail on facial features while maintaining realism
+- Natural skin tones and textures
+- Subtle facial hair if applicable (or clean-shaven)
+- Neutral expression suitable for various contexts${customContext}
+
+Generate an optimized prompt that will produce an ultra-realistic, face-only reference image that captures all the specified facial characteristics perfectly for use as a base image.
+      `;
+
+      const result = await generateObject({
+        model: this.model,
+        schema: OptimizedPromptSchema as any,
+        prompt,
+      });
+
+      this.logger.log(`Successfully generated base image prompt`);
+      return result.object;
+    } catch (error) {
+      this.logger.error(`Failed to generate base image prompt: ${error.message}`, error);
+      throw new Error('Failed to generate base image prompt');
+    }
+  }
+
+  /**
+   * Regenerate base image prompt with custom instructions
+   */
+  async regenerateBaseImagePrompt(
+    influencerData: Record<string, unknown>,
+    currentPrompt: string,
+    customInstructions: string,
+  ): Promise<OptimizedPrompt> {
+    try {
+      this.logger.log(`Regenerating base image prompt with custom instructions`);
+
+      const prompt = ` // eslint-disable-line @typescript-eslint/no-base-to-string
+You are an expert prompt engineer. Improve the following base image prompt based on the custom instructions provided.
+
+CURRENT PROMPT:
+${currentPrompt}
+
+CUSTOM INSTRUCTIONS:
+${customInstructions}
+
+INFLUENCER DATA (for reference):
+- Name: ${String(influencerData.name || 'AI Influencer')}
+- Age: ${String(influencerData.age || 'Not specified')}
+- Ethnicity: ${String(influencerData.primaryEthnicity || 'Not specified')}
+
+IMPROVEMENT REQUIREMENTS:
+1. Address all aspects mentioned in the custom instructions
+2. Maintain the core facial characteristics from the influencer data
+3. Keep the focus on face-only generation for consistency
+4. Ensure the prompt remains optimized for realistic AI generation
+5. Preserve technical specifications while incorporating improvements
+6. Make the prompt more specific and detailed where needed
+
+Generate an improved version of the prompt that incorporates the custom instructions while maintaining all the essential requirements for a base face image.
+      `;
+
+      const result = await generateObject({
+        model: this.model,
+        schema: OptimizedPromptSchema as any,
+        prompt,
+      });
+
+      this.logger.log(`Successfully regenerated base image prompt`);
+      return result.object;
+    } catch (error) {
+      this.logger.error(`Failed to regenerate base image prompt: ${error.message}`, error);
+      throw new Error('Failed to regenerate base image prompt');
+    }
+  }
+
+  /**
    * Generate optimized prompt for video generation based on selected idea
    */
   async generateVideoPrompt(

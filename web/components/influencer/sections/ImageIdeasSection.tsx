@@ -107,7 +107,7 @@ export function ImageIdeasSection({
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <div className='grid gap-4 sm:grid-cols-2 '>
             {/* Search */}
             <div className='space-y-2'>
               <label className='text-muted-foreground text-xs font-medium'>Search</label>
@@ -202,7 +202,7 @@ export function ImageIdeasSection({
       ) : imageIdeas.length > 0 ? (
         <div className='space-y-6'>
           {/* Ideas Grid */}
-          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+          <div className='grid gap-4 sm:grid-cols-2'>
             {imageIdeas.map((idea) => (
               <IdeaCard
                 key={idea.id}

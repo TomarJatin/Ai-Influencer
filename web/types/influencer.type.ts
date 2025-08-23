@@ -128,6 +128,10 @@ export interface AIInfluencer {
   acceptableVariations?: string;
   referenceImages?: string;
 
+  // Base Image for Face Consistency
+  baseImageUrl?: string;
+  baseImagePrompt?: string;
+
   isDefault: boolean;
   isActive: boolean;
   createdAt: string;
@@ -401,4 +405,36 @@ export interface LegacyVideoIdea {
   scenario: string;
   estimatedDuration: number;
   category: 'lifestyle' | 'fashion' | 'fitness' | 'beauty' | 'dance' | 'travel' | 'cooking';
+}
+
+// ============================================================================
+// BASE IMAGE MANAGEMENT TYPES
+// ============================================================================
+
+export interface GenerateBaseImagePromptRequest {
+  influencerId: string;
+  customInstructions?: string;
+}
+
+export interface RegenerateBaseImagePromptRequest {
+  influencerId: string;
+  currentPrompt: string;
+  customInstructions: string;
+}
+
+export interface GenerateBaseImageRequest {
+  influencerId: string;
+  prompt: string;
+  imageType?: 'PORTRAIT' | 'FULL_BODY' | 'BEAUTY_SHOT' | 'LIFESTYLE' | 'REFERENCE';
+}
+
+export interface SaveBaseImageRequest {
+  influencerId: string;
+  imageUrl: string;
+  prompt: string;
+}
+
+export interface BaseImageGenerationResponse {
+  imageUrl: string;
+  metadata: Record<string, unknown>;
 }

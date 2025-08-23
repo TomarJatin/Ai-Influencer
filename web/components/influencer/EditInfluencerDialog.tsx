@@ -259,13 +259,18 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
   const handleSubmit = async (data: FormData) => {
     try {
       setIsUpdating(true);
+      console.log('Submitting form data:', data);
+
       const response = await InfluencerService.updateInfluencer(influencer.id, data as UpdateAIInfluencerDto);
 
       if (response.data) {
         toast.success('Influencer updated successfully!');
-        onInfluencerUpdated();
+        console.log('Updated influencer data:', response.data);
+        await onInfluencerUpdated();
+        // Don't reset form here, it will be handled by handleOpenChange
         onClose();
       } else {
+        console.error('Update failed with error:', response.error);
         toast.error(response.error?.message || 'Failed to update influencer');
       }
     } catch (error) {
@@ -278,8 +283,8 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
 
   const handleClose = () => {
     if (!isUpdating) {
-      onClose();
       form.reset();
+      onClose();
     }
   };
 
@@ -299,8 +304,15 @@ export function EditInfluencerDialog({ influencer, open, onClose, onInfluencerUp
     </Collapsible>
   );
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && !isUpdating) {
+      form.reset();
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='max-h-[90vh] max-w-5xl overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Edit {influencer.name}</DialogTitle>

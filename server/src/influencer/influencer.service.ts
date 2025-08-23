@@ -19,6 +19,11 @@ import {
   ImageIdeaDto,
   VideoIdeaDto,
   OptimizedPromptDto,
+  GenerateBaseImagePromptDto,
+  RegenerateBaseImagePromptDto,
+  GenerateBaseImageDto,
+  SaveBaseImageDto,
+  BaseImageResponseDto,
 } from './dto/influencer.dto';
 import { RequestUser } from '../auth/dto/request-user.dto';
 
@@ -977,6 +982,218 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
     // Use the imported OptimizedPromptSchema
     const result = await this.aiService.generateObject(prompt, OptimizedPromptSchema);
     return result as OptimizedPromptDto;
+  }
+
+  // ============================================================================
+  // BASE IMAGE MANAGEMENT
+  // ============================================================================
+
+  async generateBaseImagePrompt(
+    influencerId: string,
+    dto: GenerateBaseImagePromptDto,
+    user: RequestUser,
+  ): Promise<OptimizedPromptDto> {
+    try {
+      const influencer = await this.getInfluencer(influencerId, user);
+
+      const optimizedPrompt = await this.aiService.generateBaseImagePrompt(
+        influencer,
+        dto.customInstructions,
+      );
+
+      this.logger.log(`Generated base image prompt for influencer ${influencerId}`);
+      return optimizedPrompt;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to generate base image prompt: ${error.message}`, error);
+      throw new BadRequestException('Failed to generate base image prompt');
+    }
+  }
+
+  async regenerateBaseImagePrompt(
+    influencerId: string,
+    dto: RegenerateBaseImagePromptDto,
+    user: RequestUser,
+  ): Promise<OptimizedPromptDto> {
+    try {
+      const influencer = await this.getInfluencer(influencerId, user);
+
+      const optimizedPrompt = await this.aiService.regenerateBaseImagePrompt(
+        influencer,
+        dto.currentPrompt,
+        dto.customInstructions,
+      );
+
+      this.logger.log(`Regenerated base image prompt for influencer ${influencerId}`);
+      return optimizedPrompt;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to regenerate base image prompt: ${error.message}`, error);
+      throw new BadRequestException('Failed to regenerate base image prompt');
+    }
+  }
+
+  async generateBaseImage(
+    influencerId: string,
+    dto: GenerateBaseImageDto,
+    user: RequestUser,
+  ): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
+    try {
+      const influencer = await this.getInfluencer(influencerId, user);
+
+      // Generate the base image using the provided prompt
+      const result = await this.aiService.generateImageWithGemini(
+        dto.prompt,
+        dto.imageType || 'PORTRAIT',
+        '1:1', // Square aspect ratio for face images
+      );
+
+      this.logger.log(`Generated base image for influencer ${influencerId}`);
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to generate base image: ${error.message}`, error);
+      throw new BadRequestException('Failed to generate base image');
+    }
+  }
+
+  async saveBaseImage(
+    influencerId: string,
+    dto: SaveBaseImageDto,
+    user: RequestUser,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Verify the influencer exists and user has access
+      const existingInfluencer = await this.prismaService.aIInfluencer.findFirst({
+        where: {
+          id: influencerId,
+          userId: user.id,
+          isActive: true,
+        },
+      });
+
+      if (!existingInfluencer) {
+        throw new NotFoundException('AI Influencer not found or not owned by user');
+      }
+
+      // Update the influencer with base image information
+      await this.prismaService.aIInfluencer.update({
+        where: { id: influencerId },
+        data: {
+          baseImageUrl: dto.imageUrl,
+          baseImagePrompt: dto.prompt,
+          updatedAt: new Date(),
+        },
+      });
+
+      this.logger.log(`Saved base image for influencer ${influencerId}`);
+      return {
+        success: true,
+        message: 'Base image saved successfully',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to save base image: ${error.message}`, error);
+      throw new BadRequestException('Failed to save base image');
+    }
+  }
+
+  async uploadBaseImage(
+    influencerId: string,
+    file: Express.Multer.File,
+    user: RequestUser,
+  ): Promise<BaseImageResponseDto> {
+    try {
+      const influencer = await this.getInfluencer(influencerId, user);
+
+      // Validate file
+      if (!file) {
+        throw new BadRequestException('No file provided');
+      }
+
+      // Validate file type
+      const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException('Invalid file type. Only JPEG, PNG, and WebP are allowed');
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new BadRequestException('File size too large. Maximum size is 10MB');
+      }
+
+      // Upload to S3
+      const s3Key = `influencers/${influencerId}/base-image/${Date.now()}-${file.originalname}`;
+      const s3Result = await this.s3Service.uploadBuffer(file.buffer, s3Key, file.mimetype);
+      const imageUrl = s3Result.url;
+
+      // Update database
+      await this.prismaService.aIInfluencer.update({
+        where: { id: influencerId },
+        data: {
+          baseImageUrl: imageUrl,
+          baseImagePrompt: 'Custom uploaded image', // Simple prompt for uploaded images
+        },
+      });
+
+      this.logger.log(`Base image uploaded for influencer ${influencerId}: ${imageUrl}`);
+
+      return {
+        baseImageUrl: imageUrl,
+        baseImagePrompt: 'Custom uploaded image',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to upload base image for influencer ${influencerId}:`, error);
+      throw error;
+    }
+  }
+
+  async removeBaseImage(influencerId: string, user: RequestUser): Promise<{ success: boolean; message: string }> {
+    try {
+      // Verify the influencer exists and user has access
+      const existingInfluencer = await this.prismaService.aIInfluencer.findFirst({
+        where: {
+          id: influencerId,
+          userId: user.id,
+          isActive: true,
+        },
+      });
+
+      if (!existingInfluencer) {
+        throw new NotFoundException('AI Influencer not found or not owned by user');
+      }
+
+      // Remove base image information
+      await this.prismaService.aIInfluencer.update({
+        where: { id: influencerId },
+        data: {
+          baseImageUrl: null,
+          baseImagePrompt: null,
+          updatedAt: new Date(),
+        },
+      });
+
+      this.logger.log(`Removed base image for influencer ${influencerId}`);
+      return {
+        success: true,
+        message: 'Base image removed successfully',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to remove base image: ${error.message}`, error);
+      throw new BadRequestException('Failed to remove base image');
+    }
   }
 
   // ============================================================================

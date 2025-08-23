@@ -141,9 +141,7 @@ export function GeneratedImagesSection({ influencer, onImageGenerate, onRefresh 
                     <Button
                       size='sm'
                       variant='secondary'
-                      onClick={() =>
-                        handleDownloadImage(image.id, `${influencer.name}-${image.imageType}-${image.id}`)
-                      }
+                      onClick={() => handleDownloadImage(image.id, `${influencer.name}-${image.imageType}-${image.id}`)}
                       className='h-8 w-8 p-0'
                     >
                       <Download className='h-3 w-3' />

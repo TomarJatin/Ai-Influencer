@@ -11,8 +11,19 @@ interface ProfileSectionProps {
 
 export function ProfileSection({ influencer }: ProfileSectionProps) {
   const getProfileImage = () => {
+    // First priority: Base image if available
+    if (influencer.baseImageUrl) {
+      return influencer.baseImageUrl;
+    }
+
+    // Second priority: Existing portrait reference image
     const portraitImage = influencer.images?.find((img) => img.imageType === 'PORTRAIT' && img.isReference);
-    return portraitImage?.imageUrl || '/api/placeholder/400/400';
+    if (portraitImage?.imageUrl) {
+      return portraitImage.imageUrl;
+    }
+
+    // Fallback: placeholder image
+    return '/api/placeholder/400/400';
   };
 
   const stats = {
@@ -55,6 +66,28 @@ export function ProfileSection({ influencer }: ProfileSectionProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Base Image for Face Consistency */}
+      {influencer.baseImageUrl && (
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-lg'>Base Face Image</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='bg-muted relative h-48 w-full overflow-hidden rounded-lg'>
+              <Image
+                src={influencer.baseImageUrl}
+                alt={`${influencer.name} base face`}
+                fill
+                className='object-cover'
+              />
+            </div>
+            <p className='mt-2 text-sm text-muted-foreground'>
+              This base face image ensures consistency across all generated images
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Statistics */}
       <Card>

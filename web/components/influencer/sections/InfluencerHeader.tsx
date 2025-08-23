@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Image as ImageIcon, Video } from 'lucide-react';
+import { ArrowLeft, Edit, Image as ImageIcon, Video, User } from 'lucide-react';
 import Link from 'next/link';
 import { AIInfluencer } from '@/types';
 
@@ -11,9 +11,10 @@ interface InfluencerHeaderProps {
   onEdit: () => void;
   onImageGenerate: () => void;
   onVideoGenerate: () => void;
+  onBaseImageEdit?: () => void;
 }
 
-export function InfluencerHeader({ influencer, onEdit, onImageGenerate, onVideoGenerate }: InfluencerHeaderProps) {
+export function InfluencerHeader({ influencer, onEdit, onImageGenerate, onVideoGenerate, onBaseImageEdit }: InfluencerHeaderProps) {
   return (
     <div className='flex items-center justify-between'>
       <div className='flex items-center space-x-4'>
@@ -37,6 +38,12 @@ export function InfluencerHeader({ influencer, onEdit, onImageGenerate, onVideoG
           <Edit className='mr-2 h-4 w-4' />
           Edit
         </Button>
+        {onBaseImageEdit && (
+          <Button variant='outline' onClick={onBaseImageEdit}>
+            <User className='mr-2 h-4 w-4' />
+            {influencer.baseImageUrl ? 'Edit Base Image' : 'Generate Base Image'}
+          </Button>
+        )}
         <Button onClick={onImageGenerate}>
           <ImageIcon className='mr-2 h-4 w-4' />
           Generate Image

@@ -33,6 +33,12 @@ import {
   AIInfluencerResponseDto,
   ImageIdeaDto,
   VideoIdeaDto,
+  GenerateBaseImagePromptDto,
+  RegenerateBaseImagePromptDto,
+  GenerateBaseImageDto,
+  SaveBaseImageDto,
+  OptimizedPromptDto,
+  BaseImageResponseDto,
 } from './dto/influencer.dto';
 
 @ApiTags('AI Influencers')
@@ -452,5 +458,89 @@ export class InfluencerController {
   ) {
     this.logger.log(`Legacy video status check for video ${videoId}`);
     return await this.influencerService.checkVideoGenerationStatus(videoId, user);
+  }
+
+  // ============================================================================
+  // BASE IMAGE MANAGEMENT ENDPOINTS
+  // ============================================================================
+
+  @Post(':id/base-image/generate-prompt')
+  @ApiOperation({ summary: 'Generate prompt for base image' })
+  @ApiResponse({ status: 200, description: 'Prompt generated successfully', type: OptimizedPromptDto })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  async generateBaseImagePrompt(
+    @Param('id') influencerId: string,
+    @Body() dto: GenerateBaseImagePromptDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Generating base image prompt for influencer ${influencerId}`);
+    return await this.influencerService.generateBaseImagePrompt(influencerId, dto, user);
+  }
+
+  @Post(':id/base-image/regenerate-prompt')
+  @ApiOperation({ summary: 'Regenerate base image prompt with custom instructions' })
+  @ApiResponse({ status: 200, description: 'Prompt regenerated successfully', type: OptimizedPromptDto })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  async regenerateBaseImagePrompt(
+    @Param('id') influencerId: string,
+    @Body() dto: RegenerateBaseImagePromptDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Regenerating base image prompt for influencer ${influencerId}`);
+    return await this.influencerService.regenerateBaseImagePrompt(influencerId, dto, user);
+  }
+
+  @Post(':id/base-image/generate')
+  @ApiOperation({ summary: 'Generate base image using prompt' })
+  @ApiResponse({ status: 200, description: 'Image generated successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  async generateBaseImage(
+    @Param('id') influencerId: string,
+    @Body() dto: GenerateBaseImageDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Generating base image for influencer ${influencerId}`);
+    return await this.influencerService.generateBaseImage(influencerId, dto, user);
+  }
+
+  @Post(':id/base-image/save')
+  @ApiOperation({ summary: 'Save base image for influencer' })
+  @ApiResponse({ status: 200, description: 'Base image saved successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  async saveBaseImage(
+    @Param('id') influencerId: string,
+    @Body() dto: SaveBaseImageDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Saving base image for influencer ${influencerId}`);
+    return await this.influencerService.saveBaseImage(influencerId, dto, user);
+  }
+
+  @Post(':id/base-image/upload')
+  @ApiOperation({ summary: 'Upload custom base image for influencer' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200, description: 'Base image uploaded successfully', type: BaseImageResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid file or request' })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBaseImage(
+    @Param('id') influencerId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Uploading base image for influencer ${influencerId}`);
+    return await this.influencerService.uploadBaseImage(influencerId, file, user);
+  }
+
+  @Delete(':id/base-image')
+  @ApiOperation({ summary: 'Remove base image from influencer' })
+  @ApiResponse({ status: 200, description: 'Base image removed successfully' })
+  @ApiResponse({ status: 404, description: 'Influencer not found' })
+  async removeBaseImage(
+    @Param('id') influencerId: string,
+    @CurrentUser() user: RequestUser,
+  ) {
+    this.logger.log(`Removing base image for influencer ${influencerId}`);
+    return await this.influencerService.removeBaseImage(influencerId, user);
   }
 }

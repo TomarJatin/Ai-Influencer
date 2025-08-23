@@ -946,3 +946,56 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: 'Whether there are previous pages' })
   hasPreviousPage: boolean;
 }
+
+// Base Image Management DTOs
+
+export class GenerateBaseImagePromptDto {
+  @ApiProperty({ description: 'Custom instructions for base image generation', required: false })
+  @IsOptional()
+  @IsString()
+  customInstructions?: string;
+}
+
+export class RegenerateBaseImagePromptDto {
+  @ApiProperty({ description: 'Current prompt to improve' })
+  @IsString()
+  currentPrompt: string;
+
+  @ApiProperty({ description: 'Custom instructions for prompt regeneration' })
+  @IsString()
+  customInstructions: string;
+}
+
+export class GenerateBaseImageDto {
+  @ApiProperty({ description: 'Prompt to use for base image generation' })
+  @IsString()
+  prompt: string;
+
+  @ApiProperty({ description: 'Image type for generation', enum: ImageType, default: ImageType.PORTRAIT })
+  @IsOptional()
+  @IsEnum(ImageType)
+  imageType?: ImageType = ImageType.PORTRAIT;
+}
+
+export class SaveBaseImageDto {
+  @ApiProperty({ description: 'Generated image URL' })
+  @IsString()
+  imageUrl: string;
+
+  @ApiProperty({ description: 'Prompt used to generate the image' })
+  @IsString()
+  prompt: string;
+}
+
+export class BaseImageResponseDto {
+  @ApiProperty({ description: 'S3 URL of the base image', required: false })
+  baseImageUrl?: string;
+
+  @ApiProperty({ description: 'Prompt used to generate the base image', required: false })
+  baseImagePrompt?: string;
+}
+
+export class UploadBaseImageDto {
+  @ApiProperty({ description: 'Base image file', type: 'string', format: 'binary' })
+  file: Express.Multer.File;
+}

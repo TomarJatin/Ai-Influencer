@@ -14,6 +14,7 @@ import { EditInfluencerDialog } from './EditInfluencerDialog';
 import { IdeaManagementDialog } from './IdeaManagementDialog';
 import { NewImageGenerationDialog } from './NewImageGenerationDialog';
 import { NewVideoGenerationDialog } from './NewVideoGenerationDialog';
+import { BaseImageGenerationDialog } from './BaseImageGenerationDialog';
 import { InfluencerService, ImageIdea, VideoIdea, PaginationQueryDto } from '@/services';
 
 // Import modular sections
@@ -40,6 +41,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
   const [showIdeaDialog, setShowIdeaDialog] = useState(false);
   const [showNewImageDialog, setShowNewImageDialog] = useState(false);
   const [showNewVideoDialog, setShowNewVideoDialog] = useState(false);
+  const [showBaseImageDialog, setShowBaseImageDialog] = useState(false);
 
   // Idea management states
   const [ideaDialogTab, setIdeaDialogTab] = useState<'image' | 'video'>('image');
@@ -68,9 +70,11 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
 
   const loadInfluencer = useCallback(async () => {
     try {
+      console.log('Loading influencer data...');
       setIsLoading(true);
       const response = await InfluencerService.getInfluencer(influencerId);
       if (response.data) {
+        console.log('Received updated influencer data:', response.data);
         setInfluencer(response.data);
       } else {
         toast.error(response.error?.message || 'Failed to load influencer');
@@ -147,6 +151,13 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
     loadVideoIdeas();
   }, [loadInfluencer, loadImageIdeas, loadVideoIdeas]);
 
+  // Debug: Log when influencer data changes
+  useEffect(() => {
+    if (influencer) {
+      console.log('Influencer state updated:', influencer);
+    }
+  }, [influencer]);
+
   const handleImageGenerated = () => {
     loadInfluencer(); // Refresh data
     setShowImageDialog(false);
@@ -157,9 +168,26 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
     setShowVideoDialog(false);
   };
 
-  const handleInfluencerUpdated = () => {
-    loadInfluencer(); // Refresh data
-    setShowEditDialog(false);
+  const handleInfluencerUpdated = async () => {
+    try {
+      await loadInfluencer(); // Refresh data and wait for it to complete
+      setShowEditDialog(false);
+    } catch (error) {
+      console.error('Error refreshing influencer data:', error);
+      // Still close the dialog even if refresh fails
+      setShowEditDialog(false);
+    }
+  };
+
+  const handleBaseImageUpdated = async () => {
+    try {
+      await loadInfluencer(); // Refresh data and wait for it to complete
+      setShowBaseImageDialog(false);
+    } catch (error) {
+      console.error('Error refreshing influencer data:', error);
+      // Still close the dialog even if refresh fails
+      setShowBaseImageDialog(false);
+    }
   };
 
   // Handle idea management
@@ -276,6 +304,7 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
         onEdit={() => setShowEditDialog(true)}
         onImageGenerate={() => setShowImageDialog(true)}
         onVideoGenerate={() => setShowVideoDialog(true)}
+        onBaseImageEdit={() => setShowBaseImageDialog(true)}
       />
 
       <div className='grid gap-6 md:grid-cols-3'>
@@ -443,6 +472,16 @@ export default function InfluencerDetailPage({ influencerId }: InfluencerDetailP
             setShowNewVideoDialog(false);
             handleCreateIdea('video');
           }}
+        />
+      )}
+
+      {/* Base Image Generation Dialog */}
+      {showBaseImageDialog && (
+        <BaseImageGenerationDialog
+          influencer={influencer}
+          open={showBaseImageDialog}
+          onClose={() => setShowBaseImageDialog(false)}
+          onBaseImageUpdated={handleBaseImageUpdated}
         />
       )}
     </div>
