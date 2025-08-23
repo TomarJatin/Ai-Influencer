@@ -135,6 +135,7 @@ export class InfluencerService {
 
   async updateInfluencer(id: string, updateInfluencerDto: UpdateAIInfluencerDto, user: RequestUser) {
     try {
+      console.log('updateInfluencerDto', updateInfluencerDto);
       // Check if user owns this influencer
       const existingInfluencer = await this.prismaService.aIInfluencer.findFirst({
         where: {
@@ -148,19 +149,70 @@ export class InfluencerService {
         throw new NotFoundException('AI Influencer not found or not owned by user');
       }
 
-      const updatedInfluencer = await this.prismaService.aIInfluencer.update({
-        where: { id },
-        data: updateInfluencerDto,
-        include: {
-          images: true,
-          videos: true,
-          imageIdeas: true,
-          videoIdeas: true,
-        },
+      // Filter out empty strings, null, and undefined values to reduce pipeline length
+      const filteredData: Record<string, unknown> = {};
+      
+      Object.entries(updateInfluencerDto).forEach(([key, value]) => {
+        // Only include fields that have meaningful values
+        if (value !== null && value !== undefined && value !== '') {
+          filteredData[key] = value;
+        }
       });
 
-      this.logger.log(`AI Influencer ${id} updated by user ${user.id}`);
-      return updatedInfluencer;
+      // Always update the updatedAt field
+      filteredData.updatedAt = new Date();
+
+      console.log('Filtered data for update:', Object.keys(filteredData).length, 'fields');
+
+      // If we still have too many fields (>40), split into chunks
+      const entries = Object.entries(filteredData);
+      const chunkSize = 40; // Keep under MongoDB Atlas limit of 50
+
+      if (entries.length > chunkSize) {
+        console.log('Splitting update into chunks due to field count:', entries.length);
+        
+        // Process updates in chunks
+        for (let i = 0; i < entries.length; i += chunkSize) {
+          const chunk = entries.slice(i, i + chunkSize);
+          const chunkData = Object.fromEntries(chunk);
+          
+          await this.prismaService.aIInfluencer.update({
+            where: { id },
+            data: chunkData,
+          });
+          
+          console.log(`Updated chunk ${Math.floor(i / chunkSize) + 1} with ${chunk.length} fields`);
+        }
+
+        // Final query to get the updated influencer with includes
+        const updatedInfluencer = await this.prismaService.aIInfluencer.findUnique({
+          where: { id },
+          include: {
+            images: true,
+            videos: true,
+            imageIdeas: true,
+            videoIdeas: true,
+          },
+        });
+
+        this.logger.log(`AI Influencer ${id} updated by user ${user.id} (chunked update)`);
+        return updatedInfluencer;
+      } else {
+        // Single update if field count is manageable
+        const updatedInfluencer = await this.prismaService.aIInfluencer.update({
+          where: { id },
+          data: filteredData,
+          include: {
+            images: true,
+            videos: true,
+            imageIdeas: true,
+            videoIdeas: true,
+          },
+        });
+
+        this.logger.log(`AI Influencer ${id} updated by user ${user.id}`);
+        return updatedInfluencer;
+      }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
