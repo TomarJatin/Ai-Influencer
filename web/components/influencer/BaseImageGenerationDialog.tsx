@@ -275,7 +275,7 @@ export function BaseImageGenerationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='max-h-[90vh] max-w-4xl overflow-y-auto'>
         <DialogHeader>
           <DialogTitle className='flex items-center space-x-2'>
             <ImageIcon className='h-5 w-5' />
@@ -347,7 +347,7 @@ export function BaseImageGenerationDialog({
 
                   {generatedPrompt && (
                     <div className='space-y-4'>
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                         <div className='space-y-2'>
                           <Label htmlFor='reasoning'>Reasoning</Label>
                           <Textarea
@@ -432,7 +432,7 @@ export function BaseImageGenerationDialog({
                           <img
                             src={generatedImageUrl}
                             alt='Generated base face'
-                            className='object-cover w-full h-full'
+                            className='h-full w-full object-cover'
                           />
                         </div>
 
@@ -465,7 +465,7 @@ export function BaseImageGenerationDialog({
                 <CardContent className='space-y-4'>
                   {/* File Upload Area */}
                   <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
                       dragActive
                         ? 'border-primary bg-primary/10'
                         : 'border-muted-foreground/25 hover:border-muted-foreground/50'
@@ -477,15 +477,13 @@ export function BaseImageGenerationDialog({
                   >
                     <div className='space-y-4'>
                       <div className='flex justify-center'>
-                        <Upload className='h-12 w-12 text-muted-foreground' />
+                        <Upload className='text-muted-foreground h-12 w-12' />
                       </div>
                       <div>
                         <p className='text-lg font-medium'>Drop your base image here</p>
-                        <p className='text-sm text-muted-foreground'>or click to browse files</p>
+                        <p className='text-muted-foreground text-sm'>or click to browse files</p>
                       </div>
-                      <div className='text-xs text-muted-foreground'>
-                        Supports JPEG, PNG, WebP • Max size: 10MB
-                      </div>
+                      <div className='text-muted-foreground text-xs'>Supports JPEG, PNG, WebP • Max size: 10MB</div>
                       <input
                         type='file'
                         accept='image/jpeg,image/jpg,image/png,image/webp'
@@ -514,13 +512,9 @@ export function BaseImageGenerationDialog({
                         </Button>
                       </div>
                       <div className='bg-muted relative h-64 w-full overflow-hidden rounded-lg'>
-                        <img
-                          src={uploadPreview}
-                          alt='Upload preview'
-                          className='object-cover w-full h-full'
-                        />
+                        <img src={uploadPreview} alt='Upload preview' className='h-full w-full object-cover' />
                       </div>
-                      <div className='text-sm text-muted-foreground'>
+                      <div className='text-muted-foreground text-sm'>
                         {selectedFile.name} • {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </div>
 

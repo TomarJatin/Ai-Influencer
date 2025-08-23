@@ -996,10 +996,7 @@ Generate an optimized prompt that will produce a compelling, professional-qualit
     try {
       const influencer = await this.getInfluencer(influencerId, user);
 
-      const optimizedPrompt = await this.aiService.generateBaseImagePrompt(
-        influencer,
-        dto.customInstructions,
-      );
+      const optimizedPrompt = await this.aiService.generateBaseImagePrompt(influencer, dto.customInstructions);
 
       this.logger.log(`Generated base image prompt for influencer ${influencerId}`);
       return optimizedPrompt;

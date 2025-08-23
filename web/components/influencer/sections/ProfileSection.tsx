@@ -75,14 +75,9 @@ export function ProfileSection({ influencer }: ProfileSectionProps) {
           </CardHeader>
           <CardContent>
             <div className='bg-muted relative h-48 w-full overflow-hidden rounded-lg'>
-              <Image
-                src={influencer.baseImageUrl}
-                alt={`${influencer.name} base face`}
-                fill
-                className='object-cover'
-              />
+              <Image src={influencer.baseImageUrl} alt={`${influencer.name} base face`} fill className='object-cover' />
             </div>
-            <p className='mt-2 text-sm text-muted-foreground'>
+            <p className='text-muted-foreground mt-2 text-sm'>
               This base face image ensures consistency across all generated images
             </p>
           </CardContent>

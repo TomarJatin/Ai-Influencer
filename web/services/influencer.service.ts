@@ -388,55 +388,55 @@ export class InfluencerService {
   // ============================================================================
 
   static async generateBaseImagePrompt(
-    request: GenerateBaseImagePromptRequest,
+    request: GenerateBaseImagePromptRequest
   ): Promise<{ data?: OptimizedPrompt; error?: { message: string; status: number } }> {
     return await ApiClient.post<OptimizedPrompt>(
       `/api/influencers/${request.influencerId}/base-image/generate-prompt`,
       {
         customInstructions: request.customInstructions,
-      },
+      }
     );
   }
 
   static async regenerateBaseImagePrompt(
-    request: RegenerateBaseImagePromptRequest,
+    request: RegenerateBaseImagePromptRequest
   ): Promise<{ data?: OptimizedPrompt; error?: { message: string; status: number } }> {
     return await ApiClient.post<OptimizedPrompt>(
       `/api/influencers/${request.influencerId}/base-image/regenerate-prompt`,
       {
         currentPrompt: request.currentPrompt,
         customInstructions: request.customInstructions,
-      },
+      }
     );
   }
 
   static async generateBaseImage(
-    request: GenerateBaseImageRequest,
+    request: GenerateBaseImageRequest
   ): Promise<{ data?: BaseImageGenerationResponse; error?: { message: string; status: number } }> {
     return await ApiClient.post<BaseImageGenerationResponse>(
       `/api/influencers/${request.influencerId}/base-image/generate`,
       {
         prompt: request.prompt,
         imageType: request.imageType || 'PORTRAIT',
-      },
+      }
     );
   }
 
   static async saveBaseImage(
-    request: SaveBaseImageRequest,
+    request: SaveBaseImageRequest
   ): Promise<{ data?: { success: boolean; message: string }; error?: { message: string; status: number } }> {
     return await ApiClient.post<{ success: boolean; message: string }>(
       `/api/influencers/${request.influencerId}/base-image/save`,
       {
         imageUrl: request.imageUrl,
         prompt: request.prompt,
-      },
+      }
     );
   }
 
   static async uploadBaseImage(
     influencerId: string,
-    file: File,
+    file: File
   ): Promise<{ data?: BaseImageGenerationResponse; error?: { message: string; status: number } }> {
     const formData = new FormData();
     formData.append('file', file);
@@ -448,15 +448,13 @@ export class InfluencerService {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      },
+      }
     );
   }
 
   static async removeBaseImage(
-    influencerId: string,
+    influencerId: string
   ): Promise<{ data?: { success: boolean; message: string }; error?: { message: string; status: number } }> {
-    return await ApiClient.delete<{ success: boolean; message: string }>(
-      `/api/influencers/${influencerId}/base-image`,
-    );
+    return await ApiClient.delete<{ success: boolean; message: string }>(`/api/influencers/${influencerId}/base-image`);
   }
 }

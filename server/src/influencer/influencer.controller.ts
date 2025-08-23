@@ -536,10 +536,7 @@ export class InfluencerController {
   @ApiOperation({ summary: 'Remove base image from influencer' })
   @ApiResponse({ status: 200, description: 'Base image removed successfully' })
   @ApiResponse({ status: 404, description: 'Influencer not found' })
-  async removeBaseImage(
-    @Param('id') influencerId: string,
-    @CurrentUser() user: RequestUser,
-  ) {
+  async removeBaseImage(@Param('id') influencerId: string, @CurrentUser() user: RequestUser) {
     this.logger.log(`Removing base image for influencer ${influencerId}`);
     return await this.influencerService.removeBaseImage(influencerId, user);
   }

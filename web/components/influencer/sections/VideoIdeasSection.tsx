@@ -107,7 +107,7 @@ export function VideoIdeasSection({
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='grid gap-4 sm:grid-cols-2 '>
+          <div className='grid gap-4 sm:grid-cols-2'>
             {/* Search */}
             <div className='space-y-2'>
               <label className='text-muted-foreground text-xs font-medium'>Search</label>

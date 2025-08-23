@@ -14,7 +14,13 @@ interface InfluencerHeaderProps {
   onBaseImageEdit?: () => void;
 }
 
-export function InfluencerHeader({ influencer, onEdit, onImageGenerate, onVideoGenerate, onBaseImageEdit }: InfluencerHeaderProps) {
+export function InfluencerHeader({
+  influencer,
+  onEdit,
+  onImageGenerate,
+  onVideoGenerate,
+  onBaseImageEdit,
+}: InfluencerHeaderProps) {
   return (
     <div className='flex items-center justify-between'>
       <div className='flex items-center space-x-4'>
