@@ -151,7 +151,7 @@ export class InfluencerService {
 
       // Filter out empty strings, null, and undefined values to reduce pipeline length
       const filteredData: Record<string, unknown> = {};
-      
+
       Object.entries(updateInfluencerDto).forEach(([key, value]) => {
         // Only include fields that have meaningful values
         if (value !== null && value !== undefined && value !== '') {
@@ -170,17 +170,17 @@ export class InfluencerService {
 
       if (entries.length > chunkSize) {
         console.log('Splitting update into chunks due to field count:', entries.length);
-        
+
         // Process updates in chunks
         for (let i = 0; i < entries.length; i += chunkSize) {
           const chunk = entries.slice(i, i + chunkSize);
           const chunkData = Object.fromEntries(chunk);
-          
+
           await this.prismaService.aIInfluencer.update({
             where: { id },
             data: chunkData,
           });
-          
+
           console.log(`Updated chunk ${Math.floor(i / chunkSize) + 1} with ${chunk.length} fields`);
         }
 
